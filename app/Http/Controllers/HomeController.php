@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-
 class HomeController extends Controller
 {
     /**
@@ -75,6 +75,34 @@ class HomeController extends Controller
             return back()->with('error', 'An error occurred: '.$e->getMessage());
         }
     }
+
+    
+
+    public function support()
+    {
+        return view('user.support');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function subscription()
     {
         return view('user.subscription');
@@ -101,9 +129,6 @@ class HomeController extends Controller
     {
         return view('user.inbox');
     }
-    public function support()
-    {
-        return view('user.support');
-    }
+
 
 }

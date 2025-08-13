@@ -13,66 +13,6 @@
                     </li>                   
                 </ul>
                 <ul class="topbar-item list-unstyled d-inline-flex align-items-center mb-0">
-                    <li class="bot-switcher">
-                        <!-- Dropdown Trigger -->
-                        <button class="bot-switcher-btn">
-                            <img src="{{ asset('/assets/images/extra/P9aqUeKFvc.gif') }}" class="top-bot-avatar">
-                            <span>See Assistant Details</span>
-                            <svg class="dropdown-arrow" width="12" height="8" viewBox="0 0 12 8">
-                                <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2"/>
-                            </svg>
-                        </button>
-                        
-                        <!-- Dropdown Menu - Simple Links -->
-                        <div class="bot-dropdown">
-                            <div class="dropdown-header">
-                                <h4>Your Assistants</h4>
-                                <a href="{{ route('user.bot.create') }}" class="new-bot-btn">
-                                    <svg width="16" height="16" style="background: #6c63ff; color: #fff;" viewBox="0 0 24 24">
-                                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2"/>
-                                    </svg>
-                                </a>
-                            </div>
-                            
-                            <div class="bot-links">
-                                <a href="{{ route('user.bot.overview') }}" class="bot-link active">
-                                    <img src="{{ asset('/assets/images/extra/P9aqUeKFvc.gif') }}" class="top-bot-avatar">
-                                    <div class="bot-details">
-                                        <strong>Support Assistant</strong>
-                                        <small>24/7 Customer Help</small>
-                                    </div>
-                                    <span class="status active"></span>
-                                </a>
-                                
-                                <a href="{{ route('user.bot.overview') }}" class="bot-link">
-                                    <img src="{{ asset('/assets/images/extra/P9aqUeKFvc.gif') }}" class="top-bot-avatar">
-                                    <div class="bot-details">
-                                        <strong>Sales Assistant</strong>
-                                        <small>Lead Conversion</small>
-                                    </div>
-                                    <span class="status active"></span>
-                                </a>
-                                
-                                <a href="{{ route('user.bot.overview') }}" class="bot-link">
-                                    <img src="{{ asset('/assets/images/extra/P9aqUeKFvc.gif') }}" class="top-bot-avatar">
-                                    <div class="bot-details">
-                                        <strong>FAQ Assistant</strong>
-                                        <small>Instant Answers</small>
-                                    </div>
-                                    <span class="status inactive"></span>
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                    {{--  <li class="topbar-item">
-                        <a class="nav-link nav-icon" href="javascript:void(0);" id="light-dark-mode">
-                            <i class="iconoir-half-moon dark-mode"></i>
-                            <i class="iconoir-sun-light light-mode"></i>
-                        </a>                    
-                    </li>  --}}
-    
-                    
-    
                     <li class="dropdown topbar-item">
                         <a class="nav-link dropdown-toggle arrow-none nav-icon" data-bs-toggle="dropdown" href="#" role="button"
                             aria-haspopup="false" aria-expanded="false" data-bs-offset="0,19">

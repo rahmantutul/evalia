@@ -1,0 +1,16 @@
+:root {
+  /* Base colors */
+  --color-vivid-pink: #E63AC0;
+  --color-soft-aqua: #9AF7FE;
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+
+  /* Gradient combinations */
+  --gradient-pink-aqua: linear-gradient(135deg, var(--color-vivid-pink), var(--color-soft-aqua));
+  --gradient-aqua-pink: linear-gradient(135deg, var(--color-soft-aqua), var(--color-vivid-pink));
+  --gradient-pink-white: linear-gradient(135deg, var(--color-vivid-pink), var(--color-white));
+  --gradient-aqua-white: linear-gradient(135deg, var(--color-soft-aqua), var(--color-white));
+  --gradient-pink-black: linear-gradient(135deg, var(--color-vivid-pink), var(--color-black));
+  --gradient-aqua-black: linear-gradient(135deg, var(--color-soft-aqua), var(--color-black));
+  --gradient-full: linear-gradient(135deg, var(--color-vivid-pink), var(--color-soft-aqua), var(--color-white), var(--color-black));
+}

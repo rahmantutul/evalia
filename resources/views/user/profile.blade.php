@@ -19,7 +19,7 @@
         position: absolute;
         bottom: 10px;
         right: 10px;
-        background: #6f6af8;
+        background: #0a66c2;
         color: white;
         border-radius: 50%;
         width: 36px;

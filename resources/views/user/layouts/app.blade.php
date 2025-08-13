@@ -8,7 +8,7 @@
     <meta content="creative ai" name="author" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <link rel="shortcut icon" href="assets/images/normal.png">
-    
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- CSS Files -->
     <link href="{{ asset('/') }}assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="{{ asset('/') }}assets/css/icons.min.css" rel="stylesheet" type="text/css" />

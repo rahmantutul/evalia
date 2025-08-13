@@ -3,139 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Creative AI</title>
+    <title>Register - Kayan</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f2ef;
+           // background-image: url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 10c0-5.523-4.477-10-10-10s-10 4.477-10 10 4.477 10 10 10 10-4.477 10-10zM10 40c-5.523 0-10-4.477-10-10s4.477-10 10-10 10 4.477 10 10-4.477 10-10 10zm10-10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10 10 4.477 10 10zm30 20c-5.523 0-10-4.477-10-10s4.477-10 10-10 10 4.477 10 10-4.477 10-10 10z' fill='%23e0dfdc' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        .linkedin-blue {
+            color: #0a66c2;
+        }
+        .linkedin-blue-bg {
+            background-color: #0a66c2;
+        }
+        .hover\:linkedin-blue-dark:hover {
+            background-color: #004182;
+        }
+        .form-container {
+            background-color: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(4px);
+        }
+        .google-btn {
+            border: 1px solid #d1d5db;
+            transition: all 0.2s;
+        }
+        .google-btn:hover {
+            background-color: #f9fafb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .logo-container {
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <!-- Animated Background Elements -->
-    <div class="absolute top-20 left-20 w-32 h-32 rounded-full bg-blue-200 opacity-20 blur-xl"></div>
-    <div class="absolute bottom-20 right-20 w-40 h-40 rounded-full bg-indigo-200 opacity-20 blur-xl"></div>
-    
-    <div class="relative max-w-md w-full mx-auto">
-        <!-- Card with Glass Morphism Effect -->
-        <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border border-white/30">
-            <!-- Decorative Header -->
-            <div class="bg-gradient-to-r  p-6 text-center relative" style="background: linear-gradient(90deg, #6c63ff, #4d44db); ">
-               
-                <h1 class="text-2xl font-bold text-white mt-4">Create Account</h1>
-                <p class="text-blue-100 mt-1">Join our creative community</p>
-            </div>
-
+<body class="min-h-screen flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-md">
+        <div class="form-container rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <!-- Header stripe -->
+            <div class="h-2 linkedin-blue-bg"></div>
+            
             <div class="p-8">
+                <div class="text-center mb-6">
+                    <!-- Your Custom Logo -->
+                    <div class="logo-container">
+                        <img src="{{ asset('assets/images/kayan.png') }}" alt="Kayan Logo" class="h-full object-contain">
+                    </div>
+                    <h1 class="text-2xl font-semibold text-gray-800 mt-3">Join Kayan</h1>
+                    <p class="text-gray-500 mt-1">Voice Analysis assistant</p>
+                </div>
+
                 <!-- Google Sign-Up Button -->
-                 <a href="{{ route('login.google') }}" class="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-xl bg-white text-gray-700 font-medium hover:bg-gray-50 transition-all shadow-sm hover:shadow-md mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
+                <a href="{{ route('login.google') }}" class="w-full flex items-center justify-center gap-2 google-btn py-2 px-4 rounded-md mb-6 text-gray-700 font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
                         <path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
                         <path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
                         <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                         <path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                        <path fill="none" d="M0 0h48v48H0z"/>
                     </svg>
                     <span>Continue with Google</span>
                 </a>
-                <div class="relative my-6">
+
+                <!-- Divider -->
+                <div class="relative mb-6">
                     <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300/50"></div> <!-- Softer border -->
+                        <div class="w-full border-t border-gray-300"></div>
                     </div>
                     <div class="relative flex justify-center">
-                        <span class="px-3   text-gray-500 text-xs font-medium uppercase tracking-wider"> <!-- Improved text -->
-                        or register with email
-                        </span>
+                        <span class="px-2 bg-white text-sm text-gray-500">or</span>
                     </div>
                 </div>
 
                 <!-- Registration Form -->
-                <!-- Registration Form -->
-                <form method="POST" action="{{ route('register') }}" class="space-y-5">
+                <form method="POST" action="{{ route('register') }}" class="space-y-4">
                     @csrf
 
-                    <!-- Name Field -->
-                    <div class="space-y-1">
-                        <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-user text-gray-400"></i>
-                            </div>
-                            <input name="name" value="{{ old('name') }}" type="text"
-                                class="block w-full pl-10 pr-3 py-3 border @error('name') border-red-500 @else border-gray-300 @enderror rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/50"
-                                placeholder="John Doe">
-                        </div>
+                    <div>
+                        <input name="name" value="{{ old('name') }}" type="text"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Full name">
                         @error('name')
                             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <!-- Email Field -->
-                    <div class="space-y-1">
-                        <label class="block text-sm font-medium text-gray-700">Email Address</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-envelope text-gray-400"></i>
-                            </div>
-                            <input name="email" value="{{ old('email') }}" type="email"
-                                class="block w-full pl-10 pr-3 py-3 border @error('email') border-red-500 @else border-gray-300 @enderror rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/50"
-                                placeholder="your@email.com">
-                        </div>
+                    <div>
+                        <input name="email" value="{{ old('email') }}" type="email"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Email">
                         @error('email')
                             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <!-- Password Field -->
-                    <div class="space-y-1">
-                        <label class="block text-sm font-medium text-gray-700">Password</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-lock text-gray-400"></i>
-                            </div>
-                            <input name="password" type="password"
-                                class="block w-full pl-10 pr-3 py-3 border @error('password') border-red-500 @else border-gray-300 @enderror rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/50"
-                                placeholder="••••••••">
-                        </div>
+                    <div>
+                        <input name="password" type="password"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Password (8+ characters)">
                         @error('password')
                             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
-                    <!-- Confirm Password Field -->
-                    <div class="space-y-1">
-                        <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-lock text-gray-400"></i>
-                            </div>
-                            <input name="password_confirmation" type="password"
-                                class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/50"
-                                placeholder="••••••••">
-                        </div>
+                    <div class="mt-4">
+                        <input name="password_confirmation" type="password"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Confirm Password">
+                        @error('password_confirmation')
+                            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
-
-                    <!-- Terms Checkbox -->
-                    <div class="flex items-center">
-                        <input id="terms" name="terms" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" {{ old('terms') ? 'checked' : '' }}>
-                        <label for="terms" class="ml-2 block text-sm text-gray-700">
-                            I agree to the <a href="#" class="text-blue-600 hover:text-blue-500">Terms</a> and <a href="#" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
-                        </label>
+                    <div class="pt-2">
+                        <button type="submit" 
+                                class="w-full linkedin-blue-bg hover:linkedin-blue-dark text-white font-medium py-2 px-4 rounded-md transition">
+                            Agree & Join
+                        </button>
                     </div>
-                    @error('terms')
-                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-
-                    <!-- Submit Button -->
-                    <button type="submit"
-                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md" style="background: linear-gradient(90deg, #6c63ff, #4d44db); ">
-                        Create Account
-                    </button>
                 </form>
 
-                <!-- Login Link -->
-                <div class="mt-6 text-center">
-                    <p class="text-sm text-gray-600">
-                        Already have an account?
-                        <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-500 hover:underline">
-                            Sign in
-                        </a>
+                <div class="mt-6 text-center text-sm">
+                    <p class="text-gray-600">Already have an account? 
+                        <a href="{{ route('login') }}" class="linkedin-blue font-medium">Sign in</a>
                     </p>
                 </div>
             </div>
