@@ -9,11 +9,10 @@
         <div class="col-md-12 col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <div class="row align-items-center">
-                        <div class="col">                      
-                            <h4 class="card-title">Company List</h4>                      
-                        </div><!--end col-->
-                    </div>  <!--end row-->                                  
+                    <div class="col d-flex justify-content-between align-items-center">                      
+                        <h4 class="card-title mb-0">Company List</h4>
+                        <a href="{{ route('user.company.create') }}" class="btn btn-sm btn-primary d-block float-end">+ Create New</a>                  
+                    </div>                                 
                 </div><!--end card-header-->
                 <div class="card-body pt-0">
                     <div class="table-responsive">
@@ -21,7 +20,7 @@
                             <div class="alert alert-success">
                                 {{ session('success') }}
                             </div>
-                        @endif
+                        @endif 
 
                         @if(session('error'))
                             <div class="alert alert-danger">
@@ -43,7 +42,7 @@
                                 <tr>
                                    <th>Company ID</th>
                                     <th>Company Name</th>
-                                    <th>Action <span><a href="{{ route('user.company.create') }}" class="btn btn-sm btn-primary d-block float-end">+ Create New</a></span></th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -52,16 +51,20 @@
                                         <td>{{ $company['id'] }}</td>
                                         <td>{{ $company['name'] }}</td>
                                         <td>
-                                            <a href="{{ route('user.company.view',$company['id']) }}" class="btn btn-sm btn-primary">
-                                               <i class="fas fa-eye"></i> View Details
-                                            </a>
-                                            <form action="{{ route('user.company.delete', $company['id']) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure to delete this?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash-alt"></i> Delete
-                                                </button>
-                                            </form>
+                                           <div class="btn-group" role="group">
+                                                <a href="{{ route('user.company.view',$company['id']) }}" class="btn btn-sm btn-primary rounded-start-pill">
+                                                    <i class="fas fa-eye me-1"></i> View
+                                                </a>
+                                                 <a href="{{ route('user.task.list',$company['id']) }}" class="btn btn-sm btn-dark">
+                                                    <i class="fas fa-list me-1"></i> Task List
+                                                </a>
+                                                <a href="{{ route('user.company.edit',$company['id']) }}" class="btn btn-sm btn-secondary">
+                                                    <i class="fas fa-cogs me-1"></i> Settings
+                                                </a>
+                                                <a href="{{ route('user.company.delete',$company['id']) }}" onclick="return confirm('Are you sure to delete this?')" class="btn btn-sm btn-danger rounded-end-pill">
+                                                    <i class="fas fa-trash-alt me-1"></i> Delete
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach         

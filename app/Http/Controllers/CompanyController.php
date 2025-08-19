@@ -37,6 +37,7 @@ class CompanyController extends Controller
         $response_audio = Http::get("http://65.108.142.207:8080/task_list", [
             'company_id' => $id
         ]);
+
         $taskList = $response_audio->successful() ? ($response_audio->json()['tasks'] ?? []) : [];
 
         $page = Paginator::resolveCurrentPage(); 
@@ -52,7 +53,7 @@ class CompanyController extends Controller
             $page,
             ['path' => Paginator::resolveCurrentPath()] 
         );
-
+        // dd($company);
         return view('user.company.company_details', [
             'company' => $company,
             'taskList' => $paginatedTasks,
@@ -210,4 +211,17 @@ class CompanyController extends Controller
             'payload' => $payload
         ]);
     }
+
+    public function companyEdit($id)
+    {
+        $response = Http::get('http://65.108.142.207:8080/get_company_details', [
+            'company_id' => $id
+        ]);
+
+        $company = $response->successful() ? ($response->json()['data'] ?? []) : [];
+        // dd($company);
+        
+        return view('user.company.company_edit',compact('company'));
+    }
+
 }

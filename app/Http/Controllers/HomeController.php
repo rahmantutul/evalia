@@ -27,6 +27,7 @@ class HomeController extends Controller
      */
     public function index()
     {
+        // dd('Welcome to the User Dashboard');
         return view('user.dashboard');
     }
     public function profile()

@@ -12,10 +12,9 @@ use App\Http\Controllers\Admin\{
     SettingsController
 };
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\GroupDataController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Artisan;
-use PHPUnit\TextUI\Configuration\GroupCollection;
-
 // Clear website cache 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
@@ -46,22 +45,26 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/user/subscription', [HomeController::class, 'subscription'])->name('user.subscription');
 
     // Group Routs start 
-    Route::get('/user/group/list', [GroupCollection::class, 'groupList'])->name('user.group.list');
-    Route::get('/user/group/create', [GroupCollection::class, 'groupCreate'])->name('user.group.create');
-    Route::post('/user/group/store', [GroupCollection::class, 'groupStore'])->name('user.company.store');
-    Route::delete('/user/group/delete/{id}', [GroupCollection::class, 'groupDelete'])->name('user.group.delete');
+    Route::get('/user/group_data/list', [GroupDataController::class, 'groupList'])->name('user.group_data.list');
+    Route::get('/user/group_data/create', [GroupDataController::class, 'groupCreate'])->name('user.group_data.create');
+    Route::post('/user/group_data/store', [GroupDataController::class, 'groupStore'])->name('user.group_data.store');
+    Route::delete('/user/group_data/delete/{id}', [GroupDataController::class, 'groupDelete'])->name('user.group_data.delete');
 
     // Company Routs start 
     Route::get('/user/company/list', [CompanyController::class, 'companyList'])->name('user.company.list');
     Route::get('/user/company/create', [CompanyController::class, 'companyCreate'])->name('user.company.create');
     Route::get('/user/company/view/{id}', [CompanyController::class, 'companyDetails'])->name('user.company.view');
+    Route::get('/user/company/edit/{id}', [CompanyController::class, 'companyEdit'])->name('user.company.edit');
     Route::post('/user/company/store', [CompanyController::class, 'companyStore'])->name('user.company.store');
-    Route::delete('/user/company/delete/{id}', [CompanyController::class, 'companyDelete'])->name('user.company.delete');
+    Route::put('/user/company/update/{company_id}', [CompanyController::class, 'companyUpdate'])->name('user.company.update');
+    Route::get('/user/company/delete/{id}', [CompanyController::class, 'companyDelete'])->name('user.company.delete');
 
 
     // Task routes start
+    Route::post('/user/task/store', [TaskController::class, 'taskStore'])->name('user.task.store');
     Route::get('/user/task/details/{workId}', [TaskController::class, 'taskDetails'])->name('user.task.details');
     Route::get('/user/task/delete/{workId}', [TaskController::class, 'deleteTask'])->name('user.task.delete');
+    Route::get('/user/task/list/{companyId}', [TaskController::class, 'TaskList'])->name('user.task.list');
 
     // Support route start
     Route::get('/user/support', [HomeController::class, 'support'])->name('user.support');

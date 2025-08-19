@@ -148,11 +148,11 @@
 @endpush
 @section('content')
 <div class="min-v d-flex align-items-center">
-    <div class="container-fluid py-5">
+    <div class="container-fluid py-2">
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="card">
-                    <div class="card-header border-0" style="background: linear-gradient(135deg, #f8f9fc 0%, #eef2f6 100%);">
+                    <div class="card-header border-0" style="background: linear-gradient(135deg, #efefef 0%, #eef2f6 100%)">
                         <div class="d-flex align-items-center">
                             <div class="icon-wrapper bg-white shadow-sm rounded-3 p-3 me-3">
                                 <i class="fas fa-building-circle-arrow-right text-primary fs-4"></i>

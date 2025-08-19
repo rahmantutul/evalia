@@ -22,15 +22,15 @@
                                 <span>Dashboard</span>
                             </a>
                         </li>
-                        <li class="nav-item {{ Route::is('user.group.*') ? 'active' : '' }}">
-                            <a class="nav-link {{ Route::is('user.group.*') ? 'active' : '' }}" href="{{ route('user.group.list') }}">
-                                <i class="iconoir-report-columns menu-icon"></i>
+                        <li class="nav-item {{ Route::is('user.group_data.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('user.group_data.*') ? 'active' : '' }}" href="{{ route('user.group_data.list') }}">
+                                <i class="iconoir-community menu-icon"></i>
                                 <span>Group</span>
                             </a>
                         </li>
                         <li class="nav-item {{ Route::is('user.company.*') ? 'active' : '' }}">
                             <a class="nav-link {{ Route::is('user.company.*') ? 'active' : '' }}" href="{{ route('user.company.list') }}">
-                                <i class="iconoir-report-columns menu-icon"></i>
+                                <i class="icofont-bank-alt menu-icon"></i>
                                 <span>Company</span>
                             </a>
                         </li>
