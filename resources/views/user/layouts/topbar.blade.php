@@ -36,11 +36,11 @@
                             <i class="las la-power-off fs-18 me-1 align-text-bottom"></i> <b>Logout</b>
                             </a>
 
-                            <div class="dropdown-divider mb-0"></div>
+                            {{--  <div class="dropdown-divider mb-0"></div>
                             <a href="{{ route('user.subscription') }}" class="btn bg-black text-white shadow-sm rounded-pill d-block mt-2 mb-2">
                                 Upgrade your plan
                                 <img src="{{ asset('/') }}assets/images/extra/giphy.gif" alt="" style="height: 25px; margin-left: 3px; display: inline-block; vertical-align: middle;">
-                            </a>
+                            </a>  --}}
                    
                            
 

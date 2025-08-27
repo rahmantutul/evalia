@@ -10,24 +10,14 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
+
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     public function index()
     {
-        // dd('Welcome to the User Dashboard');
         return view('user.dashboard');
     }
     public function profile()
@@ -77,8 +67,6 @@ class HomeController extends Controller
         }
     }
 
-    
-
     public function support()
     {
         return view('user.support');
@@ -94,13 +82,7 @@ class HomeController extends Controller
 
 
 
-
-
-
-
-
-
-
+    
 
 
 

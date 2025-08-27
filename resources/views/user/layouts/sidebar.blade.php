@@ -28,10 +28,22 @@
                                 <span>Group</span>
                             </a>
                         </li>
+                        <li class="nav-item {{ Route::is('user.knowledgeBase.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('user.knowledgeBase.*') ? 'active' : '' }}" href="{{ route('user.knowledgeBase.list') }}">
+                                <i class="fas fa-cloud menu-icon"></i>
+                                <span>Knowledge Base</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Route::is('user.agent.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('user.agent.*') ? 'active' : '' }}" href="{{ route('user.agent.list') }}">
+                                <i class="fas fa-headset menu-icon"></i>
+                                <span>Agents</span>
+                            </a>
+                        </li>
                         <li class="nav-item {{ Route::is('user.company.*') ? 'active' : '' }}">
                             <a class="nav-link {{ Route::is('user.company.*') ? 'active' : '' }}" href="{{ route('user.company.list') }}">
                                 <i class="icofont-bank-alt menu-icon"></i>
-                                <span>Company</span>
+                                <span>Companies</span>
                             </a>
                         </li>
                     </ul>

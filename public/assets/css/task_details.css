@@ -1399,7 +1399,7 @@ input:checked + .toggle-slider:before {
 .metric-details p {
   margin: 8px 0;
   font-size: 14px;
-  color: var(--gray);
+  color: #000;
 }
 
 .metric-details strong {

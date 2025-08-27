@@ -651,7 +651,7 @@
                     <div class="d-flex align-items-center">
                         <img src="${agent.avatar}" class="avatar-sm me-3">
                         <div class="flex-grow-1">
-                            <h6 class="mb-0">${agent.name} ${isTopPerformer ? '<span class="top-performer-badge ms-2">Top Performer</span>' : ''} ${isLowPerformer ? '<span class="needs-improvement-badge ms-2">Needs Coaching</span>' : ''}</h6>
+                            <h6 class="mb-0"><a style="color: #000;" href="{{ route('user.agent.details') }}"> ${agent.name}</a> ${isTopPerformer ? '<span class="top-performer-badge ms-2">Top Performer</span>' : ''} ${isLowPerformer ? '<span class="needs-improvement-badge ms-2">Needs Coaching</span>' : ''}</h6>
                             <small class="text-muted">${agent.company} • ${agent.calls} calls</small>
                         </div>
                         <div class="text-end">

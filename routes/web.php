@@ -11,8 +11,10 @@ use App\Http\Controllers\Admin\{
     PlanController,
     SettingsController
 };
+use App\Http\Controllers\AgentController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\GroupDataController;
+use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Artisan;
 // Clear website cache 
@@ -68,6 +70,22 @@ Route::group(['middleware' => 'auth'], function () {
 
     // Support route start
     Route::get('/user/support', [HomeController::class, 'support'])->name('user.support');
+
+    // Agent routes start
+    Route::post('/user/agent/store', [AgentController::class, 'agentStore'])->name('user.agent.store');
+    Route::get('/user/agent/details', [AgentController::class, 'agentDetails'])->name('user.agent.details');
+    Route::get('/user/agent/delete', [AgentController::class, 'agentTask'])->name('user.agent.delete');
+    Route::get('/user/agent/list', [AgentController::class, 'agentList'])->name('user.agent.list');
+    Route::get('/user/agent/create', [AgentController::class, 'agentCreate'])->name('user.agent.create');
+    Route::get('/user/agent/edit', [AgentController::class, 'agentEdit'])->name('user.agent.edit');
+
+    // Knowledge Base routes start
+    Route::post('/user/knowledgeBase/store', [KnowledgeBaseController::class, 'knowledgeBaseStore'])->name('user.knowledgeBase.store');
+    Route::get('/user/knowledgeBase/details', [KnowledgeBaseController::class, 'knowledgeBaseDetails'])->name('user.knowledgeBase.details');
+    Route::get('/user/knowledgeBase/delete', [KnowledgeBaseController::class, 'knowledgeBaseTask'])->name('user.knowledgeBase.delete');
+    Route::get('/user/knowledgeBase/list', [KnowledgeBaseController::class, 'knowledgeBaseList'])->name('user.knowledgeBase.list');
+    Route::get('/user/knowledgeBase/create', [KnowledgeBaseController::class, 'knowledgeBaseCreate'])->name('user.knowledgeBase.create');
+    Route::get('/user/knowledgeBase/edit', [KnowledgeBaseController::class, 'knowledgeBaseEdit'])->name('user.knowledgeBase.edit');
 });
 
 
