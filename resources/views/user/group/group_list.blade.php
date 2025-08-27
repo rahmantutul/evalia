@@ -12,7 +12,9 @@
                     <div class="row align-items-center">
                         <div class="col d-flex justify-content-between align-items-center">                      
                             <h4 class="card-title mb-0">Group List</h4>
-                            <a href="{{ route('user.group_data.create') }}" class="btn btn-sm btn-primary">+ Create New</a>                      
+                            <button type="button" class="btn btn-sm btn-primary" title="Under maintenance" disabled>
+                                Create New (Under maintenance)
+                            </button>                   
                         </div>
 
                     </div>                                 
@@ -40,35 +42,38 @@
                                 </ul>
                             </div>
                         @endif
-                        <table class="table mb-0">
+                       <table class="table mb-0">
                             <thead class="table-light">
                                 <tr>
-                                   <th>Group ID</th>
+                                    <th>Group ID</th>
                                     <th>Group Name</th>
                                     <th>Group description</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($groups as $group)
+                                @if(count($groups) > 0)
+                                    @foreach($groups as $group)
+                                        <tr>
+                                            <td>{{ $group['group_id'] }}</td>
+                                            <td>{{ $group['group_name'] }}</td> 
+                                            <td>{{ $group['description'] }}</td> 
+                                            <td>
+                                                <form action="{{ route('user.group_data.delete', $group['group_id']) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure to delete this?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash-alt"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
                                     <tr>
-                                        <td>{{ $group['group_id'] }}</td>
-                                        <td>{{ $group['group_name'] }}</td> 
-                                        <td>{{ $group['description'] }}</td> 
-                                        <td>
-                                            {{--  <a href="{{ route('user.group.view',$group['id']) }}" class="btn btn-sm btn-primary">
-                                               <i class="fas fa-eye"></i> View Details
-                                            </a>  --}}
-                                            <form action="{{ route('user.group_data.delete', $group['group_id']) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure to delete this?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash-alt"></i> Delete
-                                                </button>
-                                            </form>
-                                        </td>
+                                        <td colspan="4" class="text-center py-4">No groups found.</td>
                                     </tr>
-                                @endforeach         
+                                @endif         
                             </tbody>
                         </table>                                             
                     </div>

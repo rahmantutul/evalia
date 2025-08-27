@@ -1,463 +1,229 @@
 @extends('user.layouts.app')
 @push('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="{{ asset('assets/css/user-dashboard.css') }}">
+
     <style>
-        .qad-header {
-            background-color: white;
-            border-bottom: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .qad-logo {
-            width: 40px;
-            height: 40px;
-            background-color: var(--qad-primary);
+        .btn-period.active {
+            background-color: #0d6efd;
             color: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
         }
-
-        .qad-card {
-            background: white;
+        .trend-up {
+            color: #198754;
+        }
+        .trend-down {
+            color: #dc3545;
+        }
+        .trend-neutral {
+            color: #6c757d;
+        }
+        .dashboard-card {
             border-radius: 12px;
             border: none;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
+            background-color: #fff;
         }
-
-        .qad-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .qad-card-header {
-            background: transparent;
-            border-bottom: 1px solid #f1f5f9;
-            padding: 1rem 1.25rem;
-            font-weight: 600;
-            color: var(--qad-dark);
-        }
-
-        .qad-metric {
-            padding: 1.25rem;
-        }
-
-        .qad-metric-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--qad-dark);
-            line-height: 1;
-        }
-
-        .qad-metric-label {
-            font-size: 0.875rem;
-            color: #64748b;
-            font-weight: 500;
-        }
-
-        .qad-metric-change {
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.25rem 0.5rem;
-            border-radius: 9999px;
-        }
-
-        .qad-change-up {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: var(--qad-success);
-        }
-
-        .qad-change-down {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: var(--qad-danger);
-        }
-
-        .qad-change-neutral {
-            background-color: rgba(100, 116, 139, 0.1);
-            color: #64748b;
-        }
-
-        .qad-agent {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .qad-agent:last-child {
-            border-bottom: none;
-        }
-
-        .qad-agent-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            background-color: #e2e8f0;
+        .icon-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 0.75rem;
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: #475569;
         }
-
-        .qad-agent-name {
-            font-weight: 600;
-            font-size: 0.9375rem;
-        }
-
-        .qad-agent-score {
-            font-weight: 700;
-            margin-left: auto;
-        }
-
-        .qad-score-high {
-            color: var(--qad-success);
-        }
-
-        .qad-score-low {
-            color: var(--qad-danger);
-        }
-
-        .qad-score-medium {
-            color: var(--qad-warning);
-        }
-
-        .qad-progress-thin {
-            height: 4px;
-            border-radius: 2px;
-        }
-
-        .qad-topic-tag {
-            display: inline-block;
-            background-color: #e2e8f0;
-            color: #475569;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .qad-export-btn {
-            background-color: white;
-            border: 1px solid #e2e8f0;
-            color: #64748b;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            padding: 0.375rem 0.75rem;
-            border-radius: 6px;
-        }
-
-        .qad-export-btn:hover {
-            background-color: #f8fafc;
-            color: var(--qad-primary);
-            border-color: #cbd5e1;
-        }
-
         .chart-container {
             position: relative;
-            height: 250px;
-            padding: 1rem;
+            height: 300px;
+            padding: 1.25rem;
         }
-
-        @media (max-width: 767.98px) {
-            .chart-container {
-                height: 200px;
-            }
+        .sentiment-badge {
+            padding: 0.35rem 0.65rem;
+            border-radius: 50rem;
+            font-size: 0.75rem;
+        }
+        .agent-card {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid #f1f1f1;
+        }
+        .agent-card.top-agent {
+            background-color: rgba(25, 135, 84, 0.05);
+            border-left: 4px solid #198754;
+        }
+        .agent-card.low-agent {
+            background-color: rgba(220, 53, 69, 0.05);
+            border-left: 4px solid #dc3545;
+        }
+        .top-performer-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            background-color: #198754;
+            color: white;
+            border-radius: 0.25rem;
+        }
+        .needs-improvement-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 0.25rem;
+        }
+        .progress-thin {
+            height: 8px;
+        }
+        .avatar-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
         }
     </style>
 @endpush
 @section('content')
-<div class="container-fluid py-3" style="background-color: #f8f9fa; min-height: 100vh;">
-        <div class="container-fluid py-4">
-         <div class="qad-header sticky-top py-3 mb-2">
-            <div class="container-fluid">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center">
-                            <div class="qad-logo me-3">QA</div>
-                            <div>
-                                <h1 class="h5 mb-0 fw-bold">Quality Assurance Dashboard</h1>
-                                <p class="mb-0 text-muted small">Customer Support Center</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <div class="d-flex justify-content-md-end align-items-center">
-                            <div>
-                                <a class="btn btn-outline-primary fw-600 shadow-sm text-back" href="{{ route('user.company.edit',$company['company_id']) }}">
-                                    <i class="bi bi-gear me-1"></i> Settings
-                                </a>
-                               <button type="button" class="btn btn-outline-primary fw-600 shadow-sm text-back" data-bs-toggle="modal" data-bs-target="#audioUploadModal">
-                                        <i class="fas fa-plus me-2"></i> Upload & Analyze Audio
-                                </button>
-                                 <button class="btn btn-outline-primary fw-600 shadow-sm text-back">
-                                    <i class="bi bi-download me-1"></i> Export
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+
+    <div class="container-fluid p-4">
+        <!-- Header -->
+        <div class="page-header mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="fw-bold mb-1">Company Analysis Dashboard</h4>
+                    <p class="text-muted mb-0">Comprehensive overview of call quality metrics and agent performance</p>
                 </div>
-            </div>~~
+                <div class="d-flex gap-2 align-items-center">
+                    <a class="btn btn-outline-secondary fw-600 shadow-sm text-back d-flex align-items-center justify-content-center" 
+                    href="{{ route('user.company.edit',$company['company_id']) }}" style="height: 38px;">
+                        Settings
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary fw-600 shadow-sm text-back d-flex align-items-center justify-content-center" 
+                            data-bs-toggle="modal" data-bs-target="#audioUploadModal" style="height: 38px;">
+                        <i class="fas fa-plus me-2"></i> Upload & Analyze Audio
+                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary fw-600 shadow-sm text-back dropdown-toggle d-flex align-items-center justify-content-center" 
+                                type="button" id="periodDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="height: 38px;">
+                            Last 30 Days
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="periodDropdown">
+                            <li><a class="dropdown-item period-filter active" href="#" data-period="30">Last 30 Days</a></li>
+                            <li><a class="dropdown-item period-filter" href="#" data-period="7">Last 7 Days</a></li>
+                            <li><a class="dropdown-item period-filter" href="#" data-period="90">Last Quarter</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-outline-secondary fw-600 shadow-sm text-back d-flex align-items-center justify-content-center" 
+                            id="exportBtn" style="height: 38px;">
+                        <i class="fas fa-download me-1"></i> Export
+                    </button>
+                    <a class="btn btn-outline-secondary fw-600 shadow-sm text-back d-flex align-items-center justify-content-center" 
+                    href="{{ route('user.company.list') }}" style="height: 38px;">
+                        Back to Companies
+                    </a>
+                </div>
+            </div>
         </div>
-        <!-- KPI Row -->
-        <div class="row g-4 mb-4">
-            <div class="col-md-3">
-                <div class="qad-card h-100">
-                    <div class="qad-metric">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="qad-metric-label">Calls Evaluated</div>
-                            <span class="qad-metric-change qad-change-up">
-                                <i class="bi bi-arrow-up"></i> 12%
-                            </span>
-                        </div>
-                        <div class="qad-metric-value">1,248</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="qad-card h-100">
-                    <div class="qad-metric">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="qad-metric-label">Quality Score</div>
-                            <span class="qad-metric-change qad-change-neutral">
-                                <i class="bi bi-dash"></i> 0.2%
-                            </span>
-                        </div>
-                        <div class="qad-metric-value">87.4</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="qad-card h-100">
-                    <div class="qad-metric">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="qad-metric-label">CSAT</div>
-                            <span class="qad-metric-change qad-change-up">
-                                <i class="bi bi-arrow-up"></i> 3.1%
-                            </span>
-                        </div>
-                        <div class="qad-metric-value">92%</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="qad-card h-100">
-                    <div class="qad-metric">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="qad-metric-label">Active Agents</div>
-                            <span class="qad-metric-change qad-change-down">
-                                <i class="bi bi-arrow-down"></i> 2
-                            </span>
-                        </div>
-                        <div class="qad-metric-value">42</div>
-                    </div>
-                </div>
-            </div>
+
+        <!-- KPI Cards -->
+        <div class="row g-4 mb-4" id="kpiCards">
+            <!-- Cards will be updated dynamically -->
         </div>
 
         <!-- Charts Row -->
         <div class="row g-4 mb-4">
-            <div class="col-lg-6">
-                <div class="qad-card h-100">
-                    <div class="qad-card-header d-flex justify-content-between align-items-center">
-                        <span>Performance Trend</span>
-                        <button class="qad-export-btn">
-                            <i class="bi bi-download me-1"></i> Export
-                        </button>
+            <div class="col-md-8">
+                <div class="dashboard-card h-100 shadow-soft">
+                    <div class="card-header bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="fw-bold mb-0">Quality Score Trend</h6>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-period active" data-granularity="daily">Daily</button>
+                                <button class="btn btn-period" data-granularity="weekly">Weekly</button>
+                                <button class="btn btn-period" data-granularity="monthly">Monthly</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="chart-container">
-                        <canvas id="performanceChart"></canvas>
+                        <canvas id="trendChart"></canvas>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <div class="qad-card h-100">
-                    <div class="qad-card-header d-flex justify-content-between align-items-center">
-                        <span>Call Volume</span>
-                        <button class="qad-export-btn">
-                            <i class="bi bi-download me-1"></i> Export
-                        </button>
+            
+            <div class="col-md-4">
+                <div class="dashboard-card h-100 shadow-soft">
+                    <div class="card-header bg-white">
+                        <h6 class="fw-bold mb-0">Customer Sentiment Analysis</h6>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="callVolumeChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Agents Row -->
-        <div class="row g-4 mb-4">
-            <div class="col-lg-6">
-                <div class="qad-card h-100">
-                    <div class="qad-card-header d-flex justify-content-between align-items-center">
-                        <span>Top Performers</span>
-                        <button class="qad-export-btn">
-                            <i class="bi bi-download me-1"></i> Export
-                        </button>
-                    </div>
-                    <div class="p-2">
-                        <div class="qad-agent">
-                            <div class="qad-agent-avatar">JD</div>
-                            <div class="qad-agent-name">John Doe</div>
-                            <div class="qad-agent-score qad-score-high">96.8</div>
-                        </div>
-                        <div class="qad-agent">
-                            <div class="qad-agent-avatar">AS</div>
-                            <div class="qad-agent-name">Alice Smith</div>
-                            <div class="qad-agent-score qad-score-high">95.2</div>
-                        </div>
-                        <div class="qad-agent">
-                            <div class="qad-agent-avatar">RJ</div>
-                            <div class="qad-agent-name">Robert Johnson</div>
-                            <div class="qad-agent-score qad-score-high">94.5</div>
-                        </div>
-                        <div class="qad-agent">
-                            <div class="qad-agent-avatar">MB</div>
-                            <div class="qad-agent-name">Maria Brown</div>
-                            <div class="qad-agent-score qad-score-high">93.7</div>
-                        </div>
-                        <div class="qad-agent">
-                            <div class="qad-agent-avatar">DW</div>
-                            <div class="qad-agent-name">David Wilson</div>
-                            <div class="qad-agent-score qad-score-high">92.9</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="qad-card h-100">
-                    <div class="qad-card-header d-flex justify-content-between align-items-center">
-                        <span>Needs Improvement</span>
-                        <button class="qad-export-btn">
-                            <i class="bi bi-download me-1"></i> Export
-                        </button>
-                    </div>
-                    <div class="p-2">
-                        <div class="qad-agent">
-                            <div class="qad-agent-avatar">TP</div>
-                            <div class="qad-agent-name">Thomas Parker</div>
-                            <div class="qad-agent-score qad-score-low">68.2</div>
-                        </div>
-                        <div class="qad-agent">
-                            <div class="qad-agent-avatar">SG</div>
-                            <div class="qad-agent-name">Sarah Green</div>
-                            <div class="qad-agent-score qad-score-medium">72.5</div>
-                        </div>
-                        <div class="qad-agent">
-                            <div class="qad-agent-avatar">KL</div>
-                            <div class="qad-agent-name">Kevin Lee</div>
-                            <div class="qad-agent-score qad-score-medium">74.1</div>
-                        </div>
-                        <div class="qad-agent">
-                            <div class="qad-agent-avatar">AM</div>
-                            <div class="qad-agent-name">Amy Martinez</div>
-                            <div class="qad-agent-score qad-score-medium">76.8</div>
-                        </div>
-                        <div class="qad-agent">
-                            <div class="qad-agent-avatar">JR</div>
-                            <div class="qad-agent-name">James Robinson</div>
-                            <div class="qad-agent-score qad-score-medium">78.3</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Insights Row -->
-        <div class="row g-4 mb-4">
-            <div class="col-lg-4">
-                <div class="qad-card h-100">
-                    <div class="qad-card-header">Call Sentiment</div>
                     <div class="chart-container">
                         <canvas id="sentimentChart"></canvas>
                     </div>
+                    <div class="d-flex justify-content-center gap-2 mt-3 pb-3" id="sentimentBadges">
+                        <!-- Will be updated dynamically -->
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-4">
-                <div class="qad-card h-100">
-                    <div class="qad-card-header">Call Metrics</div>
-                    <div class="p-3">
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="small text-muted">Escalation Rate</span>
-                                <span class="fw-bold">8.2%</span>
-                            </div>
-                            <div class="progress qad-progress-thin">
-                                <div class="progress-bar bg-danger" role="progressbar" style="width: 8.2%"></div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="small text-muted">First Call Resolution</span>
-                                <span class="fw-bold">78.5%</span>
-                            </div>
-                            <div class="progress qad-progress-thin">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: 78.5%"></div>
+        </div>
+
+        <!-- Performance Tables -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="dashboard-card h-100 shadow-soft">
+                    <div class="card-header bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="fw-bold mb-0">Company Performance</h6>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="companySortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    By Score
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="companySortDropdown">
+                                    <li><a class="dropdown-item company-sort active" href="#" data-sort="score">By Score</a></li>
+                                    <li><a class="dropdown-item company-sort" href="#" data-sort="volume">By Call Volume</a></li>
+                                    <li><a class="dropdown-item company-sort" href="#" data-sort="improvement">By Improvement</a></li>
+                                </ul>
                             </div>
                         </div>
-                        <div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="small text-muted">Avg Resolution Time</span>
-                                <span class="fw-bold">4.2 min</span>
-                            </div>
-                            <div class="progress qad-progress-thin">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: 70%"></div>
-                            </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0" id="companyTable">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Company</th>
+                                        <th>Score</th>
+                                        <th>Trend</th>
+                                        <th class="pe-4">Calls</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Will be populated dynamically -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4">
-                <div class="qad-card h-100">
-                    <div class="qad-card-header">Common Topics</div>
-                    <div class="p-3">
-                        <div class="mb-3">
-                            <span class="qad-topic-tag">Billing Questions (32%)</span>
-                            <span class="qad-topic-tag">Technical Support (24%)</span>
-                            <span class="qad-topic-tag">Account Changes (18%)</span>
-                            <span class="qad-topic-tag">Product Info (14%)</span>
-                            <span class="qad-topic-tag">Returns (8%)</span>
-                            <span class="qad-topic-tag">Shipping (4%)</span>
-                        </div>
-                        <div class="small text-muted">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Compliance Rate</span>
-                                <span class="fw-bold">89.3%</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Script Adherence</span>
-                                <span class="fw-bold">92.7%</span>
+            
+            <div class="col-md-6">
+                <div class="dashboard-card h-100 shadow-soft">
+                    <div class="card-header bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="fw-bold mb-0">Agent Performance</h6>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="agentSortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Top Performers
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="agentSortDropdown">
+                                    <li><a class="dropdown-item agent-sort active" href="#" data-sort="top">Top Performers</a></li>
+                                    <li><a class="dropdown-item agent-sort" href="#" data-sort="needs-improvement">Needs Improvement</a></li>
+                                    <li><a class="dropdown-item agent-sort" href="#" data-sort="all">All Agents</a></li>
+                                </ul>
                             </div>
                         </div>
+                    </div>
+                    <div class="card-body p-3" id="agentPerformance">
+                        <!-- Will be populated dynamically -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="container">
-        <div class="row align-items-center bg-secondary p-3 rounded mb-3">
-            <div class="col-md-8">
-                <h3 class="fw-600 text-dark mb-2">Company Audio Analysis Dashboard</h3>
-                <p class="text-primary mb-0">Analyze and evaluate customer service call</p>
-            </div>
-            <div class="col-md-4 text-md-end">
-                <div class="badge bg-light text-dark p-3 rounded-pill shadow-sm">
-                    <i class="bi bi-building me-2"></i>
-                    <span class="fw-500">Company ID: <span class="text-primary">{{ $company['company_id'] }}</span></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Upload Section -->
-        <div class="row g-4">
+    <div class="container-fluid p-3">
+        <div class="row">
             <!-- Recent Analyses Section -->
             <div class="card border-0 shadow-sm overflow-hidden">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom py-2">
@@ -468,14 +234,14 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table class="table mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="py-2 ps-4">Analysis ID</th>
-                                    <th class="py-2">Status</th>
-                                    <th class="py-2">Duration</th>
-                                    <th class="py-2">Created</th>
-                                    <th class="py-2 pe-4 text-end">Actions</th>
+                                    <th>ID</th>
+                                    <th>Status</th>
+                                    <th>Duration</th>
+                                    <th>Created At</th>
+                                    <th class="text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -494,15 +260,23 @@
                                         <td>@if(isset($task['duration'])) {{ $task['duration'] }} min @else -- @endif</td>
                                         <td>{{ \Carbon\Carbon::parse($task['created_at'])->format('M d, Y h:i A') }}</td>
                                         <td class="pe-4 text-end">
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ route('user.task.details',$task['id']) }}" class="btn btn-sm btn-primary rounded-start-pill">
-                                                    <i class="bi bi-eye me-1"></i> View
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <!-- View Button -->
+                                                <a href="{{ route('user.task.details',$task['id']) }}" 
+                                                class="btn btn-sm btn-outline-primary" title="View Details">
+                                                    <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route('user.task.delete',$task['id']) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure to delete this?')">
-                                                    <i class="bi bi-eye"></i> Delete
+                                                
+                                                <!-- Delete Button -->
+                                                <a href="{{ route('user.task.delete',$task['id']) }}" 
+                                                class="btn btn-sm  btn-outline-danger" title="Delete Task"
+                                                onclick="return confirm('Are you sure to delete this task?')">
+                                                    <i class="fas fa-trash-alt"></i>
                                                 </a>
-                                                <button class="btn btn-sm btn-secondary rounded-end-pill">
-                                                    <i class="bi bi-arrow-repeat"></i>Re-run
+                                                
+                                                <!-- Re-run Button -->
+                                                <button class="btn btn-sm btn-outline-secondary"  title="Re-run Task">
+                                                    <i class="fas fa-redo"></i>
                                                 </button>
                                             </div>
                                         </td>
@@ -524,149 +298,426 @@
                 </div>
             </div>
         </div>
-
-</div>
-
-<!-- Trigger Button -->
-<button type="button" class="btn btn-primary rounded-pill fw-600 shadow-sm" data-bs-toggle="modal" data-bs-target="#audioUploadModal">
-    <i class="fas fa-upload me-2"></i> Upload Audio
-</button>
-
-<!-- Modal -->
-<div class="modal fade" id="audioUploadModal" tabindex="-1" aria-labelledby="audioUploadModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg rounded-4">
-      
-      <!-- Modal Header -->
-      <div class="modal-header bg-light">
-        <h5 class="modal-title fw-600 text-black" id="audioUploadModalLabel" >
-          <i class="fas fa-wave-square text-black me-2"></i> Audio Upload Form
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <!-- Modal Body -->
-      <div class="modal-body">
-        <form action="{{ route('user.task.store') }}" method="POST" enctype="multipart/form-data">
-          @csrf
-          <div class="row g-4 mb-4">
-
-              {{-- Customer Audio --}}
-              <div class="col-md-4">
-                  <div class="card border-0 shadow-sm h-100">
-                      <div class="card-header bg-white border-0 py-2">
-                          <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
-                              <span class="bg-dark bg-opacity-10 text-primary p-2 me-2 rounded">
-                                  <i class="fas fa-microphone"></i>
-                              </span>
-                              Customer Audio
-                          </h5>
-                      </div>
-                      <div class="card-body d-flex flex-column">
-                          <p class="text-muted small mb-4">Upload customer audio file in WAV or MP3 format</p>
-                          <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
-                              <i class="bi bi-cloud-upload text-primary fs-1 mb-2"></i>
-                              <span class="text-center mb-1 fw-500">Drag & drop files here</span>
-                              <span class="text-muted small mb-3">or click to browse</span>
-                              <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
-                              <input type="file" name="customer_audio" class="d-none" accept="audio/*" required>
-                          </label>
-                      </div>
-                  </div>
-              </div>
-
-              {{-- Agent Audio --}}
-              <div class="col-md-4">
-                  <div class="card border-0 shadow-sm h-100">
-                      <div class="card-header bg-white border-0 py-2">
-                          <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
-                              <span class="bg-danger bg-opacity-10 text-danger p-2 me-2 rounded">
-                                  <i class="fas fa-headset fs-5"></i>
-                              </span>
-                              Agent Audio
-                          </h5>
-                      </div>
-                      <div class="card-body d-flex flex-column">
-                          <p class="text-muted small mb-4">Upload agent audio file in WAV or MP3 format</p>
-                          <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
-                              <i class="bi bi-cloud-upload text-danger fs-1 mb-2"></i>
-                              <span class="text-center mb-1 fw-500">Drag & drop files here</span>
-                              <span class="text-muted small mb-3">or click to browse</span>
-                              <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
-                              <input type="file" name="agent_audio" class="d-none" accept="audio/*" required>
-                          </label>
-                      </div>
-                  </div>
-              </div>
-
-              {{-- Combined Audio --}}
-              <div class="col-md-4">
-                  <div class="card border-0 shadow-sm h-100">
-                      <div class="card-header bg-white border-0 py-2">
-                          <h5 class="card-title mb-0 fw-600 d-flex align-items-center">
-                              <span class="bg-success bg-opacity-10 text-success p-2 me-2 rounded">
-                                  <i class="fas fa-microphone fs-5"></i>
-                              </span>
-                              Combined Audio
-                          </h5>
-                      </div>
-                      <div class="card-body d-flex flex-column">
-                          <p class="text-muted small mb-4">Upload pre-mixed audio file (optional)</p>
-                          <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
-                              <i class="bi bi-cloud-upload text-success fs-1 mb-2"></i>
-                              <span class="text-center mb-1 fw-500">Drag & drop files here</span>
-                              <span class="text-muted small mb-3">or click to browse</span>
-                              <span class="badge bg-light text-dark px-3 py-2">Max 100MB</span>
-                              <input type="file" name="combined_audio" class="d-none" accept="audio/*">
-                          </label>
-                      </div>
-                  </div>
-              </div>
-
-          </div>
-
-          <!-- Hidden company_id -->
-          <input type="hidden" name="company_id" value="{{ $company['company_id'] }}">
-
-          <!-- Action Buttons -->
-          <div class="d-flex justify-content-center mb-2">
-              <button type="submit" class="btn btn-primary px-5 py-2 me-3 rounded-pill fw-600 shadow-sm">
-                  <i class="fas fa-chart-line me-2"></i> Analyze Audio
-              </button>
-          </div>
-        </form>
-      </div>
-
     </div>
-  </div>
-</div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="audioUploadModal" tabindex="-1" aria-labelledby="audioUploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+        
+        <!-- Modal Header -->
+        <div class="modal-header bg-light">
+            <h5 class="modal-title fw-600 text-black" id="audioUploadModalLabel" >
+            <i class="fas fa-wave-square text-black me-2"></i> Audio Upload Form
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
 
+        <!-- Modal Body -->
+        <div class="modal-body">
+            <form action="{{ route('user.task.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="row g-4 mb-4">
 
+                {{-- Customer Audio --}}
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-0 py-2">
+                            <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
+                                <span class="bg-dark bg-opacity-10 text-primary p-2 me-2 rounded">
+                                    <i class="fas fa-microphone"></i>
+                                </span>
+                                Customer Audio
+                            </h5>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <p class="text-muted small mb-4">Upload customer audio file in WAV or MP3 format</p>
+                            <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
+                                <i class="bi bi-cloud-upload text-primary fs-1 mb-2"></i>
+                                <span class="text-center mb-1 fw-500">Drag & drop files here</span>
+                                <span class="text-muted small mb-3">or click to browse</span>
+                                <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
+                                <input type="file" name="customer_audio" class="d-none" accept="audio/*" required>
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
+                {{-- Agent Audio --}}
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-0 py-2">
+                            <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
+                                <span class="bg-danger bg-opacity-10 text-danger p-2 me-2 rounded">
+                                    <i class="fas fa-headset fs-5"></i>
+                                </span>
+                                Agent Audio
+                            </h5>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <p class="text-muted small mb-4">Upload agent audio file in WAV or MP3 format</p>
+                            <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
+                                <i class="bi bi-cloud-upload text-danger fs-1 mb-2"></i>
+                                <span class="text-center mb-1 fw-500">Drag & drop files here</span>
+                                <span class="text-muted small mb-3">or click to browse</span>
+                                <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
+                                <input type="file" name="agent_audio" class="d-none" accept="audio/*" required>
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
+                {{-- Combined Audio --}}
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-0 py-2">
+                            <h5 class="card-title mb-0 fw-600 d-flex align-items-center">
+                                <span class="bg-success bg-opacity-10 text-success p-2 me-2 rounded">
+                                    <i class="fas fa-microphone fs-5"></i>
+                                </span>
+                                Combined Audio
+                            </h5>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <p class="text-muted small mb-4">Upload pre-mixed audio file (optional)</p>
+                            <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
+                                <i class="bi bi-cloud-upload text-success fs-1 mb-2"></i>
+                                <span class="text-center mb-1 fw-500">Drag & drop files here</span>
+                                <span class="text-muted small mb-3">or click to browse</span>
+                                <span class="badge bg-light text-dark px-3 py-2">Max 100MB</span>
+                                <input type="file" name="combined_audio" class="d-none" accept="audio/*">
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
+            </div>
 
+            <!-- Hidden company_id -->
+            <input type="hidden" name="company_id" value="{{ $company['company_id'] }}">
 
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-center mb-2">
+                <button type="submit" class="btn btn-primary px-5 py-2 me-3 rounded-pill fw-600 shadow-sm">
+                    <i class="fas fa-chart-line me-2"></i> Analyze Audio
+                </button>
+            </div>
+            </form>
+        </div>
 
+        </div>
+    </div>
+    </div>
 @endsection
 
 @push('scripts')
-        <script>
-        // Performance Trend Chart
-        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-        const performanceChart = new Chart(performanceCtx, {
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+    // Dummy data generators
+    const generateDummyData = {
+        kpiData: function(period) {
+            return {
+                totalCompanies: 24 + Math.floor(Math.random() * 5),
+                avgQualityScore: 85 + Math.random() * 10,
+                callsEvaluated: 1000 + Math.floor(Math.random() * 500),
+                avgResponseTime: 10 + Math.random() * 8
+            };
+        },
+        
+        trendData: function(granularity, period) {
+            let labels = [];
+            let data = [];
+            
+            if (granularity === 'daily') {
+                const days = period === 7 ? 7 : 30;
+                for (let i = days; i >= 1; i--) {
+                    labels.push(`Day ${i}`);
+                    data.push(80 + Math.random() * 15);
+                }
+            } else if (granularity === 'weekly') {
+                const weeks = period === 7 ? 1 : period === 30 ? 4 : 12;
+                for (let i = weeks; i >= 1; i--) {
+                    labels.push(`Week ${i}`);
+                    data.push(80 + Math.random() * 15);
+                }
+            } else {
+                const months = period === 90 ? 3 : 6;
+                for (let i = months; i >= 1; i--) {
+                    labels.push(`Month ${i}`);
+                    data.push(80 + Math.random() * 15);
+                }
+            }
+            
+            return { labels, data };
+        },
+        
+        sentimentData: function() {
+            const positive = 60 + Math.random() * 15;
+            const neutral = 20 + Math.random() * 10;
+            const negative = 100 - positive - neutral;
+            
+            return {
+                positive: parseFloat(positive.toFixed(1)),
+                neutral: parseFloat(neutral.toFixed(1)),
+                negative: parseFloat(negative.toFixed(1))
+            };
+        },
+        
+        companyPerformance: function(sortBy) {
+            const companies = [
+                { name: "TechCorp Inc.", score: 94.2, trend: 3.2, calls: 187 },
+                { name: "Global Solutions", score: 89.5, trend: 1.1, calls: 156 },
+                { name: "Innovate LLC", score: 87.8, trend: 0.0, calls: 132 },
+                { name: "DataSystems", score: 76.4, trend: -2.4, calls: 98 },
+                { name: "FutureTech", score: 91.2, trend: 2.1, calls: 143 },
+                { name: "CloudMasters", score: 83.7, trend: -1.2, calls: 121 }
+            ];
+            
+            // Sort based on selection
+            if (sortBy === 'score') {
+                companies.sort((a, b) => b.score - a.score);
+            } else if (sortBy === 'volume') {
+                companies.sort((a, b) => b.calls - a.calls);
+            } else if (sortBy === 'improvement') {
+                companies.sort((a, b) => b.trend - a.trend);
+            }
+            
+            return companies;
+        },
+        
+        agentPerformance: function(sortBy) {
+            const agents = [
+                { 
+                    name: "Sarah Lee", 
+                    company: "TechCorp Inc.", 
+                    score: 97.4, 
+                    trend: 4.2, 
+                    calls: 187,
+                    avatar: "https://ui-avatars.com/api/?name=Sarah+Lee&background=10B981&color=fff"
+                },
+                { 
+                    name: "Michael Chen", 
+                    company: "Global Solutions", 
+                    score: 93.1, 
+                    trend: 1.8, 
+                    calls: 156,
+                    avatar: "https://ui-avatars.com/api/?name=Michael+Chen&background=4F46E5&color=fff"
+                },
+                { 
+                    name: "David Kim", 
+                    company: "DataSystems", 
+                    score: 72.5, 
+                    trend: -3.1, 
+                    calls: 98,
+                    avatar: "https://ui-avatars.com/api/?name=David+Kim&background=EF4444&color=fff"
+                },
+                { 
+                    name: "Emma Wilson", 
+                    company: "FutureTech", 
+                    score: 95.2, 
+                    trend: 2.8, 
+                    calls: 134,
+                    avatar: "https://ui-avatars.com/api/?name=Emma+Wilson&background=8B5CF6&color=fff"
+                },
+                { 
+                    name: "James Brown", 
+                    company: "CloudMasters", 
+                    score: 88.3, 
+                    trend: -0.5, 
+                    calls: 112,
+                    avatar: "https://ui-avatars.com/api/?name=James+Brown&background=F59E0B&color=fff"
+                }
+            ];
+            
+            // Sort based on selection
+            if (sortBy === 'top') {
+                agents.sort((a, b) => b.score - a.score);
+                return agents.slice(0, 3);
+            } else if (sortBy === 'needs-improvement') {
+                agents.sort((a, b) => a.score - b.score);
+                return agents.slice(0, 3);
+            } else {
+                agents.sort((a, b) => b.score - a.score);
+                return agents;
+            }
+        }
+    };
+
+    // Chart instances
+    let trendChart = null;
+    let sentimentChart = null;
+    
+    // Current filters
+    let currentPeriod = 30;
+    let currentGranularity = 'daily';
+    let currentCompanySort = 'score';
+    let currentAgentSort = 'top';
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        updateDashboard();
+        setupEventListeners();
+    });
+
+    // Set up event listeners
+    function setupEventListeners() {
+        // Period filter
+        document.querySelectorAll('.period-filter').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.period-filter').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                currentPeriod = parseInt(this.getAttribute('data-period'));
+                document.getElementById('periodDropdown').textContent = this.textContent;
+                updateDashboard();
+            });
+        });
+
+        // Granularity buttons
+        document.querySelectorAll('.btn-period').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentGranularity = this.getAttribute('data-granularity');
+                updateTrendChart();
+            });
+        });
+
+        // Company sort
+        document.querySelectorAll('.company-sort').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.company-sort').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                currentCompanySort = this.getAttribute('data-sort');
+                updateCompanyTable();
+            });
+        });
+
+        // Agent sort
+        document.querySelectorAll('.agent-sort').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.agent-sort').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                currentAgentSort = this.getAttribute('data-sort');
+                updateAgentPerformance();
+            });
+        });
+
+        // Export button
+        document.getElementById('exportBtn').addEventListener('click', exportDashboardData);
+    }
+
+    // Update entire dashboard
+    function updateDashboard() {
+        updateKpiCards();
+        updateTrendChart();
+        updateSentimentChart();
+        updateCompanyTable();
+        updateAgentPerformance();
+    }
+
+    // Update KPI cards
+    function updateKpiCards() {
+        const kpiData = generateDummyData.kpiData(currentPeriod);
+        const kpiCards = document.getElementById('kpiCards');
+        
+        kpiCards.innerHTML = `
+            <div class="col-md-3">
+                <div class="dashboard-card h-100 shadow-soft">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-muted mb-1">Total Companies</p>
+                                <h3 class="metric-value mb-1">${kpiData.totalCompanies}</h3>
+                                <small class="text-muted">+${Math.floor(Math.random() * 5)} from last month</small>
+                            </div>
+                            <div class="icon-circle bg-soft-primary">
+                                <i class="fas fa-building text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="dashboard-card h-100 shadow-soft">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-muted mb-1">Avg. Quality Score</p>
+                                <h3 class="metric-value mb-1">${kpiData.avgQualityScore.toFixed(1)}%</h3>
+                                <small class="trend-up"><i class="fas fa-arrow-up me-1"></i> ${(Math.random() * 3).toFixed(1)}% improvement</small>
+                            </div>
+                            <div class="icon-circle bg-soft-success">
+                                <i class="fas fa-chart-line text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="dashboard-card h-100 shadow-soft">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-muted mb-1">Calls Evaluated</p>
+                                <h3 class="metric-value mb-1">${kpiData.callsEvaluated}</h3>
+                                <small class="text-muted"><i class="fas fa-arrow-up text-success me-1"></i> ${Math.floor(Math.random() * 100)} this week</small>
+                            </div>
+                            <div class="icon-circle bg-soft-info">
+                                <i class="fas fa-phone-alt text-info"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="dashboard-card h-100 shadow-soft">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-muted mb-1">Avg. Response Time</p>
+                                <h3 class="metric-value mb-1">${kpiData.avgResponseTime.toFixed(1)}s</h3>
+                                <small class="trend-down"><i class="fas fa-arrow-down me-1"></i> ${(Math.random() * 2).toFixed(1)}s faster</small>
+                            </div>
+                            <div class="icon-circle bg-soft-warning">
+                                <i class="fas fa-stopwatch text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Update trend chart
+    function updateTrendChart() {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        const trendData = generateDummyData.trendData(currentGranularity, currentPeriod);
+        
+        if (trendChart) {
+            trendChart.destroy();
+        }
+        
+        trendChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                labels: trendData.labels,
                 datasets: [{
                     label: 'Quality Score',
-                    data: [82, 84, 83, 86, 85, 87, 89],
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true
+                    data: trendData.data,
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#0d6efd',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }]
             },
             options: {
@@ -684,7 +735,7 @@
                 scales: {
                     y: {
                         beginAtZero: false,
-                        min: 80,
+                        min: 70,
                         max: 100,
                         grid: {
                             drawBorder: false
@@ -698,75 +749,195 @@
                 }
             }
         });
+    }
 
-        // Call Volume Chart
-        const callVolumeCtx = document.getElementById('callVolumeChart').getContext('2d');
-        const callVolumeChart = new Chart(callVolumeCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                datasets: [{
-                    label: 'Calls',
-                    data: [320, 290, 350, 410, 380, 220, 180],
-                    backgroundColor: '#3b82f6',
-                    borderColor: '#2563eb',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            drawBorder: false
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
-
-        // Sentiment Chart
-        const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
-        const sentimentChart = new Chart(sentimentCtx, {
+    // Update sentiment chart
+    function updateSentimentChart() {
+        const ctx = document.getElementById('sentimentChart').getContext('2d');
+        const sentimentData = generateDummyData.sentimentData();
+        
+        if (sentimentChart) {
+            sentimentChart.destroy();
+        }
+        
+        sentimentChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: ['Positive', 'Neutral', 'Negative'],
                 datasets: [{
-                    data: [62, 28, 10],
+                    data: [sentimentData.positive, sentimentData.neutral, sentimentData.negative],
                     backgroundColor: [
-                        '#10b981',
-                        '#94a3b8',
-                        '#ef4444'
+                        'rgba(25, 135, 84, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(220, 53, 69, 0.8)'
                     ],
-                    borderWidth: 0
+                    borderColor: [
+                        'rgb(25, 135, 84)',
+                        'rgb(255, 193, 7)',
+                        'rgb(220, 53, 69)'
+                    ],
+                    borderWidth: 1,
+                    hoverOffset: 10
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '70%',
                 plugins: {
                     legend: {
-                        position: 'bottom',
-                        labels: {
-                            boxWidth: 12,
-                            padding: 20
-                        }
+                        position: 'bottom'
                     }
-                }
+                },
+                cutout: '70%'
             }
         });
-    </script>
+        
+        // Update sentiment badges
+        document.getElementById('sentimentBadges').innerHTML = `
+            <span class="sentiment-badge bg-success bg-opacity-10 text-success">${sentimentData.positive}% Positive</span>
+            <span class="sentiment-badge bg-warning bg-opacity-10 text-warning">${sentimentData.neutral}% Neutral</span>
+            <span class="sentiment-badge bg-danger bg-opacity-10 text-danger">${sentimentData.negative}% Negative</span>
+        `;
+    }
+
+    // Update company table
+    function updateCompanyTable() {
+        const companies = generateDummyData.companyPerformance(currentCompanySort);
+        const tableBody = document.querySelector('#companyTable tbody');
+        
+        let html = '';
+        companies.forEach(company => {
+            const trendClass = company.trend > 0 ? 'trend-up' : (company.trend < 0 ? 'trend-down' : 'trend-neutral');
+            const trendIcon = company.trend > 0 ? 'fa-arrow-up' : (company.trend < 0 ? 'fa-arrow-down' : 'fa-minus');
+            
+            html += `
+                <tr>
+                    <td class="ps-4"><strong>${company.name}</strong></td>
+                    <td><span class="fw-bold">${company.score}%</span></td>
+                    <td><span class="${trendClass}"><i class="fas ${trendIcon} me-1"></i> ${Math.abs(company.trend)}%</span></td>
+                    <td class="pe-4">${company.calls}</td>
+                </tr>
+            `;
+        });
+        
+        tableBody.innerHTML = html;
+    }
+
+    // Update agent performance
+    function updateAgentPerformance() {
+        const agents = generateDummyData.agentPerformance(currentAgentSort);
+        const agentContainer = document.getElementById('agentPerformance');
+        
+        let html = '';
+        
+        agents.forEach(agent => {
+            const isTopPerformer = agent.score >= 90;
+            const isLowPerformer = agent.score < 75;
+            const trendClass = agent.trend > 0 ? 'trend-up' : (agent.trend < 0 ? 'trend-down' : 'trend-neutral');
+            const scoreClass = isTopPerformer ? 'text-success' : (isLowPerformer ? 'text-danger' : '');
+            
+            html += `
+                <div class="agent-card ${isTopPerformer ? 'top-agent' : ''} ${isLowPerformer ? 'low-agent' : ''}">
+                    <div class="d-flex align-items-center">
+                        <img src="${agent.avatar}" class="avatar-sm me-3">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">${agent.name} ${isTopPerformer ? '<span class="top-performer-badge ms-2">Top Performer</span>' : ''} ${isLowPerformer ? '<span class="needs-improvement-badge ms-2">Needs Coaching</span>' : ''}</h6>
+                            <small class="text-muted">${agent.company} • ${agent.calls} calls</small>
+                        </div>
+                        <div class="text-end">
+                            <h5 class="mb-0 ${scoreClass}">${agent.score}%</h5>
+                            <small class="${trendClass}">${agent.trend > 0 ? '+' : ''}${agent.trend}%</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        // Add performance distribution
+        html += `
+            <div class="mt-4">
+                <div class="d-flex justify-content-between mb-2">
+                    <small class="text-muted">Performance Distribution</small>
+                    <small class="text-muted">${agents.length} agents</small>
+                </div>
+                <div class="progress progress-thin">
+                    <div class="progress-bar bg-success" style="width: 20%"></div>
+                    <div class="progress-bar bg-primary" style="width: 60%"></div>
+                    <div class="progress-bar bg-warning" style="width: 15%"></div>
+                    <div class="progress-bar bg-danger" style="width: 5%"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <small class="text-success">Top 20%</small>
+                    <small class="text-primary">Mid 60%</small>
+                    <small class="text-warning">Low 15%</small>
+                    <small class="text-danger">Bottom 5%</small>
+                </div>
+            </div>
+        `;
+        
+        agentContainer.innerHTML = html;
+    }
+
+    // Export dashboard data to Excel
+    function exportDashboardData() {
+        // Prepare data for export
+        const kpiData = generateDummyData.kpiData(currentPeriod);
+        const trendData = generateDummyData.trendData(currentGranularity, currentPeriod);
+        const sentimentData = generateDummyData.sentimentData();
+        const companies = generateDummyData.companyPerformance(currentCompanySort);
+        const agents = generateDummyData.agentPerformance(currentAgentSort);
+        
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Add KPIs sheet
+        const kpiSheetData = [
+            ['Metric', 'Value', 'Trend'],
+            ['Total Companies', kpiData.totalCompanies, `+${Math.floor(Math.random() * 5)} from last month`],
+            ['Average Quality Score', `${kpiData.avgQualityScore.toFixed(1)}%`, `${(Math.random() * 3).toFixed(1)}% improvement`],
+            ['Calls Evaluated', kpiData.callsEvaluated, `${Math.floor(Math.random() * 100)} this week`],
+            ['Average Response Time', `${kpiData.avgResponseTime.toFixed(1)}s`, `${(Math.random() * 2).toFixed(1)}s faster`]
+        ];
+        const kpiSheet = XLSX.utils.aoa_to_sheet(kpiSheetData);
+        XLSX.utils.book_append_sheet(wb, kpiSheet, 'KPIs');
+        
+        // Add trend data sheet
+        const trendSheetData = [['Period', 'Quality Score']];
+        trendData.labels.forEach((label, index) => {
+            trendSheetData.push([label, trendData.data[index]]);
+        });
+        const trendSheet = XLSX.utils.aoa_to_sheet(trendSheetData);
+        XLSX.utils.book_append_sheet(wb, trendSheet, 'Quality Trend');
+        
+        // Add sentiment data sheet
+        const sentimentSheetData = [
+            ['Sentiment', 'Percentage'],
+            ['Positive', `${sentimentData.positive}%`],
+            ['Neutral', `${sentimentData.neutral}%`],
+            ['Negative', `${sentimentData.negative}%`]
+        ];
+        const sentimentSheet = XLSX.utils.aoa_to_sheet(sentimentSheetData);
+        XLSX.utils.book_append_sheet(wb, sentimentSheet, 'Sentiment Analysis');
+        
+        // Add company performance sheet
+        const companySheetData = [['Company', 'Score', 'Trend', 'Calls']];
+        companies.forEach(company => {
+            companySheetData.push([company.name, `${company.score}%`, `${company.trend > 0 ? '+' : ''}${company.trend}%`, company.calls]);
+        });
+        const companySheet = XLSX.utils.aoa_to_sheet(companySheetData);
+        XLSX.utils.book_append_sheet(wb, companySheet, 'Company Performance');
+        
+        // Add agent performance sheet
+        const agentSheetData = [['Agent', 'Company', 'Score', 'Trend', 'Calls']];
+        agents.forEach(agent => {
+            agentSheetData.push([agent.name, agent.company, `${agent.score}%`, `${agent.trend > 0 ? '+' : ''}${agent.trend}%`, agent.calls]);
+        });
+        const agentSheet = XLSX.utils.aoa_to_sheet(agentSheetData);
+        XLSX.utils.book_append_sheet(wb, agentSheet, 'Agent Performance');
+        
+        // Export the workbook
+        const fileName = `Quality_Dashboard_Export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+    }
+</script>
 @endpush

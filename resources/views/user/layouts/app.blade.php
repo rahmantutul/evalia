@@ -17,6 +17,7 @@
     <link href="{{ asset('/') }}assets/libs/mobius1-selectr/selectr.min.css" rel="stylesheet" type="text/css" />
     <link href="{{ asset('/') }}assets/libs/huebee/huebee.min.css" rel="stylesheet" type="text/css" />
     <link href="{{ asset('/') }}assets/libs/vanillajs-datepicker/css/datepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('/') }}assets/libs/simple-datatables/style.css" rel="stylesheet" type="text/css" />
     
     @stack('styles')
 </head>
@@ -49,7 +50,9 @@
     <script src="{{ asset('/') }}assets/js/pages/forms-advanced.js"></script>
     <script src="{{ asset('/') }}assets/js/app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('/') }}assets/libs/simple-datatables/umd/simple-datatables.js"></script>
+    <script src="{{ asset('/') }}assets/js/pages/datatable.init.js"></script>  
     @if(session('success'))
         <script>
             Swal.fire({

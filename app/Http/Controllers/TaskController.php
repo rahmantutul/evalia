@@ -56,6 +56,7 @@ class TaskController extends Controller
             }
 
             $data = $result['data'];
+            // dd($data); // Debugging line to inspect the data structure
             return view('user.task.task_details', [
                 'data' => $data,
                 'workId' => $workId,

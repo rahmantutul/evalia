@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Kayan AI</title>
+    <title>Login - Evalia </title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -37,10 +37,10 @@
                 <div class="text-center mb-6">
                     <!-- Your Logo -->
                     <div class="logo-container flex justify-center mb-4">
-                        <img src="{{ asset('assets/images/kayan.png') }}" alt="Kayan AI Logo" class="h-full object-contain">
+                        <img src="{{ asset('assets/images/kayan.png') }}" alt="Evalia  Logo" class="h-full object-contain">
                     </div>
                     <h1 class="text-2xl font-semibold text-gray-800">Sign in</h1>
-                    <p class="text-gray-500 mt-1">to continue to Kayan AI</p>
+                    <p class="text-gray-500 mt-1">to continue to Evalia </p>
                 </div>
 
                 <!-- Google Sign-In Button -->
@@ -113,7 +113,7 @@
                 </form>
 
                 <div class="mt-6 text-center text-sm">
-                    <p class="text-gray-600">New to Kayan AI? 
+                    <p class="text-gray-600">New to Evalia ? 
                         <a href="{{ route('register') }}" class="linkedin-blue font-medium">Join now</a>
                     </p>
                 </div>

@@ -27,14 +27,14 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table class="table mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="py-2 ps-4">Analysis ID</th>
-                                    <th class="py-2">Status</th>
-                                    <th class="py-2">Duration</th>
-                                    <th class="py-2">Created</th>
-                                    <th class="py-2 pe-4 text-end">Actions</th>
+                                    <th>ID</th>
+                                    <th>Status</th>
+                                    <th>Duration</th>
+                                    <th>Created At</th>
+                                    <th class="text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -53,21 +53,33 @@
                                         <td>@if(isset($task['duration'])) {{ $task['duration'] }} min @else -- @endif</td>
                                         <td>{{ \Carbon\Carbon::parse($task['created_at'])->format('M d, Y h:i A') }}</td>
                                         <td class="pe-4 text-end">
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ route('user.task.details',$task['id']) }}" class="btn btn-sm btn-primary rounded-start-pill">
-                                                    <i class="bi bi-eye me-1"></i> View
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <!-- View Button -->
+                                                <a href="{{ route('user.task.details',$task['id']) }}" 
+                                                class="btn btn-sm btn-icon btn-outline-primary" 
+                                                data-bs-toggle="tooltip" title="View Details">
+                                                    <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route('user.task.delete',$task['id']) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure to delete this?')">
-                                                    <i class="bi bi-eye"></i> Delete
+                                                
+                                                <!-- Delete Button -->
+                                                <a href="{{ route('user.task.delete',$task['id']) }}" 
+                                                class="btn btn-sm btn-icon btn-outline-danger" 
+                                                data-bs-toggle="tooltip" title="Delete Task"
+                                                onclick="return confirm('Are you sure to delete this task?')">
+                                                    <i class="fas fa-trash-alt"></i>
                                                 </a>
-                                                <button class="btn btn-sm btn-secondary rounded-end-pill">
-                                                    <i class="bi bi-arrow-repeat"></i>Re-run
+                                                
+                                                <!-- Re-run Button -->
+                                                <button class="btn btn-sm btn-icon btn-outline-secondary" 
+                                                        data-bs-toggle="tooltip" title="Re-run Task">
+                                                    <i class="fas fa-redo"></i>
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
+                        </table>
                         </table>
                     </div>
                 </div>
