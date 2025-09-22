@@ -86,6 +86,71 @@
 
 @section('content')
 <div class="container-fluid">
+    <div class="row m-4">
+        <!-- Total Agents Card -->
+        <div class="col-md-3">
+            <div class="card stat-card" style="border: 2px solid #0d6efd; padding: 20px;">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="card-title mb-0 text-dark">Total Agents</h5>
+                            <h2 class="fw-bold mt-2 mb-0 text-primary">{{ $totalAgents ?? 42 }}</h2>
+                            <p class="card-text small mb-0 text-muted"><i class="bi bi-arrow-up-short text-success"></i> +5 from last week</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-people-fill display-6 text-primary opacity-75"></i>
+                        </div>
+                    </div>
+            </div>
+        </div>
+
+        <!-- Total Calls Card -->
+        <div class="col-md-3">
+            <div class="card stat-card" style="border: 2px solid #198754;  padding: 20px;">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-0 text-dark">Total Calls</h5>
+                        <h2 class="fw-bold mt-2 mb-0 text-success">{{ $totalCalls ?? 1248 }}</h2>
+                        <p class="card-text small mb-0 text-muted"><i class="bi bi-arrow-up-short text-success"></i> +128 today</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-telephone-fill display-6 text-success opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Calls Card -->
+        <div class="col-md-3">
+            <div class="card stat-card" style="border: 2px solid #0dcaf0;  padding: 20px;">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-0 text-dark">Active Calls</h5>
+                        <h2 class="fw-bold mt-2 mb-0 text-info">{{ $activeCalls ?? 18 }}</h2>
+                        <p class="card-text small mb-0 text-muted">Avg. duration: 4.2 min</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-telephone-outbound-fill display-6 text-info opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resolution Rate Card -->
+        <div class="col-md-3">
+            <div class="card stat-card" style="border: 2px solid #ffc107;  padding: 20px;">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-0 text-dark">Resolution Rate</h5>
+                        <h2 class="fw-bold mt-2 mb-0 text-warning">{{ $resolutionRate ?? 87 }}%</h2>
+                        <p class="card-text small mb-0 text-muted"><i class="bi bi-arrow-up-short text-success"></i> +3% from last month</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-graph-up display-6 text-warning opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row mb-4 mt-3">
         <div class="col-md-12 col-lg-12">
             <div class="card">
@@ -131,7 +196,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($companies as $company)
+                                @foreach($paginatedCompanies  as $company)
                                     @php
                                         $industries = ['Tech', 'Finance', 'Healthcare', 'Education', 'Logistics','Tech', 'Finance', 'Healthcare', 'Education', 'Logistics'];
                                         $locations = ['New York', 'San Francisco', 'Chicago', 'Los Angeles', 'Miami'];
@@ -153,6 +218,9 @@
                                                 <a href="{{ route('user.task.list',$company['id']) }}" class="btn btn-icon" title="Task List">
                                                     <i class="fas fa-list"></i>
                                                 </a>
+                                                <a href="{{ route('user.company.copy',$company['id']) }}" class="btn btn-icon" title="Copy" onclick="copyCompany({{ $company['id'] }}); return false;">
+                                                    <i class="fas fa-copy"></i>
+                                                </a>
                                                 <a href="{{ route('user.company.edit',$company['id']) }}" class="btn btn-icon" title="Settings">
                                                     <i class="fas fa-cogs"></i>
                                                 </a>
@@ -164,7 +232,7 @@
                                     </tr>
                                 @endforeach         
                             </tbody>
-                        </table>                                             
+                        </table>                                          
                     </div>
                 </div>
             </div>

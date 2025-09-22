@@ -12,7 +12,7 @@
             <div class="col-md-4 text-md-end">
                 <div class="badge bg-light text-dark p-2 rounded-pill shadow-sm">
                     <i class="bi bi-building me-2"></i>
-                    <span class="fw-500">Company ID: <span class="text-primary">{{ $company_id }}</span></span>
+                    <span class="fw-500">Company ID: <span class="text-primary">{{ $companyId }}</span></span>
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($taskList as $task)
+                                @foreach ($paginatedTask as $task)
                                     <tr>
                                         <td class="ps-4 fw-500">#{{ $task['id'] }}</td>
                                         <td>
@@ -86,10 +86,10 @@
                 <div class="card-footer bg-white border-top py-2">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="text-muted small">
-                            Showing {{ $taskList->firstItem() }} to {{ $taskList->lastItem() }} of {{ $taskList->total() }} entries
+                            Showing {{ $paginatedTask->firstItem() }} to {{ $paginatedTask->lastItem() }} of {{ $paginatedTask->total() }} entries
                         </div>
                         <div>
-                            {{ $taskList->links('pagination::bootstrap-4') }}
+                            {{ $paginatedTask->links('pagination::bootstrap-4') }}
                         </div>
                     </div>
                 </div>

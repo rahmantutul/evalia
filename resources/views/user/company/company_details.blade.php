@@ -318,7 +318,22 @@
             <form action="{{ route('user.task.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="row g-4 mb-4">
-
+                <div class="col-md-12 mb-3">
+                    <label for="agent_id" class="form-label fw-semibold text-dark">Agents <span class="text-danger">*</span></label>
+                    <select name="agent_id" id="agent_id" class="form-select"
+                        style="background-color: rgba(255, 255, 255, 0.7);" required>
+                        <option value="">— Select an Agent —</option>
+                        @if(isset($agents) && count($agents))
+                            @foreach($agents[0]['agents'] as $agentOption)
+                                <option value="{{ $agentOption['id'] ?? $agentOption['agent_id'] }}">
+                                    {{ $agentOption['agent_name'] ?? $agentOption['name'] }}
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                    <input type="hidden" name="company_id" value="{{ $company['company_id'] }}">
+                    <input type="hidden" name="group_id" value="{{ $company['group_id'] }}">
+                </div>
                 {{-- Customer Audio --}}
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm h-100">

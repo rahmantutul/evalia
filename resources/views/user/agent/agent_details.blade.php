@@ -165,6 +165,19 @@
         border-radius: 10px;
         padding: 1.25rem;
     }
+     .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #6c757d;
+            color: white;
+            font-size: 12px;
+            font-style: italic;
+            cursor: help;
+        }
 </style>
 @endpush
 @section('content')
@@ -192,14 +205,16 @@
             </div>
         </div>
     </div>
-
     <div class="row">
         <!-- Left Column -->
         <div class="col-lg-8">
             <!-- Performance Metrics -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="section-title">Performance Metrics</h5>
+                    <div class="card-header d-flex justify-content-between align-items-center p-2">
+                        <h4 class="card-title mb-0">Performance Metrics</h4>
+                        <div class="info-icon" data-bs-toggle="tooltip" title="Calculation Details: (Response Speed × 0.3) + (Answer Accuracy × 0.5) + (Customer Satisfaction × 0.2) ">i</div>
+                    </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <div class="metric-card">
@@ -246,12 +261,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="bg-light-custom mt-4">
-                        <h6 class="fw-semibold">Calculation Details</h6>
-                        <p class="mb-1 small">Final Score = (Response Speed × 0.3) + (Answer Accuracy × 0.5) + (Customer Satisfaction × 0.2)</p>
-                        <p class="mb-0 small"> = (80 × 0.3) + (90 × 0.5) + (70 × 0.2) = 24 + 45 + 14 = <strong>83</strong></p>
                     </div>
                 </div>
             </div>

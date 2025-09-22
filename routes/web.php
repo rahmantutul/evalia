@@ -29,7 +29,7 @@ Route::get('/clear-cache', function() {
 })->name('cache.clear');
 
 // Login route 
-Route::get('/', function () {
+Route::get('/', function () { 
     return redirect()->route('login'); 
 });
 
@@ -48,15 +48,18 @@ Route::group(['middleware' => 'auth'], function () {
 
     // Group Routs start 
     Route::get('/user/group_data/list', [GroupDataController::class, 'groupList'])->name('user.group_data.list');
+    Route::get('/user/group_data/edit/{id}', [GroupDataController::class, 'groupEdit'])->name('user.group_data.edit');
     Route::get('/user/group_data/create', [GroupDataController::class, 'groupCreate'])->name('user.group_data.create');
     Route::post('/user/group_data/store', [GroupDataController::class, 'groupStore'])->name('user.group_data.store');
-    Route::delete('/user/group_data/delete/{id}', [GroupDataController::class, 'groupDelete'])->name('user.group_data.delete');
+    Route::post('/user/group_data/update', [GroupDataController::class, 'groupUpdate'])->name('user.group_data.update');
+    Route::get('/user/group_data/delete/{id}', [GroupDataController::class, 'groupDelete'])->name('user.group_data.delete');
 
     // Company Routs start 
     Route::get('/user/company/list', [CompanyController::class, 'companyList'])->name('user.company.list');
     Route::get('/user/company/create', [CompanyController::class, 'companyCreate'])->name('user.company.create');
     Route::get('/user/company/view/{id}', [CompanyController::class, 'companyDetails'])->name('user.company.view');
     Route::get('/user/company/edit/{id}', [CompanyController::class, 'companyEdit'])->name('user.company.edit');
+    Route::get('/user/company/copy/{id}', [CompanyController::class, 'companyCopy'])->name('user.company.copy');
     Route::post('/user/company/store', [CompanyController::class, 'companyStore'])->name('user.company.store');
     Route::put('/user/company/update/{company_id}', [CompanyController::class, 'companyUpdate'])->name('user.company.update');
     Route::get('/user/company/delete/{id}', [CompanyController::class, 'companyDelete'])->name('user.company.delete');
@@ -73,11 +76,12 @@ Route::group(['middleware' => 'auth'], function () {
 
     // Agent routes start
     Route::post('/user/agent/store', [AgentController::class, 'agentStore'])->name('user.agent.store');
-    Route::get('/user/agent/details', [AgentController::class, 'agentDetails'])->name('user.agent.details');
-    Route::get('/user/agent/delete', [AgentController::class, 'agentTask'])->name('user.agent.delete');
+    Route::post('/user/agent/update/{id}', [AgentController::class, 'agentUpdate'])->name('user.agent.update');
+    Route::get('/user/agent/details/{id?}', [AgentController::class, 'agentDetails'])->name('user.agent.details');
+    Route::get('/user/agent/delete/{id}', [AgentController::class, 'agentDelete'])->name('user.agent.delete');
     Route::get('/user/agent/list', [AgentController::class, 'agentList'])->name('user.agent.list');
     Route::get('/user/agent/create', [AgentController::class, 'agentCreate'])->name('user.agent.create');
-    Route::get('/user/agent/edit', [AgentController::class, 'agentEdit'])->name('user.agent.edit');
+    Route::get('/user/agent/edit/{id}', [AgentController::class, 'agentEdit'])->name('user.agent.edit');
 
     // Knowledge Base routes start
     Route::post('/user/knowledgeBase/store', [KnowledgeBaseController::class, 'knowledgeBaseStore'])->name('user.knowledgeBase.store');

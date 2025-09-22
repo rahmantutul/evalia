@@ -7,29 +7,38 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 class ExternalApiHelper
 {
-    protected static $baseUrl = 'http://52.22.157.186:8080/api/v1/auth';
+    protected static $baseUrl = 'http://13.218.100.190:8080/api/v1/auth';
 
-    public static function getToken(string $password): ?string
+    public static function getToken()
     {
         $user = Auth::user();
         if (!$user) {
+            Log::warning('No authenticated user for external API token');
             return null;
         }
+        
         try {
-            // 1. Try Login
+            $password = 'DefaultPassword123!';
+
+            // Try login first
             $loginResponse = Http::post(self::$baseUrl . "/login", [
-                "username" => $user->email, // using email as username
+                "email" => $user->email,
                 "password" => $password,
             ]);
-
+            
             if ($loginResponse->successful()) {
-                return $loginResponse->json('token');
+                $token = $loginResponse->json('access_token');
+                if ($token) {
+                    return $token;
+                }
+                Log::warning('Login successful but no access_token in response');
+            } else {
+                Log::warning('Login failed: ' . $loginResponse->body());
             }
 
-            // 2. Try Register if login failed
+            // If login fails, try registration
             $registerPayload = [
                 "email"      => $user->email,
-                "username"   => $user->email,
                 "role"       => "client",
                 "full_name"  => $user->name ?? $user->email,
                 "password"   => $password,
@@ -38,22 +47,22 @@ class ExternalApiHelper
             $registerResponse = Http::post(self::$baseUrl . "/register", $registerPayload);
 
             if ($registerResponse->successful()) {
-                // Login again after successful registration
+                // Try login again after registration
                 $loginResponse = Http::post(self::$baseUrl . "/login", [
-                    "username" => $user->email,
+                    "email" => $user->email,
                     "password" => $password,
                 ]);
 
                 if ($loginResponse->successful()) {
-                    return $loginResponse->json('token');
+                    $token = $loginResponse->json('access_token');
+                    if ($token) {
+                        return $token;
+                    }
+                    Log::warning('Post-registration login successful but no access_token');
                 }
+            } else {
+                Log::warning('Registration failed: ' . $registerResponse->body());
             }
-
-            // If still failed
-            Log::error('External API login/register failed', [
-                'login_response'    => $loginResponse->body(),
-                'register_response' => $registerResponse->body() ?? null,
-            ]);
 
             return null;
 

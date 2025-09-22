@@ -206,7 +206,21 @@
             </div>
         </div>
     </div>
-</div>
+    <!-- Status Popup Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3">
+        <div class="modal-header">
+            <h5 class="modal-title">Agent Status</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="statusMessage">
+            <!-- Message will be injected here -->
+        </div>
+        </div>
+    </div>
+    </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -651,7 +665,11 @@
                     <div class="d-flex align-items-center">
                         <img src="${agent.avatar}" class="avatar-sm me-3">
                         <div class="flex-grow-1">
-                            <h6 class="mb-0"><a style="color: #000;" href="{{ route('user.agent.details') }}"> ${agent.name}</a> ${isTopPerformer ? '<span class="top-performer-badge ms-2">Top Performer</span>' : ''} ${isLowPerformer ? '<span class="needs-improvement-badge ms-2">Needs Coaching</span>' : ''}</h6>
+                            <h6 class="mb-0">
+                                <a style="color: #000;" href="{{ route('user.agent.details') }}"> ${agent.name}</a>
+                                ${isTopPerformer ? `<span class="top-performer-badge ms-2 badge-clickable" data-message="🎉 ${agent.name} is a Top Performer! Keep up the great work.">Top Performer</span>` : ''}
+                                ${isLowPerformer ? `<span class="needs-improvement-badge ms-2 badge-clickable" data-message="⚠️ ${agent.name} needs coaching to improve performance.">Needs Coaching</span>` : ''}
+                            </h6>
                             <small class="text-muted">${agent.company} • ${agent.calls} calls</small>
                         </div>
                         <div class="text-end">
@@ -660,7 +678,7 @@
                         </div>
                     </div>
                 </div>
-            `;
+                `;
         });
         
         // Add performance distribution
@@ -749,5 +767,18 @@
         const fileName = `Quality_Dashboard_Export_${new Date().toISOString().slice(0, 10)}.xlsx`;
         XLSX.writeFile(wb, fileName);
     }
+</script>
+<script>
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('badge-clickable')) {
+            const message = e.target.getAttribute('data-message');
+            document.getElementById('statusMessage').innerHTML = message;
+
+            // Show Bootstrap modal
+            const modal = new bootstrap.Modal(document.getElementById('statusModal'));
+            modal.show();
+        }
+    });
+
 </script>
 @endpush

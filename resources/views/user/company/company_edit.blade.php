@@ -173,12 +173,7 @@
                             <div class="form-section">
                                 <h4 class="section-title"><i class="bi bi-gear icon-title"></i>Content Configuration</h4>
                                 <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <label for="company_id" class="form-label">Company ID:</label>
-                                        <input type="text" class="form-control" id="company_id" name="company_id" 
-                                            value="{{ $company['company_id'] ?? old('company_id') }}" required>
-                                        <div class="invalid-feedback">Please provide a company ID.</div>
-                                    </div>
+                                    <input type="hidden" class="form-control" id="company_id" name="company_id" value="{{ $company['company_id'] }}" required>
                                     <div class="col-md-4">
                                         <label for="company_name" class="form-label">Company Name:</label>
                                         <input type="text" class="form-control" id="company_name" name="company_name" 
@@ -196,6 +191,15 @@
                                         <input type="text" class="form-control" id="main_topics" name="main_topics" 
                                             value="{{ isset($company) ? implode(',', array_keys($company['main_topics'] ?? [])) : '' }}" 
                                             placeholder="Type and press enter to add">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="group_id" class="form-label">Select Group:</label>
+                                        <select name="group_id" id="" class="form-control" required>
+                                            <option value="">--Select a group--</option>
+                                            @foreach ($groups as $item)
+                                                <option {{ ($item['group_id'] == $company['group_id']) ? 'selected' : '' }} value="{{ $item['group_id'] }}">{{ $item['group_name'] }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="call_types" class="form-label">Call Types:</label>
@@ -278,7 +282,7 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
                                     <div class="col-md-6">
                                         <label for="call_outcomes" class="form-label">Call Outcomes:</label>
                                         <input type="text" class="form-control" id="call_outcomes" name="call_outcomes" 
-                                            value="{{ isset($company) ? implode(',', array_keys($company['call_outcomes'] ?? [])) : 'resolved,unresolved,follow_up_needed,sale_successful' }}">
+                                            value="{{ isset($company) ? implode(',', $company['call_outcomes'] ?? []) : '' }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label for="agent_assessments_configs" class="form-label">Agent Assessments:</label>
@@ -348,7 +352,7 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
                             <div class="d-grid gap-2 d-md-flex justify-content-between mt-4">
                                 <a class="btn btn-primary" href="{{ route('user.support') }}"> Need any help?</a>
                                 <button type="submit" class="btn btn-primary px-4 py-2">
-                                    <i class="bi bi-save me-2"></i>{{ isset($company) ? 'Update Company' : 'Register Company' }}
+                                    <i class="bi bi-save me-2"></i>Update Company
                                 </button>
                             </div>
                         </form>
@@ -428,8 +432,10 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
                 if (!response.ok) {
                     throw new Error(result.message || 'Failed to submit form');
                 }
-
-                showAlert('Company registered successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = "{{ route('user.company.list') }}";
+                }, 1000);
+                showAlert('Company Updated successfully!', 'success');
                 
             } catch (error) {
                 console.error('Submission error:', error);

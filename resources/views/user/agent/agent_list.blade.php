@@ -1,7 +1,6 @@
 @extends('user.layouts.app')
 @push('styles')
 <style>
-        /* Tooltip styling */
         .action-btn {
             position: relative;
             margin-left: 5px;
@@ -81,10 +80,127 @@
         color: white;
     }
     </style>
+
+
+    <style>
+
+        .stat-card {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            padding: 23px;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .display-6 {
+            font-size: 2rem;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .fw-bold {
+            font-size: 1.8rem;
+        }
+
+        .card-text {
+            font-size: 0.8rem;
+        }
+    </style>
 @endpush
 
 @section('content')
 <div class="container-fluid">
+    @php
+        $totalAgents = 2;
+        $activeAgents = 2;
+        $companiesCount = 2;
+        $agentsPerCompany = 1;
+        $inactiveAgents = 0;
+    @endphp
+    <div class="row m-4">
+        <!-- Total Agents Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card" style="border: 2px solid #0d6efd;">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-0 text-dark">Total Agents</h5>
+                        <h2 class="fw-bold mt-2 mb-0 text-primary">{{ $totalAgents ?? 0 }}</h2>
+                        <p class="card-text small mb-0 text-muted">
+                            <i class="fas fa-arrow-up text-success"></i> 
+                            {{ $activeAgents ?? 0 }} active
+                        </p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-user-tie display-6 text-primary opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Agents Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card" style="border: 2px solid #198754;">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-0 text-dark">Active Agents</h5>
+                        <h2 class="fw-bold mt-2 mb-0 text-success">{{ $activeAgents ?? 0 }}</h2>
+                        <p class="card-text small mb-0 text-muted">
+                            <i class="fas fa-chart-pie text-success"></i> 
+                            {{ $totalAgents ? round(($activeAgents / $totalAgents) * 100, 1) : 0 }}% of total
+                        </p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-user-check display-6 text-success opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Companies Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card" style="border: 2px solid #0dcaf0;">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-0 text-dark">Companies</h5>
+                        <h2 class="fw-bold mt-2 mb-0 text-info">{{ $companiesCount ?? 0 }}</h2>
+                        <p class="card-text small mb-0 text-muted">
+                            Avg: {{ $agentsPerCompany ?? 0 }} agents/company
+                        </p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-building display-6 text-info opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inactive Agents Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card" style="border: 2px solid #ffc107;">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-0 text-dark">Inactive Agents</h5>
+                        <h2 class="fw-bold mt-2 mb-0 text-warning">{{ $inactiveAgents ?? 0 }}</h2>
+                        <p class="card-text small mb-0 text-muted">
+                            <i class="fas fa-exclamation-triangle text-warning"></i> 
+                            {{ $totalAgents ? round(($inactiveAgents / $totalAgents) * 100, 1) : 0 }}% of total
+                        </p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-user-alt-slash display-6 text-warning opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row mb-4 mt-3">
         <div class="col-md-12 col-lg-12">
             <div class="card">
@@ -117,121 +233,50 @@
                                 </ul>
                             </div>
                         @endif
-
-                        <table class="table datatable mb-0" id="datatable_1">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Agent ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Company</th>
-                                    <th style="text-align: center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>AG-1001</td>
-                                    <td>Abdullah Al Hasib</td>
-                                    <td>abdullah@example.com</td>
-                                    <td>+1 (555) 111-2222</td>
-                                    <td>Tech Innovators</td>
-                                    <td class="text-center">
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('user.agent.details') }}" class="btn btn-icon" title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('user.agent.edit') }}" class="btn btn-icon" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{{ route('user.agent.delete') }}" onclick="return confirm('Are you sure to delete this?')" class="btn btn-icon btn-delete" title="Delete">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>AG-1002</td>
-                                    <td>Sarah Johnson</td>
-                                    <td>sarah@example.com</td>
-                                    <td>+1 (555) 333-4444</td>
-                                    <td>Finance Corp</td>
-                                    <td class="text-center">
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('user.agent.details') }}" class="btn btn-icon" title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('user.agent.edit') }}" class="btn btn-icon" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{{ route('user.agent.delete') }}" onclick="return confirm('Are you sure to delete this?')" class="btn btn-icon btn-delete" title="Delete">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>AG-1003</td>
-                                    <td>Michael Smith</td>
-                                    <td>michael@example.com</td>
-                                    <td>+1 (555) 555-6666</td>
-                                    <td>Healthcare Plus</td>
-                                    <td class="text-center">
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('user.agent.details') }}" class="btn btn-icon" title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('user.agent.edit') }}" class="btn btn-icon" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{{ route('user.agent.delete') }}" onclick="return confirm('Are you sure to delete this?')" class="btn btn-icon btn-delete" title="Delete">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>AG-1004</td>
-                                    <td>Emma Brown</td>
-                                    <td>emma@example.com</td>
-                                    <td>+1 (555) 777-8888</td>
-                                    <td>Edu Global</td>
-                                    <td class="text-center">
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('user.agent.details', 1004) }}" class="btn btn-icon" title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('user.agent.edit', 1004) }}" class="btn btn-icon" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{{ route('user.agent.delete', 1004) }}" onclick="return confirm('Are you sure to delete this?')" class="btn btn-icon btn-delete" title="Delete">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>AG-1005</td>
-                                    <td>David Wilson</td>
-                                    <td>david@example.com</td>
-                                    <td>+1 (555) 999-0000</td>
-                                    <td>Logistics Hub</td>
-                                    <td class="text-center">
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('user.agent.details', 1005) }}" class="btn btn-icon" title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('user.agent.edit', 1005) }}" class="btn btn-icon" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{{ route('user.agent.delete', 1005) }}" onclick="return confirm('Are you sure to delete this?')" class="btn btn-icon btn-delete" title="Delete">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>                                             
+                            <table class="table datatable mb-0" id="datatable_1">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Company Name</th>
+                                        <th>Agent Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($agents as $parent)
+                                        @foreach($parent['agents'] as $agent)
+                                        <tr>
+                                            <td>{{ $parent['company_name'] }}</td>
+                                            <td>{{ $agent['agent_name'] }}</td>
+                                            <td>{{ $agent['email'] }}</td>
+                                            <td>{{ $agent['phone_number'] }}</td>
+                                            <td>{{ $agent['description'] }}</td>
+                                            <td>
+                                                <span class="badge {{ $agent['is_active'] ? 'bg-success' : 'bg-secondary' }}">
+                                                    {{ $agent['is_active'] ? 'Active' : 'Inactive' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ route('user.agent.details',$agent['agent_id']) }}" class="btn btn-icon" title="View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ route('user.agent.edit',$agent['agent_id']) }}" class="btn btn-icon" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{{ route('user.agent.delete',$agent['agent_id']) }}" onclick="return confirm('Are you sure to delete this?')" class="btn btn-icon btn-delete" title="Delete">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    @endforeach
+                                </tbody>
+                            </table>
                     </div>
                 </div>
             </div>

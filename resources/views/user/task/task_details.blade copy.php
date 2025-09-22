@@ -1,20 +1,4 @@
 @extends('user.layouts.app')
-
-@php
-    function formatDuration($startTime, $endTime) {
-        if (!$startTime || !$endTime) {
-            return '00:00';
-        }
-        $start = strtotime('1970-01-01 ' . substr($startTime, 0, 5) . ' UTC');
-        $end = strtotime('1970-01-01 ' . substr($endTime, 0, 5) . ' UTC');
-        if ($start === false || $end === false) {
-            return '00:00';
-        }
-        $duration = $end - $start;
-        return gmdate('i:s', $duration);
-    }
-@endphp
-
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/task_details.css') }}">
     <style>
@@ -200,24 +184,24 @@
                                 <h3>Agent Performance</h3>
                                 <div class="overall-score">
                                     <div class="score-circle"
-                                        style="--percentage: {{ $data['agent_professionalism']['total_score']['percentage'] ?? 0 }}%">
-                                        <span>{{ $data['agent_professionalism']['total_score']['percentage'] ?? 0 }}%</span>
+                                        style="--percentage: {{ $data['agent_professionalism']['total_score']['percentage'] }}%">
+                                        <span>{{ $data['agent_professionalism']['total_score']['percentage'] }}%</span>
                                     </div>
                                     <div class="score-details">
                                         <div class="score-item">
                                             <span class="label">Professionalism</span>
                                             <span
-                                                class="value">{{ $data['agent_professionalism']['total_score']['percentage'] ?? 0 }}%</span>
+                                                class="value">{{ $data['agent_professionalism']['total_score']['percentage'] }}%</span>
                                         </div>
                                         <div class="score-item">
                                             <span class="label">Assessment</span>
                                             <span
-                                                class="value">{{ $data['agent_assessment']['total_score']['percentage'] ?? 0 }}%</span>
+                                                class="value">{{ $data['agent_assessment']['total_score']['percentage'] }}%</span>
                                         </div>
                                         <div class="score-item">
                                             <span class="label">Cooperation</span>
                                             <span
-                                                class="value">{{ $data['agent_cooperation']['total_score']['percentage'] ?? 0 }}%</span>
+                                                class="value">{{ $data['agent_cooperation']['total_score']['percentage'] }}%</span>
                                         </div>
                                     </div>
                                 </div>
@@ -230,17 +214,17 @@
                             <div class="speech-metrics">
                                 <div class="metric">
                                     <i class="fas fa-volume-up"></i>
-                                    <span>{{ ucfirst($data['agent_professionalism']['speech_characteristics']['volume']['loudness_class'] ?? '') }}
+                                    <span>{{ ucfirst($data['agent_professionalism']['speech_characteristics']['volume']['loudness_class']) }}
                                         Volume</span>
                                     <div class="progress-bar">
                                         <div class="progress"
-                                            style="width: {{ $data['agent_professionalism']['speech_characteristics']['volume']['optimal_loudness_percentage'] ?? 0 }}%">
+                                            style="width: {{ $data['agent_professionalism']['speech_characteristics']['volume']['optimal_loudness_percentage'] }}%">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="metric">
                                     <i class="fas fa-tachometer-alt"></i>
-                                    <span>{{ round($data['agent_professionalism']['speech_characteristics']['speed'] ?? 0) }}
+                                    <span>{{ round($data['agent_professionalism']['speech_characteristics']['speed']) }}
                                         WPM</span>
                                     <div class="progress-bar">
                                         <div class="progress" style="width: 80%"></div>
@@ -249,7 +233,7 @@
                                 </div>
                                 <div class="metric">
                                     <i class="fas fa-pause"></i>
-                                    <span>{{ $data['agent_professionalism']['speech_characteristics']['pauses'] ?? 0 }}
+                                    <span>{{ $data['agent_professionalism']['speech_characteristics']['pauses'] }}
                                         Pauses</span>
                                 </div>
                             </div>
@@ -280,15 +264,15 @@
                                 @foreach (['customer_satisfaction', 'professionalism', 'tone_consistency', 'polite_language_usage', 'configured_standards_compliance'] as $metric)
                                     <div class="metric-card">
                                         <div class="metric-score">
-                                            {{ $data['agent_professionalism'][$metric]['score'] ?? 0 }}/10</div>
+                                            {{ $data['agent_professionalism'][$metric]['score'] }}/10</div>
                                         <h4>{{ ucfirst(str_replace('_', ' ', $metric)) }}</h4>
                                         <div class="metric-details">
                                             <p><strong>Evidence:</strong>
-                                                "{{ $data['agent_professionalism'][$metric]['evidence'] ?? '' }}"</p>
+                                                "{{ $data['agent_professionalism'][$metric]['evidence'] }}"</p>
                                             <p><strong>Reasoning:</strong>
-                                                {{ $data['agent_professionalism'][$metric]['reasoning'] ?? '' }}</p>
+                                                {{ $data['agent_professionalism'][$metric]['reasoning'] }}</p>
                                             <p><strong>Determination:</strong>
-                                                {{ $data['agent_professionalism'][$metric]['determination'] ?? '' }}</p>
+                                                {{ $data['agent_professionalism'][$metric]['determination'] }}</p>
                                         </div>
                                     </div>
                                 @endforeach
@@ -296,21 +280,21 @@
                                     <div class="performance-summary">
                                         <div class="summary-header">
                                             <i
-                                                class="fas fa-{{ ($data['agent_professionalism']['total_score']['percentage'] ?? 0) > 80 ? 'trophy' : 'check-circle' }}"></i>
-                                            <h3>{{ ($data['agent_professionalism']['total_score']['percentage'] ?? 0) > 80 ? 'Excellent Performance' : 'Good Performance' }}
+                                                class="fas fa-{{ $data['agent_professionalism']['total_score']['percentage'] > 80 ? 'trophy' : 'check-circle' }}"></i>
+                                            <h3>{{ $data['agent_professionalism']['total_score']['percentage'] > 80 ? 'Excellent Performance' : 'Good Performance' }}
                                             </h3>
                                         </div>
                                         <div class="summary-content">
-                                            <p>{{ $data['agent_professionalism']['customer_satisfaction']['reasoning'] ?? '' }}
+                                            <p>{{ $data['agent_professionalism']['customer_satisfaction']['reasoning'] }}
                                             </p>
                                             <div class="summary-stats">
                                                 <div class="stat">
                                                     <span>Total Score:</span>
-                                                    <span>{{ $data['agent_professionalism']['total_score']['score'] ?? 0 }}/{{ $data['agent_professionalism']['total_score']['max_score'] ?? 0 }}</span>
+                                                    <span>{{ $data['agent_professionalism']['total_score']['score'] }}/{{ $data['agent_professionalism']['total_score']['max_score'] }}</span>
                                                 </div>
                                                 <div class="stat">
                                                     <span>Customer Satisfaction:</span>
-                                                    <span>{{ $data['agent_professionalism']['customer_satisfaction']['score'] ?? 0 }}/10</span>
+                                                    <span>{{ $data['agent_professionalism']['customer_satisfaction']['score'] }}/10</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -324,16 +308,16 @@
                             <div class="metrics-grid">
                                 @foreach (['communication', 'problem_solving', 'technical_knowledge', 'efficiency'] as $metric)
                                     <div class="metric-card">
-                                        <div class="metric-score">{{ $data['agent_assessment'][$metric]['score'] ?? 0 }}/10
+                                        <div class="metric-score">{{ $data['agent_assessment'][$metric]['score'] }}/10
                                         </div>
                                         <h4>{{ ucfirst(str_replace('_', ' ', $metric)) }}</h4>
                                         <div class="metric-details">
                                             <p><strong>Evidence:</strong>
-                                                "{{ $data['agent_assessment'][$metric]['evidence'] ?? '' }}"</p>
+                                                "{{ $data['agent_assessment'][$metric]['evidence'] }}"</p>
                                             <p><strong>Reasoning:</strong>
-                                                {{ $data['agent_assessment'][$metric]['reasoning'] ?? '' }}</p>
+                                                {{ $data['agent_assessment'][$metric]['reasoning'] }}</p>
                                             <p><strong>Determination:</strong>
-                                                {{ $data['agent_assessment'][$metric]['determination'] ?? '' }}</p>
+                                                {{ $data['agent_assessment'][$metric]['determination'] }}</p>
                                         </div>
                                     </div>
                                 @endforeach
@@ -345,16 +329,16 @@
                             <div class="metrics-grid">
                                 @foreach (['agent_proactive_assistance', 'agent_responsiveness', 'agent_empathy', 'effectiveness'] as $metric)
                                     <div class="metric-card">
-                                        <div class="metric-score">{{ $data['agent_cooperation'][$metric]['score'] ?? 0 }}/10
+                                        <div class="metric-score">{{ $data['agent_cooperation'][$metric]['score'] }}/10
                                         </div>
                                         <h4>{{ ucfirst(str_replace('agent_', '', str_replace('_', ' ', $metric))) }}</h4>
                                         <div class="metric-details">
                                             <p><strong>Evidence:</strong>
                                                 "{{ $data['agent_cooperation'][$metric]['evidence'] ?? 'N/A' }}"</p>
                                             <p><strong>Reasoning:</strong>
-                                                {{ $data['agent_cooperation'][$metric]['reasoning'] ?? '' }}</p>
+                                                {{ $data['agent_cooperation'][$metric]['reasoning'] }}</p>
                                             <p><strong>Determination:</strong>
-                                                {{ $data['agent_cooperation'][$metric]['determination'] ?? '' }}</p>
+                                                {{ $data['agent_cooperation'][$metric]['determination'] }}</p>
                                         </div>
                                     </div>
                                 @endforeach
@@ -380,12 +364,12 @@
                                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                                     <span class="fw-semibold">Friendly</span>
                                                     <span class="text-muted small">
-                                                        {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['friendly'] ?? 0 }}%
+                                                        {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['friendly'] ?? 45 }}%
                                                     </span>
                                                 </div>
                                                 <div class="progress" style="height: 6px;">
                                                     <div class="progress-bar bg-success rounded-pill" role="progressbar"
-                                                        style="width: {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['friendly'] ?? 0 }}%">
+                                                        style="width: {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['friendly'] ?? 45 }}%">
                                                     </div>
                                                 </div>
                                             </div>
@@ -395,12 +379,12 @@
                                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                                     <span class="fw-semibold">Confident</span>
                                                     <span class="text-muted small">
-                                                        {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['confident'] ?? 0 }}%
+                                                        {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['confident'] ?? 60 }}%
                                                     </span>
                                                 </div>
                                                 <div class="progress" style="height: 6px;">
                                                     <div class="progress-bar bg-primary rounded-pill" role="progressbar"
-                                                        style="width: {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['confident'] ?? 0 }}%">
+                                                        style="width: {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['confident'] ?? 60 }}%">
                                                     </div>
                                                 </div>
                                             </div>
@@ -410,12 +394,12 @@
                                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                                     <span class="fw-semibold">Empathetic</span>
                                                     <span class="text-muted small">
-                                                        {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['empathetic'] ?? 0 }}%
+                                                        {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['empathetic'] ?? 30 }}%
                                                     </span>
                                                 </div>
                                                 <div class="progress" style="height: 6px;">
                                                     <div class="progress-bar bg-warning rounded-pill" role="progressbar"
-                                                        style="width: {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['empathetic'] ?? 0 }}%">
+                                                        style="width: {{ $data['agent_professionalism']['speech_characteristics']['tone_analysis']['empathetic'] ?? 30 }}%">
                                                     </div>
                                                 </div>
                                             </div>
@@ -439,7 +423,7 @@
                                                 <div class="p-3 bg-light rounded-3 shadow-sm h-100">
                                                     <div class="fw-semibold text-dark">Formal Language</div>
                                                     <div class="fs-5 fw-bold text-primary">
-                                                        {{ $data['agent_professionalism']['linguistic_analysis']['formal_language_percentage'] ?? 0 }}%
+                                                        {{ $data['agent_professionalism']['linguistic_analysis']['formal_language_percentage'] ?? 55 }}%
                                                     </div>
                                                 </div>
                                             </div>
@@ -448,7 +432,7 @@
                                                 <div class="p-3 bg-light rounded-3 shadow-sm h-100">
                                                     <div class="fw-semibold text-dark">Polite Phrases</div>
                                                     <div class="fs-5 fw-bold text-success">
-                                                        {{ $data['agent_professionalism']['polite_language_usage']['score'] ?? 0 }}/10
+                                                        {{ $data['agent_professionalism']['polite_language_usage']['score'] ?? 7 }}/10
                                                     </div>
                                                 </div>
                                             </div>
@@ -784,7 +768,32 @@
                                                                     </span>
                                                                 </td>
                                                                 <td>
-                                                                    {{ formatDuration($transcript['start_time'] ?? null, $transcript['end_time'] ?? null) }}
+                                                                    @php
+                                                                        $start = isset($transcript['start_time'])
+                                                                            ? strtotime(
+                                                                                '1970-01-01 ' .
+                                                                                    substr(
+                                                                                        $transcript['start_time'],
+                                                                                        0,
+                                                                                        5,
+                                                                                    ) .
+                                                                                    ' UTC',
+                                                                            )
+                                                                            : 0;
+                                                                        $end = isset($transcript['end_time'])
+                                                                            ? strtotime(
+                                                                                '1970-01-01 ' .
+                                                                                    substr(
+                                                                                        $transcript['end_time'],
+                                                                                        0,
+                                                                                        5,
+                                                                                    ) .
+                                                                                    ' UTC',
+                                                                            )
+                                                                            : 0;
+                                                                        $duration = $end - $start;
+                                                                        echo gmdate('i:s', $duration);
+                                                                    @endphp
                                                                 </td>
                                                                 <td>
                                                                     <div class="progress sentiment-progress"
@@ -856,7 +865,32 @@
                                                                     </span>
                                                                 </td>
                                                                 <td>
-                                                                    {{ formatDuration($transcript['start_time'] ?? null, $transcript['end_time'] ?? null) }}
+                                                                    @php
+                                                                        $start = isset($transcript['start_time'])
+                                                                            ? strtotime(
+                                                                                '1970-01-01 ' .
+                                                                                    substr(
+                                                                                        $transcript['start_time'],
+                                                                                        0,
+                                                                                        5,
+                                                                                    ) .
+                                                                                    ' UTC',
+                                                                            )
+                                                                            : 0;
+                                                                        $end = isset($transcript['end_time'])
+                                                                            ? strtotime(
+                                                                                '1970-01-01 ' .
+                                                                                    substr(
+                                                                                        $transcript['end_time'],
+                                                                                        0,
+                                                                                        5,
+                                                                                    ) .
+                                                                                    ' UTC',
+                                                                            )
+                                                                            : 0;
+                                                                        $duration = $end - $start;
+                                                                        echo gmdate('i:s', $duration);
+                                                                    @endphp
                                                                 </td>
                                                                 <td>
                                                                     <div class="progress sentiment-progress"
@@ -1007,11 +1041,12 @@
                                                                         );
 
                                                                         if (
-                                                                            isset($transcript['start_time'], $transcript['end_time'], $delay['delay_start'], $delay['delay_end']) &&
-                                                                            strtotime('1970-01-01 ' . substr($transcript['start_time'], 0, 5) . ' UTC') >= strtotime('1970-01-01 ' . substr($delay['delay_start'], 0, 5) . ' UTC') - 5 &&
-                                                                            strtotime('1970-01-01 ' . substr($transcript['end_time'], 0, 5) . ' UTC') <= strtotime('1970-01-01 ' . substr($delay['delay_end'], 0, 5) . ' UTC') + 5
+                                                                            $start >= $delayStart - 5 &&
+                                                                            $end <= $delayEnd + 5
                                                                         ) {
-                                                                            $context = $transcript['transcript'] ?? 'No context available';
+                                                                            $context =
+                                                                                $transcript['transcript'] ??
+                                                                                'No context available';
                                                                             break;
                                                                         }
                                                                     }
@@ -1197,105 +1232,99 @@
 
                     <div class="card-body p-0">
                         <div class="accordion accordion-flush" id="analysisAccordion">
-                            @if(!empty($data['analysis_alignment_result_notebook']))
-                                @foreach ($data['analysis_alignment_result_notebook'] as $index => $result)
-                                    <div class="accordion-item border-bottom">
-                                        <h2 class="accordion-header" id="heading{{ $index }}">
-                                            <button
-                                                class="accordion-button collapsed d-flex justify-content-between align-items-center"
-                                                type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapse{{ $index }}" aria-expanded="false"
-                                                aria-controls="collapse{{ $index }}">
-                                                <span class="fw-semibold text-dark">
-                                                    <i class="fas fa-question-circle me-2 text-primary"></i>
-                                                    {{ Str::limit($result['question'] ?? '', 80) }}
-                                                </span>
-                                                <span class="badge bg-light text-dark border ms-2">
-                                                    {{ ucfirst($result['confidence_level'] ?? '') }}
-                                                </span>
-                                            </button>
-                                        </h2>
-                                        <div id="collapse{{ $index }}" class="accordion-collapse collapse"
-                                            aria-labelledby="heading{{ $index }}" data-bs-parent="#analysisAccordion">
-                                            <div class="accordion-body">
-                                                <div class="row g-3">
+                            @foreach ($data['analysis_alignment_result_notebook'] as $index => $result)
+                                <div class="accordion-item border-bottom">
+                                    <h2 class="accordion-header" id="heading{{ $index }}">
+                                        <button
+                                            class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                            type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapse{{ $index }}" aria-expanded="false"
+                                            aria-controls="collapse{{ $index }}">
+                                            <span class="fw-semibold text-dark">
+                                                <i class="fas fa-question-circle me-2 text-primary"></i>
+                                                {{ Str::limit($result['question'], 80) }}
+                                            </span>
+                                            <span class="badge bg-light text-dark border ms-2">
+                                                {{ ucfirst($result['confidence_level']) }}
+                                            </span>
+                                        </button>
+                                    </h2>
+                                    <div id="collapse{{ $index }}" class="accordion-collapse collapse"
+                                        aria-labelledby="heading{{ $index }}" data-bs-parent="#analysisAccordion">
+                                        <div class="accordion-body">
+                                            <div class="row g-3">
 
-                                                    <div class="col-md-6">
-                                                        <div class="small text-muted mb-1">
-                                                            <i class="fas fa-lightbulb text-warning me-1"></i> Answer
-                                                        </div>
-                                                        <div class="fw-medium">{{ $result['answer'] ?? '' }}</div>
+                                                <div class="col-md-6">
+                                                    <div class="small text-muted mb-1">
+                                                        <i class="fas fa-lightbulb text-warning me-1"></i> Answer
                                                     </div>
+                                                    <div class="fw-medium">{{ $result['answer'] }}</div>
+                                                </div>
 
-                                                    <div class="col-md-6">
-                                                        <div class="small text-muted mb-1">
-                                                            <i class="fas fa-check-circle text-success me-1"></i> Evaluation
-                                                        </div>
-                                                        <span class="badge bg-success rounded-pill">
-                                                            {{ $result['evaluation'] ?? '' }}
-                                                        </span>
+                                                <div class="col-md-6">
+                                                    <div class="small text-muted mb-1">
+                                                        <i class="fas fa-check-circle text-success me-1"></i> Evaluation
                                                     </div>
+                                                    <span class="badge bg-success rounded-pill">
+                                                        {{ $result['evaluation'] }}
+                                                    </span>
+                                                </div>
 
-                                                    <div class="col-md-6">
-                                                        <div class="small text-muted mb-1">
-                                                            <i class="fas fa-book text-info me-1"></i> Knowledge Base
-                                                        </div>
-                                                        <div class="fw-light">
-                                                            {{ $result['KBtext'] ?? 'No relevant text in knowledge base' }}
-                                                        </div>
+                                                <div class="col-md-6">
+                                                    <div class="small text-muted mb-1">
+                                                        <i class="fas fa-book text-info me-1"></i> Knowledge Base
                                                     </div>
-
-                                                    <div class="col-md-6">
-                                                        <div class="small text-muted mb-1">
-                                                            <i class="fas fa-project-diagram text-secondary me-1"></i> Matching
-                                                            Sections
-                                                        </div>
-                                                        <div style="max-width: 300px;">
-                                                            @if(!empty($result['matching_transcript_sections']))
-                                                                @foreach ($result['matching_transcript_sections'] as $section)
-                                                                    <span
-                                                                        class="badge bg-light text-dark border">{{ $section }}</span>
-                                                                @endforeach
-                                                            @endif
-                                                        </div>
-
+                                                    <div class="fw-light">
+                                                        {{ $result['KBtext'] ?? 'No relevant text in knowledge base' }}
                                                     </div>
+                                                </div>
 
-                                                    <div class="col-md-4">
-                                                        <div class="small text-muted mb-1">
-                                                            <i class="fas fa-notebook text-primary me-1"></i> Notebook
-                                                        </div>
-                                                        <span class="fw-medium">{{ $result['notebook_name']?? '' }}</span>
+                                                <div class="col-md-6">
+                                                    <div class="small text-muted mb-1">
+                                                        <i class="fas fa-project-diagram text-secondary me-1"></i> Matching
+                                                        Sections
                                                     </div>
-
-                                                    <div class="col-md-4">
-                                                        <div class="small text-muted mb-1">
-                                                            <i class="fas fa-tags text-info me-1"></i> Topics
-                                                        </div>
-                                                        @if(!empty($result['matching_topics']))
-                                                            @foreach ($result['matching_topics'] as $topic)
-                                                                <span
-                                                                    class="badge bg-light text-dark border">{{ $topic }}</span>
-                                                            @endforeach
-                                                        @endif
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <div class="small text-muted mb-1">
-                                                            <i class="fas fa-chart-line text-success me-1"></i> Confidence
-                                                        </div>
-                                                        <span
-                                                            class="badge bg-{{ ($result['confidence_level'] ?? '') == 'high' ? 'success' : (($result['confidence_level'] ?? '') == 'medium' ? 'warning' : 'danger') }}">
-                                                            {{ ucfirst($result['confidence_level'] ?? '') }}
-                                                        </span>
+                                                    <div style="max-width: 300px;">
+                                                        @foreach ($result['matching_transcript_sections'] as $section)
+                                                            <span
+                                                                class="badge bg-light text-dark border">{{ $section }}</span>
+                                                        @endforeach
                                                     </div>
 
                                                 </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="small text-muted mb-1">
+                                                        <i class="fas fa-notebook text-primary me-1"></i> Notebook
+                                                    </div>
+                                                    <span class="fw-medium">{{ $result['notebook_name']?? '' }}</span>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="small text-muted mb-1">
+                                                        <i class="fas fa-tags text-info me-1"></i> Topics
+                                                    </div>
+                                                    @foreach ($result['matching_topics'] as $topic)
+                                                        <span
+                                                            class="badge bg-light text-dark border">{{ $topic }}</span>
+                                                    @endforeach
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="small text-muted mb-1">
+                                                        <i class="fas fa-chart-line text-success me-1"></i> Confidence
+                                                    </div>
+                                                    <span
+                                                        class="badge bg-{{ $result['confidence_level'] == 'high' ? 'success' : ($result['confidence_level'] == 'medium' ? 'warning' : 'danger') }}">
+                                                        {{ ucfirst($result['confidence_level']) }}
+                                                    </span>
+                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
-                                @endforeach
-                            @endif
+                                </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -1601,4 +1630,3 @@
         });
     </script>
 @endpush
-
