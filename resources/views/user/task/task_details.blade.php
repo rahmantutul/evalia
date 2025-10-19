@@ -51,7 +51,7 @@
 @endpush
 
 @section('content')
-    <div class="container-fluid py-4">
+    <div class="container-fluid py-4 professional-theme">
         <!-- Top Call Duration Bar -->
         <div class="top-bar animate-fade">
             {{--  <div class="duration">

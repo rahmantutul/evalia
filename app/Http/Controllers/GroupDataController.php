@@ -6,158 +6,89 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
-
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+
 class GroupDataController extends Controller
 {
-     public function __construct()
+    private $baseUrl;
+
+    public function __construct()
     {
-        return \App\Helpers\ExternalApiHelper::getToken();
-    }
-    
-    private function getToken()
-    {
-        return \App\Helpers\ExternalApiHelper::getToken();
-    }
-
-    private function makeAuthenticatedRequest($method, $url, $data = [], $options = [])
-    {
-        $token = $this->getToken();
-        if (!$token) {
-            throw new \Exception('Could not authenticate with external API: No token available');
-        }
-
-        $defaultOptions = [
-            'timeout' => 30,
-            'retry' => [3, 100],
-            'headers' => [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ],
-            'withToken' => true
-        ];
-
-        $options = array_merge($defaultOptions, $options);
-
-        $http = Http::timeout($options['timeout'])->retry($options['retry'][0], $options['retry'][1]);
-
-        if ($options['withToken']) {
-            $http->withToken($token);
-        }
-
-        foreach ($options['headers'] as $key => $value) {
-            $http->withHeaders([$key => $value]);
-        }
-
-        switch (strtoupper($method)) {
-            case 'GET':
-                return $http->get($url, $data);
-            case 'POST':
-                return $http->post($url, $data);
-            case 'PUT':
-                return $http->put($url, $data);
-            case 'DELETE':
-                return $http->delete($url, $data);
-            default:
-                return $http->get($url, $data);
-        }
+        $this->baseUrl = config('app.api_base_url', 'http://35.153.178.201:8080');
     }
 
     public function groupList(Request $request)
     {
-            $page = $request->get('page', 1);
-            $limit = $request->get('limit', 100);
-            
-            $response = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/list_groups', [
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 100);
+        
+        $response = Http::timeout(30)
+            ->retry(3, 100)
+            ->withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])
+            ->get($this->baseUrl . '/list_groups', [
                 'page' => $page,
                 'limit' => $limit
             ]);
-            
-            if ($response->successful()) {
-                $responseData = $response->json();
-                $groups = $responseData['data'] ?? [];
-                $total = $responseData['total'] ?? count($groups);
-                $perPage = $responseData['per_page'] ?? $limit;
-                $currentPage = $responseData['current_page'] ?? $page;
-                
-                $paginatedGroups = new LengthAwarePaginator(
-                    $groups,
-                    $total,
-                    $perPage,
-                    $currentPage,
-                    [
-                        'path' => Paginator::resolveCurrentPath(),
-                        'query' => $request->query()
-                    ]
-                );
-                return view('user.group.group_list', compact('paginatedGroups'));
-            } else {
-                return back()->with('error', 'Failed to fetch group list: ' . $response->body());
-            }
         
+        if ($response->successful()) {
+            $responseData = $response->json();
+            $groups = $responseData['data'] ?? [];
+            $total = $responseData['total'] ?? count($groups);
+            $perPage = $responseData['per_page'] ?? $limit;
+            $currentPage = $responseData['current_page'] ?? $page;
+            
+            $paginatedGroups = new LengthAwarePaginator(
+                $groups,
+                $total,
+                $perPage,
+                $currentPage,
+                [
+                    'path' => Paginator::resolveCurrentPath(),
+                    'query' => $request->query()
+                ]
+            );
+            return view('user.group.group_list', compact('paginatedGroups'));
+        } else {
+            return back()->with('error', 'Failed to fetch group list: ' . $response->body());
+        }
     }
+
     public function groupCreate()
     {
         return view('user.group.group_create');
     }
-    public function groupDetails($groupId)
+
+    public function getGroupDetails(Request $request, $group_id)
     {
-        try {
-            $response = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/get_group_details', [
-                'group_id' => $groupId
+        $response = Http::timeout(30)
+            ->retry(3, 100)
+            ->withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])
+            ->get($this->baseUrl . '/get_group_details', [
+                'group_id' => $group_id
             ]);
-
-            if ($response->successful()) {
-                $result = $response->json();
-                
-                if (!isset($result['data'])) {
-                    return redirect()->back()->with('error', 'Invalid response structure from API.');
-                }
-
-                $data = $result['data'];
-                
-                $tasksResponse = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/task_list', [
-                    'group_id' => $groupId
-                ]);
-                
-                $taskList = $tasksResponse->successful() ? ($tasksResponse->json()['data'] ?? []) : [];
-                
-                $page = Paginator::resolveCurrentPage(); 
-                $perPage = 10;
-                $offset = ($page - 1) * $perPage;
-
-                $pagedTasks = array_slice($taskList, $offset, $perPage);
-
-                $paginatedTasks = new LengthAwarePaginator(
-                    $pagedTasks,
-                    count($taskList),
-                    $perPage,
-                    $page,
-                    ['path' => Paginator::resolveCurrentPath()] 
-                );
-
-                return view('user.group.group_details', [
-                    'data' => $data,
-                    'groupId' => $groupId,
-                    'taskList' => $paginatedTasks,
-                    'status' => $result['status'] ?? 'active'
-                ]);
-            } else {
-                return redirect()->back()->with('error', 'Failed to fetch group details. API returned status: ' . $response->status());
-            }
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Request failed: ' . $e->getMessage());
-        }
+            
+        $group = $response['data'];
+        return view('user.group.group_edit', compact('group'));
     }
 
     public function groupDelete($id)
     {
-         try {
-            $url = "http://13.218.100.190:8080/api/v1/delete_group?group_id={$id}";
-
-            $response = $this->makeAuthenticatedRequest('DELETE', $url);
+        try {
+            $response = Http::timeout(30)
+                ->retry(3, 100)
+                ->withHeaders([
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ])
+                ->delete($this->baseUrl . "/delete_group?group_id={$id}");
 
             if ($response->successful()) {
                 return redirect()->back()->with('success', 'Group deleted successfully.');
@@ -201,13 +132,6 @@ class GroupDataController extends Controller
             'gpt_qna_pair_eval' => 'nullable|string',
             'spelling_correction_prompt' => 'nullable|string',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], 422);
-        }
 
         $cleanTagifyInput = function ($input) {
             if (empty($input)) return [];
@@ -256,15 +180,8 @@ class GroupDataController extends Controller
             'company_policies' => $cleanTagifyInput($data['company_policies'] ?? ''),
             'common_words_threshold' => (int)($data['common_words_threshold'] ?? 0),
             'llm_api_limit' => (int)($data['llm_api_limit'] ?? 100),
-            'llm_total_usage' => [
-                'prompt_tokens' => 0,
-                'completion_tokens' => 0,
-                'total_tokens' => 0,
-            ],
-            'llm_total_usage_price' => 0,
             'transcription_api_limit' => (int)($data['transcription_api_limit'] ?? 100),
             'transcription_api_rate' => (float)($data['transcription_api_rate'] ?? 0.025),
-            'transcription_api_total_usage' => 0,
             'call_outcomes' => $cleanTagifyInput($data['call_outcomes'] ?? ''),
             'agent_assessments_configs' => $cleanTagifyInput($data['agent_assessments_configs'] ?? ''),
             'agent_cooperation_configs' => $cleanTagifyInput($data['agent_cooperation_configs'] ?? ''),
@@ -275,66 +192,42 @@ class GroupDataController extends Controller
             'spelling_correction_prompt' => $data['spelling_correction_prompt'] ?? '',
         ];
 
-            $response = $this->makeAuthenticatedRequest('POST', 'http://13.218.100.190:8080/api/v1/register_group', $payload, [
-                'headers' => [
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
-                    'X-Request-Verification' => (string) Str::uuid(),
-                ]
-            ]);
+        $response = Http::timeout(30)
+            ->retry(3, 100)
+            ->withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'X-Request-Verification' => (string) Str::uuid(),
+            ])
+            ->post($this->baseUrl . '/register_group', $payload);
 
-            if ($response->successful()) {
-                $responseData = $response->json();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Company registered successfully',
-                    'data' => $responseData,
-                ]);
-            }
-
-            Log::error('API Error Response', [
-                'status' => $response->status(),
-                'response' => $response->body(),
-                'payload' => $payload
-            ]);
+        if ($response->successful()) {
+            $responseData = $response->json();
 
             return response()->json([
-                'success' => false,
-                'message' => 'API request failed: ' . $response->body(),
-            ], $response->status());
-    }
-
-    public function updateGroup(Request $request, $groupId)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
-
-        try {
-            $response = $this->makeAuthenticatedRequest('PUT', 'http://13.218.100.190:8080/api/v1/update_group', [
-                'group_id' => $groupId,
-                'name' => $request->input('name'),
-                'description' => $request->input('description')
+                'success' => true,
+                'message' => 'Company registered successfully',
+                'data' => $responseData,
             ]);
-
-            if ($response->successful()) {
-                return redirect()->back()->with('success', 'Group updated successfully!');
-            } else {
-                return redirect()->back()->with('error', 'Failed to update group: ' . $response->body());
-            }
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Request failed: ' . $e->getMessage());
         }
+        return response()->json([
+            'success' => false,
+            'message' => 'API request failed: ' . $response->body(),
+        ], $response->status());
     }
 
-     public function groupEdit($id)
+    public function groupEdit($id)
     {
         try {
-            $response = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/get_group_details', [
-                'group_id' => $id
-            ]);
+            $response = Http::timeout(30)
+                ->retry(3, 100)
+                ->withHeaders([
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ])
+                ->get($this->baseUrl . '/get_group_details', [
+                    'group_id' => $id
+                ]);
 
             $group = $response->successful() ? ($response->json()['data'] ?? []) : [];
             return view('user.group.group_edit', compact('group'));
@@ -413,7 +306,6 @@ class GroupDataController extends Controller
             'group_id' => $data['group_id'] ?? '',
             'group_name' => $data['group_name'] ?? '',
             'description' => $data['description'] ?? '',
-            'group_id' => $data['group_id'] ?? 'string',
             'filler_words' => $cleanTagifyInput($data['filler_words'] ?? ''),
             'main_topics' => $cleanTagifyInput($data['main_topics'] ?? ''),
             'call_types' => $cleanTagifyInput($data['call_types'] ?? ''),
@@ -443,33 +335,31 @@ class GroupDataController extends Controller
             'gpt_qna_pair_eval' => $data['gpt_qna_pair_eval'] ?? '',
             'spelling_correction_prompt' => $data['spelling_correction_prompt'] ?? '',
         ];
-            $groupId = $data['group_id'];
-
-            $response = $this->makeAuthenticatedRequest(
-                'PUT',
-                "http://13.218.100.190:8080/api/v1/update_group?group_id={$groupId}", // ✅ double quotes
-                $payload,
-                [
-                    'headers' => [
-                        'Accept' => 'application/json',
-                        'Content-Type' => 'application/json',
-                        'X-Request-Verification' => (string) Str::uuid(),
-                    ]
-                ]
-            );
-            if ($response->successful()) {
-                $responseData = $response->json();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Group updated successfully',
-                    'data' => $responseData,
-                ]);
-            }
-            return response()->json([
-                'success' => false,
-                'message' => 'API update request failed: ' . $response->body(),
-            ], $response->status());
         
+        $groupId = $data['group_id'];
+
+        $response = Http::timeout(30)
+            ->retry(3, 100)
+            ->withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'X-Request-Verification' => (string) Str::uuid(),
+            ])
+            ->put($this->baseUrl . "/update_group?group_id={$groupId}", $payload);
+        
+        if ($response->successful()) {
+            $responseData = $response->json();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Group updated successfully',
+                'data' => $responseData,
+            ]);
+        }
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'API update request failed: ' . $response->body(),
+        ], $response->status());
     }
 }

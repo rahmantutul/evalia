@@ -35,6 +35,45 @@
         .table td .btn-group {
             float: right;
         }
+        
+        /* Sticky Statistics Bar Styles */
+        .sticky-top-bar {
+            transition: all 0.3s ease;
+            top: 20px;
+        }
+        
+        .sticky-top-bar.sticky-active {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stat-item {
+            border-right: 1px solid #e9ecef;
+            padding-right: 15px;
+        }
+        
+        .stat-item:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .stat-item {
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+                padding-right: 0;
+                padding-bottom: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .stat-item:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+                padding-bottom: 0;
+            }
+        }
     </style>
      <style>
     .btn-group {
@@ -86,71 +125,96 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="row m-4">
-        <!-- Total Agents Card -->
-        <div class="col-md-3">
-            <div class="card stat-card" style="border: 2px solid #0d6efd; padding: 20px;">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h5 class="card-title mb-0 text-dark">Total Agents</h5>
-                            <h2 class="fw-bold mt-2 mb-0 text-primary">{{ $totalAgents ?? 42 }}</h2>
-                            <p class="card-text small mb-0 text-muted"><i class="bi bi-arrow-up-short text-success"></i> +5 from last week</p>
+    <!-- Sticky Statistics Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm sticky-top-bar">
+                <div class="card-body py-3">
+                    <div class="row g-3">
+                        <!-- Total Companies -->
+                        <div class="col-md-2 col-sm-4 col-6 stat-item">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded me-3">
+                                    <i class="fas fa-building text-primary fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-0 fw-bold" id="totalCompanies">0</h5>
+                                    <small class="text-muted">Total Companies</small>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-people-fill display-6 text-primary opacity-75"></i>
+                        
+                        <!-- Active Tasks -->
+                        <div class="col-md-2 col-sm-4 col-6 stat-item">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded me-3">
+                                    <i class="fas fa-tasks text-success fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-0 fw-bold" id="activeTasks">0</h5>
+                                    <small class="text-muted">Active Tasks</small>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-            </div>
-        </div>
-
-        <!-- Total Calls Card -->
-        <div class="col-md-3">
-            <div class="card stat-card" style="border: 2px solid #198754;  padding: 20px;">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <h5 class="card-title mb-0 text-dark">Total Calls</h5>
-                        <h2 class="fw-bold mt-2 mb-0 text-success">{{ $totalCalls ?? 1248 }}</h2>
-                        <p class="card-text small mb-0 text-muted"><i class="bi bi-arrow-up-short text-success"></i> +128 today</p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <i class="bi bi-telephone-fill display-6 text-success opacity-75"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Active Calls Card -->
-        <div class="col-md-3">
-            <div class="card stat-card" style="border: 2px solid #0dcaf0;  padding: 20px;">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <h5 class="card-title mb-0 text-dark">Active Calls</h5>
-                        <h2 class="fw-bold mt-2 mb-0 text-info">{{ $activeCalls ?? 18 }}</h2>
-                        <p class="card-text small mb-0 text-muted">Avg. duration: 4.2 min</p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <i class="bi bi-telephone-outbound-fill display-6 text-info opacity-75"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Resolution Rate Card -->
-        <div class="col-md-3">
-            <div class="card stat-card" style="border: 2px solid #ffc107;  padding: 20px;">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <h5 class="card-title mb-0 text-dark">Resolution Rate</h5>
-                        <h2 class="fw-bold mt-2 mb-0 text-warning">{{ $resolutionRate ?? 87 }}%</h2>
-                        <p class="card-text small mb-0 text-muted"><i class="bi bi-arrow-up-short text-success"></i> +3% from last month</p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <i class="bi bi-graph-up display-6 text-warning opacity-75"></i>
+                        
+                        <!-- Completed Tasks -->
+                        <div class="col-md-2 col-sm-4 col-6 stat-item">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 bg-info bg-opacity-10 p-3 rounded me-3">
+                                    <i class="fas fa-check-circle text-info fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-0 fw-bold" id="completedTasks">0</h5>
+                                    <small class="text-muted">Completed Tasks</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pending Analysis -->
+                        <div class="col-md-2 col-sm-4 col-6 stat-item">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 bg-warning bg-opacity-10 p-3 rounded me-3">
+                                    <i class="fas fa-clock text-warning fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-0 fw-bold" id="pendingAnalysis">0</h5>
+                                    <small class="text-muted">Pending Analysis</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Total Agents -->
+                        <div class="col-md-2 col-sm-4 col-6 stat-item">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 bg-secondary bg-opacity-10 p-3 rounded me-3">
+                                    <i class="fas fa-users text-secondary fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-0 fw-bold" id="totalAgents">0</h5>
+                                    <small class="text-muted">Total Agents</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Success Rate -->
+                        <div class="col-md-2 col-sm-4 col-6 stat-item">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 bg-danger bg-opacity-10 p-3 rounded me-3">
+                                    <i class="fas fa-chart-line text-danger fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-0 fw-bold" id="successRate">0%</h5>
+                                    <small class="text-muted">Success Rate</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Company List -->
     <div class="row mb-4 mt-3">
         <div class="col-md-12 col-lg-12">
             <div class="card">
@@ -196,13 +260,17 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($paginatedCompanies  as $company)
+                                @php
+                                    $totalAgents = 0;
+                                @endphp
+                                @foreach($companies as $company)
                                     @php
                                         $industries = ['Tech', 'Finance', 'Healthcare', 'Education', 'Logistics','Tech', 'Finance', 'Healthcare', 'Education', 'Logistics'];
                                         $locations = ['New York', 'San Francisco', 'Chicago', 'Los Angeles', 'Miami'];
                                         $agents = rand(5, 50);
                                         $industry = $industries[array_rand($industries)];
                                         $location = $locations[array_rand($locations)];
+                                        $totalAgents += $agents;
                                     @endphp
                                     <tr>
                                         <td>{{ $company['id'] }}</td>
@@ -215,11 +283,11 @@
                                                 <a href="{{ route('user.company.view',$company['id']) }}" class="btn btn-icon" title="View">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                <button type="button" class="btn btn-icon" data-bs-toggle="modal" data-bs-target="#audioUploadModal{{ $company['id'] }}" style="height: 38px;" title="Add a new task">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
                                                 <a href="{{ route('user.task.list',$company['id']) }}" class="btn btn-icon" title="Task List">
                                                     <i class="fas fa-list"></i>
-                                                </a>
-                                                <a href="{{ route('user.company.copy',$company['id']) }}" class="btn btn-icon" title="Copy" onclick="copyCompany({{ $company['id'] }}); return false;">
-                                                    <i class="fas fa-copy"></i>
                                                 </a>
                                                 <a href="{{ route('user.company.edit',$company['id']) }}" class="btn btn-icon" title="Settings">
                                                     <i class="fas fa-cogs"></i>
@@ -230,9 +298,115 @@
                                             </div>
                                         </td>
                                     </tr>
+
+
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="audioUploadModal{{ $company['id'] }}" tabindex="-1" aria-labelledby="audioUploadModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-xl modal-dialog-centered">
+                                            <div class="modal-content border-0 shadow-lg rounded-4">
+                                                <!-- Modal Header -->
+                                                <div class="modal-header bg-light">
+                                                    <h5 class="modal-title fw-600 text-black" id="audioUploadModalLabel" >
+                                                    <i class="fas fa-wave-square text-black me-2"></i> Audio Upload Form
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="{{ route('user.task.store') }}" method="POST" enctype="multipart/form-data">
+                                                    @csrf
+                                                    <div class="row g-4 mb-4">
+
+                                                        {{-- Customer Audio --}}
+                                                        <div class="col-md-4">
+                                                            <div class="card border-0 shadow-sm h-100">
+                                                                <div class="card-header bg-white border-0 py-2">
+                                                                    <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
+                                                                        <span class="bg-dark bg-opacity-10 text-primary p-2 me-2 rounded">
+                                                                            <i class="fas fa-microphone"></i>
+                                                                        </span>
+                                                                        Customer Audio
+                                                                    </h5>
+                                                                </div>
+                                                                <div class="card-body d-flex flex-column">
+                                                                    <p class="text-muted small mb-4">Upload customer audio file in WAV or MP3 format</p>
+                                                                    <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
+                                                                        <i class="bi bi-cloud-upload text-primary fs-1 mb-2"></i>
+                                                                        <span class="text-center mb-1 fw-500">Drag & drop files here</span>
+                                                                        <span class="text-muted small mb-3">or click to browse</span>
+                                                                        <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
+                                                                        <input type="file" name="customer_audio" class="d-none" accept="audio/*" required>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Agent Audio --}}
+                                                        <div class="col-md-4">
+                                                            <div class="card border-0 shadow-sm h-100">
+                                                                <div class="card-header bg-white border-0 py-2">
+                                                                    <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
+                                                                        <span class="bg-danger bg-opacity-10 text-danger p-2 me-2 rounded">
+                                                                            <i class="fas fa-headset fs-5"></i>
+                                                                        </span>
+                                                                        Agent Audio
+                                                                    </h5>
+                                                                </div>
+                                                                <div class="card-body d-flex flex-column">
+                                                                    <p class="text-muted small mb-4">Upload agent audio file in WAV or MP3 format</p>
+                                                                    <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
+                                                                        <i class="bi bi-cloud-upload text-danger fs-1 mb-2"></i>
+                                                                        <span class="text-center mb-1 fw-500">Drag & drop files here</span>
+                                                                        <span class="text-muted small mb-3">or click to browse</span>
+                                                                        <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
+                                                                        <input type="file" name="agent_audio" class="d-none" accept="audio/*" required>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Combined Audio --}}
+                                                        <div class="col-md-4">
+                                                            <div class="card border-0 shadow-sm h-100">
+                                                                <div class="card-header bg-white border-0 py-2">
+                                                                    <h5 class="card-title mb-0 fw-600 d-flex align-items-center">
+                                                                        <span class="bg-success bg-opacity-10 text-success p-2 me-2 rounded">
+                                                                            <i class="fas fa-microphone fs-5"></i>
+                                                                        </span>
+                                                                        Combined Audio
+                                                                    </h5>
+                                                                </div>
+                                                                <div class="card-body d-flex flex-column">
+                                                                    <p class="text-muted small mb-4">Upload pre-mixed audio file (optional)</p>
+                                                                    <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
+                                                                        <i class="bi bi-cloud-upload text-success fs-1 mb-2"></i>
+                                                                        <span class="text-center mb-1 fw-500">Drag & drop files here</span>
+                                                                        <span class="text-muted small mb-3">or click to browse</span>
+                                                                        <span class="badge bg-light text-dark px-3 py-2">Max 100MB</span>
+                                                                        <input type="file" name="combined_audio" class="d-none" accept="audio/*">
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <!-- Hidden company_id -->
+                                                    <input type="hidden" name="company_id" value="{{ $company['id'] }}">
+
+                                                    <!-- Action Buttons -->
+                                                    <div class="d-flex justify-content-center mb-2">
+                                                        <button type="submit" class="btn btn-primary px-5 py-2 me-3 rounded-pill fw-600 shadow-sm">
+                                                            <i class="fas fa-chart-line me-2"></i> Analyze Audio
+                                                        </button>
+                                                    </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endforeach         
                             </tbody>
-                        </table>                                          
+                        </table>                                             
                     </div>
                 </div>
             </div>
@@ -242,5 +416,58 @@
 @endsection
 
 @push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Generate fake statistics data
+        const fakeStats = {
+            totalCompanies: {{ count($companies) }},
+            activeTasks: Math.floor(Math.random() * 50) + 10, // Random between 10-60
+            completedTasks: Math.floor(Math.random() * 100) + 50, // Random between 50-150
+            pendingAnalysis: Math.floor(Math.random() * 20) + 5, // Random between 5-25
+            totalAgents: {{ $totalAgents }},
+            successRate: Math.floor(Math.random() * 30) + 70 // Random between 70-100
+        };
 
+        // Animate counting up for each statistic
+        function animateCounter(elementId, finalValue, suffix = '') {
+            const element = document.getElementById(elementId);
+            let current = 0;
+            const increment = finalValue / 50; // Adjust speed here
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= finalValue) {
+                    current = finalValue;
+                    clearInterval(timer);
+                }
+                if (suffix === '%') {
+                    element.textContent = Math.floor(current) + suffix;
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 30);
+        }
+
+        // Start animations
+        animateCounter('totalCompanies', fakeStats.totalCompanies);
+        animateCounter('activeTasks', fakeStats.activeTasks);
+        animateCounter('completedTasks', fakeStats.completedTasks);
+        animateCounter('pendingAnalysis', fakeStats.pendingAnalysis);
+        animateCounter('totalAgents', fakeStats.totalAgents);
+        animateCounter('successRate', fakeStats.successRate, '%');
+
+        // Make the statistics bar sticky when scrolling
+        const stickyBar = document.querySelector('.sticky-top-bar');
+        const originalOffsetTop = stickyBar.offsetTop;
+        
+        function handleScroll() {
+            if (window.pageYOffset > originalOffsetTop) {
+                stickyBar.classList.add('sticky-active');
+            } else {
+                stickyBar.classList.remove('sticky-active');
+            }
+        }
+        
+        window.addEventListener('scroll', handleScroll);
+    });
+</script>
 @endpush

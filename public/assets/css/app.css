@@ -1631,7 +1631,7 @@ hr.hr-dashed {
   -webkit-transition: 0.3s;
   transition: 0.3s;
   margin-left: 4px;
-  height: 36px;
+  height: 55px;
 }
 .startbar .startbar-menu {
   padding-bottom: var(--bs-topbar-height);

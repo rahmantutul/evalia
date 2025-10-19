@@ -164,20 +164,28 @@
                         </div>
                     </div>
                     <div class="card-body p-4">
-                        <form id="companyRegistrationForm" method="POST" action="{{ isset($company) ? route('user.company.update', $company['company_id']) : route('user.company.store') }}" class="needs-validation" novalidate>
+                        <form id="companyRegistrationForm" method="PUT" action="{{ route('user.company.update', $company['company_id'])}}" class="needs-validation" novalidate>
                             @csrf
                             @if(isset($company))
                                 @method('PUT')
                             @endif
-                            
                             <div class="form-section">
                                 <h4 class="section-title"><i class="bi bi-gear icon-title"></i>Content Configuration</h4>
                                 <div class="row g-3">
                                     <input type="hidden" class="form-control" id="company_id" name="company_id" value="{{ $company['company_id'] }}" required>
+                                     <div class="col-md-4">
+                                        <label for="group_id" class="form-label">Select Group:</label>
+                                        <select name="group_id" id="" class="form-control" required>
+                                            <option value="">--Select a group--</option>
+                                            @foreach ($groups as $item)
+                                                <option selected value="{{ $item['group_id'] }}">{{ $item['group_name'] }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                     <div class="col-md-4">
                                         <label for="company_name" class="form-label">Company Name:</label>
                                         <input type="text" class="form-control" id="company_name" name="company_name" 
-                                            value="{{ $company['company_name'] ?? old('company_name') }}" required>
+                                            value="Test Company" required>
                                         <div class="invalid-feedback">Please provide a company name.</div>
                                     </div>
                                     <div class="col-md-4">
@@ -192,15 +200,7 @@
                                             value="{{ isset($company) ? implode(',', array_keys($company['main_topics'] ?? [])) : '' }}" 
                                             placeholder="Type and press enter to add">
                                     </div>
-                                    <div class="col-md-4">
-                                        <label for="group_id" class="form-label">Select Group:</label>
-                                        <select name="group_id" id="" class="form-control" required>
-                                            <option value="">--Select a group--</option>
-                                            @foreach ($groups as $item)
-                                                <option {{ ($item['group_id'] == $company['group_id']) ? 'selected' : '' }} value="{{ $item['group_id'] }}">{{ $item['group_name'] }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                   
                                     <div class="col-md-4">
                                         <label for="call_types" class="form-label">Call Types:</label>
                                         <input type="text" class="form-control" id="call_types" name="call_types" 

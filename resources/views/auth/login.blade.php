@@ -45,7 +45,7 @@
                     <p class="text-gray-500 mt-1">to continue to Evalia </p>
                 </div>
 
-                <!-- Google Sign-In Button -->
+                {{--  <!-- Google Sign-In Button -->
                 <a href="{{ route('login.google') }}" class="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md mb-6 text-gray-700 font-medium hover:bg-gray-50 transition">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
                         <path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -54,7 +54,7 @@
                         <path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                     </svg>
                     <span>Continue with Google</span>
-                </a>
+                </a>  --}}
 
                 <!-- Divider -->
                 <div class="relative mb-6">
@@ -71,11 +71,11 @@
                     @csrf
 
                     <div>
-                        <input name="email" value="{{ old('email') }}" type="email"
+                        <input name="username" value="{{ old('username') }}" type="username"
                             class="w-full px-4 py-2 border border-gray-300 rounded-md input-focus placeholder-gray-500"
-                            placeholder="Email"
+                            placeholder="Username"
                             required
-                            autocomplete="email"
+                            autocomplete="username"
                             autofocus>
                         @error('email')
                             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>

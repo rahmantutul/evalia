@@ -7,7 +7,7 @@
                         <p class="text-muted mb-0">
                             ©
                             <script> document.write(new Date().getFullYear()) </script>
-                            Creative AI
+                            Evalia
                            
                         </p>
                     </div>

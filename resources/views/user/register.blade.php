@@ -10,7 +10,6 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f2ef;
-           // background-image: url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 10c0-5.523-4.477-10-10-10s-10 4.477-10 10 4.477 10 10 10 10-4.477 10-10zM10 40c-5.523 0-10-4.477-10-10s4.477-10 10-10 10 4.477 10 10-4.477 10-10 10zm10-10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10 10 4.477 10 10zm30 20c-5.523 0-10-4.477-10-10s4.477-10 10-10 10 4.477 10 10-4.477 10-10 10z' fill='%23e0dfdc' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
         .linkedin-blue {
             color: #0a66c2;
@@ -25,19 +24,44 @@
             background-color: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(4px);
         }
-        .google-btn {
-            border: 1px solid #d1d5db;
-            transition: all 0.2s;
-        }
-        .google-btn:hover {
-            background-color: #f9fafb;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
         .logo-container {
             height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        .username-preview {
+            background-color: #f8f9fa;
+            border: 1px dashed #dee2e6;
+            border-radius: 0.375rem;
+            padding: 0.5rem 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .username-preview strong {
+            color: #495057;
+        }
+        .input-focus:focus {
+            border-color: #0a66c2;
+            box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.2);
+        }
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        .error-border {
+            border-color: #dc2626;
+        }
+        .success-message {
+            background-color: #d1fae5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -51,77 +75,151 @@
                 <div class="text-center mb-6">
                     <!-- Your Custom Logo -->
                     <div class="logo-container">
-                        <img src="{{ asset('assets/images/kayan.png') }}" alt="Evalia Logo" class="h-full object-contain">
+                        <!-- Placeholder for logo -->
+                        <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <img src="{{ asset('assets/images/kayan.png') }}" alt="Evalia Logo" class="h-full object-contain">
+                        </div>
                     </div>
                     <h1 class="text-2xl font-semibold text-gray-800 mt-3">Join Evalia</h1>
-                    <p class="text-gray-500 mt-1">Voice Analysis assistant</p>
+                    <p class="text-gray-500 mt-1">Voice Analysis Assistant</p>
                 </div>
-
-                <!-- Google Sign-Up Button -->
-                <a href="{{ route('login.google') }}" class="w-full flex items-center justify-center gap-2 google-btn py-2 px-4 rounded-md mb-6 text-gray-700 font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
-                        <path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                        <path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                        <path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                    </svg>
-                    <span>Continue with Google</span>
-                </a>
-
-                <!-- Divider -->
-                <div class="relative mb-6">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center">
-                        <span class="px-2 bg-white text-sm text-gray-500">or</span>
-                    </div>
+                
+                <!-- Display success message if exists -->
+                @if(session('success'))
+                <div class="success-message">
+                    {{ session('success') }}
                 </div>
-
+                @endif
+                
+                <!-- Display general error if exists -->
+                @if(session('error'))
+                <div class="error-message bg-red-50 p-3 rounded mb-4">
+                    {{ session('error') }}
+                </div>
+                @endif
+                
                 <!-- Registration Form -->
-                <form method="POST" action="{{ route('register') }}" class="space-y-4">
+                <form method="POST" action="{{ route('register') }}" class="space-y-4" id="registrationForm">
                     @csrf
-
+                    
+                    <!-- Email field - triggers username generation -->
                     <div>
-                        <input name="name" value="{{ old('name') }}" type="text"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Full name">
-                        @error('name')
-                            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <input name="email" value="{{ old('email') }}" type="email"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Email">
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input 
+                            id="email" 
+                            name="email" 
+                            value="{{ old('email') }}" 
+                            type="email"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md input-focus placeholder-gray-500 @error('email') error-border @enderror"
+                            placeholder="Enter your email address"
+                            required
+                            autocomplete="email"
+                            autofocus>
                         @error('email')
-                            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    
+                    <!-- Username preview (read-only) -->
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <div class="username-preview">
+                            Your username will be: <strong id="usernamePreview">Enter email above</strong>
+                        </div>
+                        <input 
+                            id="username" 
+                            name="username" 
+                            type="hidden"
+                            value="{{ old('username') }}">
+                        @error('username')
+                            <span class="error-message">{{ $message }}</span>
                         @enderror
                     </div>
 
+                    <!-- Full Name -->
                     <div>
-                        <input name="password" type="password"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Password (8+ characters)">
+                        <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input 
+                            id="full_name" 
+                            name="full_name" 
+                            value="{{ old('full_name') }}" 
+                            type="text"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md input-focus placeholder-gray-500 @error('full_name') error-border @enderror"
+                            placeholder="Enter your full name"
+                            required
+                            autocomplete="name">
+                        @error('full_name')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    {{--  <!-- Position (Optional) -->
+                    <div>
+                        <label for="position" class="block text-sm font-medium text-gray-700 mb-1">Position (Optional)</label>
+                        <input 
+                            id="position" 
+                            name="position" 
+                            value="{{ old('position') }}" 
+                            type="text"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md input-focus placeholder-gray-500 @error('position') error-border @enderror"
+                            placeholder="Your position or title"
+                            autocomplete="organization-title">
+                        @error('position')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <!-- Phone (Optional) -->
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone (Optional)</label>
+                        <input 
+                            id="phone" 
+                            name="phone" 
+                            value="{{ old('phone') }}" 
+                            type="tel"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md input-focus placeholder-gray-500 @error('phone') error-border @enderror"
+                            placeholder="Your phone number"
+                            autocomplete="tel">
+                        @error('phone')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>  --}}
+
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input 
+                            id="password" 
+                            name="password" 
+                            type="password"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md input-focus placeholder-gray-500 @error('password') error-border @enderror"
+                            placeholder="Create a password"
+                            required
+                            autocomplete="new-password">
                         @error('password')
-                            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            <span class="error-message">{{ $message }}</span>
                         @enderror
                     </div>
-                    <div class="mt-4">
-                        <input name="password_confirmation" type="password"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Confirm Password">
+
+                    <!-- Confirm Password -->
+                    <div>
+                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                        <input 
+                            id="password_confirmation" 
+                            name="password_confirmation" 
+                            type="password"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md input-focus placeholder-gray-500 @error('password_confirmation') error-border @enderror"
+                            placeholder="Confirm your password"
+                            required
+                            autocomplete="new-password">
                         @error('password_confirmation')
-                            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            <span class="error-message">{{ $message }}</span>
                         @enderror
                     </div>
-                    <div class="pt-2">
-                        <button type="submit" 
-                                class="w-full linkedin-blue-bg hover:linkedin-blue-dark text-white font-medium py-2 px-4 rounded-md transition">
-                            Agree & Join
-                        </button>
-                    </div>
+                    <button type="submit" 
+                            class="w-full linkedin-blue-bg hover:linkedin-blue-dark text-white font-medium py-2 px-4 rounded-md transition">
+                        Create Account
+                    </button>
                 </form>
 
                 <div class="mt-6 text-center text-sm">
@@ -132,5 +230,82 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('email');
+            const usernamePreview = document.getElementById('usernamePreview');
+            const usernameInput = document.getElementById('username');
+            
+            // Function to generate username from email
+            function generateUsername(email) {
+                if (!email) return '';
+                
+                // Extract the part before @ and clean it up
+                let username = email.split('@')[0];
+                
+                // Remove special characters and replace with underscores
+                username = username.replace(/[^a-zA-Z0-9]/g, '_');
+                
+                // Remove multiple consecutive underscores
+                username = username.replace(/_+/g, '_');
+                
+                // Remove leading/trailing underscores
+                username = username.replace(/^_+|_+$/g, '');
+                
+                // Ensure username is at least 3 characters
+                if (username.length < 3) {
+                    username = username + '_user';
+                }
+                
+                return username.toLowerCase();
+            }
+            
+            // Update username preview when email changes
+            emailInput.addEventListener('input', function() {
+                const email = this.value.trim();
+                const username = generateUsername(email);
+                
+                if (username) {
+                    usernamePreview.textContent = username;
+                    usernameInput.value = username;
+                } else {
+                    usernamePreview.textContent = 'Enter email above';
+                    usernameInput.value = '';
+                }
+            });
+            
+            // Also update on form submission to ensure latest value
+            document.getElementById('registrationForm').addEventListener('submit', function() {
+                const email = emailInput.value.trim();
+                const username = generateUsername(email);
+                
+                if (username) {
+                    usernameInput.value = username;
+                }
+            });
+            
+            // Initialize on page load if there's already an email value
+            if (emailInput.value) {
+                const username = generateUsername(emailInput.value.trim());
+                if (username) {
+                    usernamePreview.textContent = username;
+                    usernameInput.value = username;
+                }
+            }
+            
+            // Clear error styling when user starts typing in a field with error
+            const errorFields = document.querySelectorAll('.error-border');
+            errorFields.forEach(field => {
+                field.addEventListener('input', function() {
+                    this.classList.remove('error-border');
+                    const errorElement = this.nextElementSibling;
+                    if (errorElement && errorElement.classList.contains('error-message')) {
+                        errorElement.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

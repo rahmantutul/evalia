@@ -1,5 +1,5 @@
 /* Professional Color Scheme */
-:root {
+.professional-theme  {
   --primary: #6B7A8F;       /* Muted slate blue */
   --primary-light: #F1F3F7; /* Very light slate */
   --accent: #9A8E85;        /* Warm taupe */
@@ -917,10 +917,10 @@ input:checked + .toggle-slider:before {
   background-color: var(--primary-light);
   color: var(--primary);
 }
-
+/* 
 .summary-content {
   padding: 1.5rem;
-}
+} */
 
 .detailed-summary {
   background: var(--light);
@@ -1399,7 +1399,7 @@ input:checked + .toggle-slider:before {
 .metric-details p {
   margin: 8px 0;
   font-size: 14px;
-  color: #000;
+  color: var(--gray);
 }
 
 .metric-details strong {

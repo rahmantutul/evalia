@@ -2,11 +2,11 @@
         <div class="brand d-flex justify-content-center align-items-center">
             <a href="{{ route('user.home') }}" class="logo text-center">
                 <span>
-                    <img src="{{ asset('/') }}assets/images/normal.png" alt="logo-small" class="logo-sm mx-auto">
+                    <img src="{{ asset('/') }}assets/images/preview.png" alt="logo-small" class="logo-sm mx-auto">
                 </span>
                 <span>
-                    <img src="{{ asset('/') }}assets/images/crtvai.png" height="100" alt="logo-large" class="logo-lg logo-light mx-auto">
-                    <img src="{{ asset('/') }}assets/images/crtvai.png" height="100" alt="logo-large" class="logo-lg logo-dark mx-auto">
+                    <img src="{{ asset('/') }}assets/images/logo.png" height="100" alt="logo-large" class="logo-lg logo-light mx-auto">
+                    <img src="{{ asset('/') }}assets/images/logo.png" height="100" alt="logo-large" class="logo-lg logo-dark mx-auto">
                 </span>
             </a>
         </div>
@@ -22,6 +22,18 @@
                                 <span>Dashboard</span>
                             </a>
                         </li>
+                        <li class="nav-item {{ Route::is('users.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('users.index') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                                <i class="fas fa-user-check menu-icon"></i>
+                                <span>Users</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Route::is('roles.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('roles.index') ? 'active' : '' }}" href="{{ route('roles.index') }}">
+                                <i class="fas fa-lock menu-icon"></i>
+                                <span>Roles</span>
+                            </a>
+                        </li>
                         <li class="nav-item {{ Route::is('user.group_data.*') ? 'active' : '' }}">
                             <a class="nav-link {{ Route::is('user.group_data.*') ? 'active' : '' }}" href="{{ route('user.group_data.list') }}">
                                 <i class="iconoir-community menu-icon"></i>
@@ -34,18 +46,24 @@
                                 <span>Knowledge Base</span>
                             </a>
                         </li>
-                        <li class="nav-item {{ Route::is('user.agent.*') ? 'active' : '' }}">
-                            <a class="nav-link {{ Route::is('user.agent.*') ? 'active' : '' }}" href="{{ route('user.agent.list') }}">
-                                <i class="fas fa-headset menu-icon"></i>
-                                <span>Agents</span>
-                            </a>
-                        </li>
-                        <li class="nav-item {{ Route::is('user.company.*') ? 'active' : '' }}">
+                         <li class="nav-item {{ Route::is('user.company.*') ? 'active' : '' }}">
                             <a class="nav-link {{ Route::is('user.company.*') ? 'active' : '' }}" href="{{ route('user.company.list') }}">
                                 <i class="icofont-bank-alt menu-icon"></i>
                                 <span>Companies</span>
                             </a>
                         </li>
+                        <li class="nav-item {{ Route::is('user.agents.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('user.agents.index.*') ? 'active' : '' }}" href="{{ route('user.agents.index') }}">
+                                <i class="fas fa-headset menu-icon"></i>
+                                <span>Agents</span>
+                            </a>
+                        </li>
+                        {{--  <li class="nav-item {{ Route::is('user.telephonyAccounts.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('user.telephonyAccounts.*') ? 'active' : '' }}" href="{{ route('user.telephonyAccounts.index') }}">
+                                <i class="fas fa-mobile-alt menu-icon"></i>
+                                <span>Telephony Accounts</span>
+                            </a>
+                        </li>  --}}
                     </ul>
                 </div>
             </div>

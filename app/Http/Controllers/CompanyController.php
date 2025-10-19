@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\TelephonyAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -12,168 +13,95 @@ use Illuminate\Support\Str;
 
 class CompanyController extends Controller
 {
-    public function __construct()
-    {
-        return \App\Helpers\ExternalApiHelper::getToken();
-    }
-
     private function getToken()
     {
-        return \App\Helpers\ExternalApiHelper::getToken();
+        return session('user_access_token');
     }
 
-    private function makeAuthenticatedRequest($method, $url, $data = [], $options = [])
+    private function getAuthHeaders()
     {
         $token = $this->getToken();
-        
-        if (!$token) {
-            throw new \Exception('Could not authenticate with external API: No token available');
-        }
-
-        $defaultOptions = [
-            'timeout' => 30,
-            'retry' => [3, 100],
-            'headers' => [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ],
-            'withToken' => true
+        return [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $token,
         ];
-
-        $options = array_merge($defaultOptions, $options);
-
-        $http = Http::timeout($options['timeout'])->retry($options['retry'][0], $options['retry'][1]);
-
-        if ($options['withToken']) {
-            $http->withToken($token);
-        }
-
-        foreach ($options['headers'] as $key => $value) {
-            $http->withHeaders([$key => $value]);
-        }
-
-        switch (strtoupper($method)) {
-            case 'GET':
-                return $http->get($url, $data);
-            case 'POST':
-                return $http->post($url, $data);
-            case 'PUT':
-                return $http->put($url, $data);
-            case 'DELETE':
-                return $http->delete($url, $data);
-            default:
-                return $http->get($url, $data);
-        }
     }
-    private function fetchAgentsData()
-    {
-        $response = $this->makeAuthenticatedRequest(
-            'GET',
-            'http://13.218.100.190:8080/api/v1/company-agents/list-agents'
-        );
 
+    private function groupList()
+    {
+        $response = Http::timeout(30)
+            ->retry(3, 100)
+            ->withHeaders($this->getAuthHeaders())
+            ->get('http://35.153.178.201:8080/list_groups');
+        
         if ($response->successful()) {
             $responseData = $response->json();
             return $responseData['data'] ?? [];
+        } else {
+            return back()->with('error', 'Failed to fetch group list: ' . $response->body());
         }
-
-        return [];
     }
 
-    public function companyList(Request $request)
+    public function companyList()
     {
-        $page = $request->get('page', 1);
-        $limit = $request->get('limit', 100);
-        
-        $response = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/list_of_companies', [
-            'page' => $page,
-            'limit' => $limit
-        ]);
+        $response = Http::withHeaders($this->getAuthHeaders())
+            ->get('http://35.153.178.201:8080/list_of_companies');
 
+        $companies = [];
         if ($response->successful()) {
-            $responseData = $response->json();
-            $companies = $responseData['data'] ?? [];
-            $total = $responseData['total'] ?? count($companies);
-            $perPage = $responseData['per_page'] ?? $limit;
-            $currentPage = $responseData['current_page'] ?? $page;
-            
-            $paginatedCompanies = new LengthAwarePaginator(
-                $companies,
-                $total,
-                $perPage,
-                $currentPage,
-                [
-                    'path' => Paginator::resolveCurrentPath(),
-                    'query' => $request->query()
-                ]
-            );
-            return view('user.company.company_list', compact('paginatedCompanies'));
-        } else {
-            return back()->with('error', 'Failed to fetch companies list');
+            $companies = $response->json()['data'] ?? [];
         }
-       
+        return view('user.company.company_list', compact('companies'));
     }
 
     public function companyCreate()
     {
-        $page =  1;
-        $limit = 100;
-        $groups = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/list_groups', [
-            'page' => $page,
-            'limit' => $limit
-        ]);
-        $groups= $groups['data'];
-        return view('user.company.company_create',compact('groups'));
+        $groups = $this->groupList();
+        return view('user.company.company_create', compact('groups'));
     }
 
     public function companyDetails($id)
     {
-        try {
-            // Get company details
-            $response = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/get_company_details', [
+        $response = Http::withHeaders($this->getAuthHeaders())
+            ->get('http://35.153.178.201:8080/get_company_details', [
                 'company_id' => $id
             ]);
-            $company = $response->successful() ? ($response->json()['data'] ?? []) : [];
-
-            // Get task list
-            $response_audio = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/task_list', [
+        
+        $company = $response->successful() ? ($response->json()['data'] ?? []) : [];
+        
+        $response_audio = Http::withHeaders($this->getAuthHeaders())
+            ->get("http://35.153.178.201:8080/task_list", [
                 'company_id' => $id
             ]);
 
-            $taskList = $response_audio->successful() ? ($response_audio->json()['tasks'] ?? []) : [];
+        $taskList = $response_audio->successful() ? ($response_audio->json()['tasks'] ?? []) : [];
 
-            // Paginate tasks
-            $page = Paginator::resolveCurrentPage(); 
-            $perPage = 10;
-            $offset = ($page - 1) * $perPage;
+        $page = Paginator::resolveCurrentPage(); 
+        $perPage = 10;
+        $offset = ($page - 1) * $perPage;
 
-            $pagedTasks = array_slice($taskList, $offset, $perPage);
+        $pagedTasks = array_slice($taskList, $offset, $perPage);
 
-            $paginatedTasks = new LengthAwarePaginator(
-                $pagedTasks,
-                count($taskList),
-                $perPage,
-                $page,
-                ['path' => Paginator::resolveCurrentPath()] 
-            );
-            $agents = $this->fetchAgentsData();
-            return view('user.company.company_details', [
-                'company' => $company,
-                'taskList' => $paginatedTasks,
-                'agents' => $agents,
-            ]);
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        $paginatedTasks = new LengthAwarePaginator(
+            $pagedTasks,
+            count($taskList),
+            $perPage,
+            $page,
+            ['path' => Paginator::resolveCurrentPath()] 
+        );
+        
+        return view('user.company.company_details', [
+            'company' => $company,
+            'taskList' => $paginatedTasks,
+        ]);
     }
 
     public function companyDelete($id)
     {
         try {
-            // Append company_id as query parameter
-            $url = "http://13.218.100.190:8080/api/v1/delete_company?company_id={$id}";
-
-            $response = $this->makeAuthenticatedRequest('DELETE', $url);
+            $response = Http::withHeaders($this->getAuthHeaders())
+                ->delete("http://35.153.178.201:8080/delete_company?company_id={$id}");
 
             if ($response->successful()) {
                 return redirect()->back()->with('success', 'Company deleted successfully.');
@@ -186,7 +114,6 @@ class CompanyController extends Controller
             return redirect()->back()->with('error', 'Request failed: ' . $e->getMessage());
         }
     }
-
 
     public function companyStore(Request $request)
     {
@@ -218,7 +145,7 @@ class CompanyController extends Controller
             'gpt_qna_pair_eval' => 'nullable|string',
             'spelling_correction_prompt' => 'nullable|string',
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -252,9 +179,16 @@ class CompanyController extends Controller
 
         $data = $validator->validated();
 
+        if (empty($data['company_id'])) {
+            $companyId = Str::uuid()->toString();
+        } else {
+            $companyId = $data['company_id'];
+        }
+
         $payload = [
             'company_name' => $data['company_name'] ?? '',
-            'group_id' => $data['group_id'] ?? '8d5fc194-c8ff-4bd1-a78c-547f32649ec6',
+            'group_id' => $data['group_id'] ?? 'hassan',
+            'company_id' => $companyId,
             'filler_words' => $cleanTagifyInput($data['filler_words'] ?? ''),
             'main_topics' => $cleanTagifyInput($data['main_topics'] ?? ''),
             'call_types' => $cleanTagifyInput($data['call_types'] ?? ''),
@@ -292,68 +226,44 @@ class CompanyController extends Controller
             'spelling_correction_prompt' => $data['spelling_correction_prompt'] ?? '',
         ];
 
-            $response = $this->makeAuthenticatedRequest('POST', 'http://13.218.100.190:8080/api/v1/register_company', $payload, [
-                'headers' => [
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
-                    'X-Request-Verification' => (string) Str::uuid(),
-                ]
-            ]);
+        $headers = $this->getAuthHeaders();
+        $headers['X-Request-Verification'] = (string) Str::uuid();
 
-            if ($response->successful()) {
-                $responseData = $response->json();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Company registered successfully',
-                    'data' => $responseData,
-                ]);
-            }
+        $response = Http::timeout(30)
+            ->retry(3, 100)
+            ->withHeaders($headers)
+            ->post('http://35.153.178.201:8080/register_company', $payload);
+        
+        if ($response->successful()) {
+            $message = $request->has('telephony_account') 
+                ? 'Company registered on both platform successfully'
+                : 'Company registered successfully';
+            
+            $responseData = $response->json();
             return response()->json([
-                'success' => false,
-                'message' => 'API request failed: ' . $response->body(),
-            ], $response->status());
+                'success' => true,
+                'message' => $message,
+                'data' => $responseData,
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'API registration request failed: ' . $response->body(),
+        ], $response->status());
     }
 
     public function companyEdit($id)
     {
-        try {
-            $page =  1;
-            $limit = 100;
-            $response = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/get_company_details', [
+        $response = Http::withHeaders($this->getAuthHeaders())
+            ->get('http://35.153.178.201:8080/get_company_details', [
                 'company_id' => $id
             ]);
-
-            $company = $response->successful() ? ($response->json()['data'] ?? []) : [];
-            $groups = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/list_groups', [
-            'page' => $page,
-            'limit' => $limit
-        ]);
-            $groups= $groups['data'];
-            return view('user.company.company_edit', compact('company','groups'));
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
-    }
-    public function companyCopy($id)
-    {
-        try {
-            $page =  1;
-            $limit = 100;
-            $response = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/get_company_details', [
-                'company_id' => $id
-            ]);
-
-            $company = $response->successful() ? ($response->json()['data'] ?? []) : [];
-            $groups = $this->makeAuthenticatedRequest('GET', 'http://13.218.100.190:8080/api/v1/list_groups', [
-            'page' => $page,
-            'limit' => $limit
-        ]);
-            $groups= $groups['data'];
-            return view('user.company.company_copy', compact('company','groups'));
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        
+        $company = $response->successful() ? ($response->json()['data'] ?? []) : [];
+        $groups = $this->groupList();
+        
+        return view('user.company.company_edit', compact('company', 'groups'));
     }
 
     public function companyUpdate(Request $request)
@@ -462,35 +372,30 @@ class CompanyController extends Controller
             'spelling_correction_prompt' => $data['spelling_correction_prompt'] ?? '',
         ];
 
-            $response = $this->makeAuthenticatedRequest('PUT', 'http://13.218.100.190:8080/api/v1/update_company', $payload, [
-                'headers' => [
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
-                    'X-Request-Verification' => (string) Str::uuid(),
-                ]
-            ]);
-             Log::error('API Update Error Response', [
-                'status' => $response->status(),
-                'response' => $response->body(),
-                'payload' => $payload
-            ]);
+        $headers = $this->getAuthHeaders();
+        $headers['X-Request-Verification'] = (string) Str::uuid();
 
-            if ($response->successful()) {
-                $responseData = $response->json();
+        $response = Http::timeout(30)
+            ->retry(3, 100)
+            ->withHeaders($headers)
+            ->put('http://35.153.178.201:8080/update_company', $payload);
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Company updated successfully',
-                    'data' => $responseData,
-                ]);
-            }
-
-           
-
+        if ($response->successful()) {
+            $message = $request->has('telephony_account')
+                ? 'Company updated on both platform successfully'
+                : 'Company updated successfully';
+            
+            $responseData = $response->json();
             return response()->json([
-                'success' => false,
-                'message' => 'API update request failed: ' . $response->body(),
-            ], $response->status());
+                'success' => true,
+                'message' => $message,
+                'data' => $responseData,
+            ]);
+        }
         
+        return response()->json([
+            'success' => false,
+            'message' => 'API update request failed: ' . $response->body(),
+        ], $response->status());
     }
 }

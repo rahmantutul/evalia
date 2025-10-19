@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Creative AI</title>
+    <title>Login - Evalia</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -22,7 +22,7 @@
         <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border border-white/30">
             <!-- Decorative Header -->
             <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-center relative">
-                <h1 class="text-2xl font-bold text-white mt-4">Creative AI</h1>
+                <h1 class="text-2xl font-bold text-white mt-4">Evalia</h1>
                 <p class="text-blue-100 mt-1">Your intelligent voice assistant</p>
             </div>
 
@@ -33,7 +33,7 @@
                     <p class="text-gray-600 mt-2">Sign in to continue your creative journey</p>
                 </div>
 
-                <!-- Google Sign-In Button -->
+                {{--  <!-- Google Sign-In Button -->
                 <a href="{{ route('login.google') }}" class="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-xl bg-white text-gray-700 font-medium hover:bg-gray-50 transition-all shadow-sm hover:shadow-md mb-6">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
                         <path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -43,7 +43,7 @@
                         <path fill="none" d="M0 0h48v48H0z"/>
                     </svg>
                     <span>Continue with Google</span>
-                </a>
+                </a>  --}}
 
                 <div class="relative my-6">
                     <div class="absolute inset-0 flex items-center">

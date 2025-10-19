@@ -1,8 +1,6 @@
 @extends('user.layouts.app')
 @push('styles')
-    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
+
     <!-- Custom CSS -->
     <style>
         :root {
@@ -161,14 +159,41 @@
                                 <h3 class="mb-0 text-dark fw-semibold">Company Registration</h3>
                                 <p class="text-muted mb-0 fs-7">Register your business entity with our premium service</p>
                             </div>
+                            
                         </div>
                     </div>
                     <div class="card-body p-4">
                         <form id="companyRegistrationForm" method="POST" action="{{ route('user.company.store') }}" class="needs-validation" novalidate>
                             @csrf
                             <div class="form-section">
-                                <h4 class="section-title"><i class="bi bi-gear icon-title"></i>Content Configuration</h4>
+                                <h4 class="section-title"><i class="bi bi-gear icon-title"></i>
+                                    Content Configuration
+                                </h4>
                                 <div class="row g-3">
+                                    {{--  <div class="col-md-4">
+                                        <label for="company_id" class="form-label">Company ID:</label>
+                                        <input type="text" class="form-control" id="company_id" name="company_id" required>
+                                        <div class="invalid-feedback">Please provide a company ID.</div>
+                                    </div>  --}}
+                                    {{--  <div class="col-md-4">
+                                        <label for="company_name" class="form-label">Telephony Account:</label>
+                                        <select name="telephony_account" id="" class="form-control">
+                                            <option value="">Select account if you want to connect</option>
+                                            @foreach ($accounts as $account)
+                                                <option value="{{ $account->id }}">{{ $account->provider }}</option>
+                                            @endforeach
+                                        </select>
+                                        <small style="color: red">Optional: connect a telephony account.</small>
+                                    </div>  --}}
+                                     <div class="col-md-4">
+                                        <label for="company_name" class="form-label">Select a group:</label>
+                                        <select name="group_id" id="" class="form-control">
+                                            <option value="">Select group</option>
+                                            @foreach ($groups as $group)
+                                                <option value="{{ $group['group_id'] }}">{{ $group['group_name'] }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                     <div class="col-md-4">
                                         <label for="company_name" class="form-label">Company Name:</label>
                                         <input type="text" class="form-control" id="company_name" name="company_name" required>
@@ -181,15 +206,6 @@
                                     <div class="col-md-4">
                                         <label for="main_topics" class="form-label">Main Topics:</label>
                                         <input type="text" class="form-control" id="main_topics" name="main_topics" placeholder="Type and press enter to add">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="group_id" class="form-label">Select Group:</label>
-                                        <select name="group_id" id="" class="form-control" required>
-                                            <option value="">--Select a group--</option>
-                                            @foreach ($groups as $item)
-                                                <option value="{{ $item['group_id'] }}">{{ $item['group_name'] }}</option>
-                                            @endforeach
-                                        </select>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="call_types" class="form-label">Call Types:</label>
@@ -337,9 +353,8 @@ TASK RULES:
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
-<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize Tagify for tag inputs
@@ -381,41 +396,49 @@ TASK RULES:
                 return;
             }
 
-            try {
-                // Disable submit button
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+           try {
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
 
-                // Prepare FormData
-                const formData = new FormData(form);
-                
-                // Submit to Laravel endpoint
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: formData
-                });
+            // Prepare FormData
+            const formData = new FormData(form);
+            
+            // Submit to Laravel endpoint
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: formData
+            });
 
-                const result = await response.json();
+            const result = await response.json();
 
-                if (!response.ok) {
-                    throw new Error(result.message || 'Failed to submit form');
-                }
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-                showAlert('Company registered successfully!', 'success');
-                
-            } catch (error) {
-                console.error('Submission error:', error);
-                showAlert(`Error: ${error.message}`, 'danger');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Register Company';
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to submit form');
             }
+
+            // Determine success message based on telephony_account presence
+            const hasTelephonyAccount = formData.has('telephony_account') && formData.get('telephony_account');
+            const successMessage = hasTelephonyAccount 
+                ? 'Company registered on both platform successfully!' 
+                : 'Company registered successfully!';
+
+            showAlert(successMessage, 'success');
+             // Reload page after 3 seconds (3000 milliseconds)
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+            
+        } catch (error) {
+            console.error('Submission error:', error);
+            showAlert(`Error: ${error.message}`, 'danger');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Register Company';
+        }
         });
 
         // Show Bootstrap alert

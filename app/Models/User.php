@@ -9,39 +9,46 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+   use HasFactory;
 
-
+    // Remove all authentication-related properties and methods
+    // We're using this model only to store API user data temporarily
+    
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'phone',
-        'company',
-        'avatar'
+        'id', 'username', 'email', 'full_name', 'position', 
+        'phone', 'is_active', 'role', 'company_id', 'supervisor_id'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
+    protected $casts = [
+        'is_active' => 'boolean',
+        'role' => 'array'
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    // Implement required Authenticatable methods (empty since we use API)
+    public function getAuthIdentifierName()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return 'id';
+    }
+
+    public function getAuthIdentifier()
+    {
+        return $this->id;
+    }
+
+    public function getAuthPassword()
+    {
+        return ''; // No local password
+    }
+
+    public function getRememberToken()
+    {
+        return '';
+    }
+
+    public function setRememberToken($value) {}
+
+    public function getRememberTokenName()
+    {
+        return '';
     }
 }

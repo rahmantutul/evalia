@@ -99,91 +99,7 @@
 
 @section('content')
 <div class="container-fluid">
-    @php
-        $totalGroups = 8;
-        $activeGroups = 8;
-        $recentGroups = 8;
-        $inactiveGroups = 0;
-        $totalMembers = 22;
-    @endphp
-    <!-- Statistics Section -->
-    <div class="row m-4">
-        <!-- Total Groups Card -->
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card" style="border: 2px solid #0d6efd;">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <h5 class="card-title mb-0 text-dark">Total Groups</h5>
-                        <h2 class="fw-bold mt-2 mb-0 text-primary">{{ $totalGroups ?? 0 }}</h2>
-                        <p class="card-text small mb-0 text-muted">
-                            <i class="fas fa-layer-group text-primary"></i> 
-                            All groups in system
-                        </p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-layer-group display-6 text-primary opacity-75"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Active Groups Card -->
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card" style="border: 2px solid #198754;">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <h5 class="card-title mb-0 text-dark">Active Groups</h5>
-                        <h2 class="fw-bold mt-2 mb-0 text-success">{{ $activeGroups ?? 0 }}</h2>
-                        <p class="card-text small mb-0 text-muted">
-                            <i class="fas fa-chart-pie text-success"></i> 
-                            {{ $totalGroups ? round(($activeGroups / $totalGroups) * 100, 1) : 0 }}% of total
-                        </p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-check-circle display-6 text-success opacity-75"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Members Card -->
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card" style="border: 2px solid #0dcaf0;">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <h5 class="card-title mb-0 text-dark">Total Members</h5>
-                        <h2 class="fw-bold mt-2 mb-0 text-info">{{ $totalMembers ?? 0 }}</h2>
-                        <p class="card-text small mb-0 text-muted">
-                            Avg: {{ $totalGroups ? round($totalMembers / $totalGroups, 1) : 0 }} members/group
-                        </p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-users display-6 text-info opacity-75"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Inactive Groups Card -->
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card" style="border: 2px solid #ffc107;">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <h5 class="card-title mb-0 text-dark">Inactive Groups</h5>
-                        <h2 class="fw-bold mt-2 mb-0 text-warning">{{ $inactiveGroups ?? 0 }}</h2>
-                        <p class="card-text small mb-0 text-muted">
-                            <i class="fas fa-exclamation-triangle text-warning"></i> 
-                            {{ $totalGroups ? round(($inactiveGroups / $totalGroups) * 100, 1) : 0 }}% of total
-                        </p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-times-circle display-6 text-warning opacity-75"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <!-- Group List Section -->
     <div class="row mb-4 mt-3">
         <div class="col-md-12 col-lg-12">
@@ -223,28 +139,28 @@
                             </div>
                         @endif
                        <table class="table mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Group ID</th>
-                                    <th>Group Name</th>
-                                    <th>Group description</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if(count($paginatedGroups) > 0)
-                                    @foreach($paginatedGroups as $group)
-                                        <tr>
-                                            <td>{{ $group['group_id'] }}</td>
-                                            <td>{{ $group['group_name'] }}</td> 
-                                            <td>{{ $group['description'] }}</td> 
-                                            <td>
-                                                    <span class="badge bg-success">Active</span>
-                                            </td>
-                                            <td>
+                        <thead class="table-light">
+                            <tr>
+                                <th>Group ID</th>
+                                <th>Group Name</th>
+                                <th>Group description</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(count($paginatedGroups) > 0)
+                                @foreach($paginatedGroups as $group)
+                                    <tr>
+                                        <td>{{ $group['group_id'] }}</td>
+                                        <td>{{ $group['group_name'] }}</td> 
+                                        <td>{{ $group['description'] }}</td> 
+                                        <td>
+                                            <span class="badge bg-success">Active</span>
+                                        </td>
+                                        <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('user.group_data.edit',$group['group_id']) }}" class="btn btn-icon" title="Settings">
+                                                <a href="{{ route('user.group_data.details',$group['group_id']) }}" class="btn btn-icon" title="Settings">
                                                     <i class="fas fa-cogs"></i>
                                                 </a>
                                                 <a href="{{ route('user.group_data.delete', $group['group_id']) }}" onclick="return confirm('Are you sure to delete this?')" class="btn btn-icon btn-delete" title="Delete">
@@ -252,15 +168,48 @@
                                                 </a>
                                             </div>
                                         </td>
-                                        </tr>
-                                    @endforeach
-                                @else
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">No groups found.</td>
                                     </tr>
-                                @endif         
-                            </tbody>
-                        </table>                                             
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">No groups found.</td>
+                                </tr>
+                            @endif         
+                        </tbody>
+                    </table>
+
+                    <!-- Pagination Section -->
+                    @if(isset($pagination) && $pagination['total'] > $pagination['per_page'])
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="text-muted">
+                                Showing {{ $pagination['from'] }} to {{ $pagination['to'] }} of {{ $pagination['total'] }} entries
+                            </div>
+                            <nav>
+                                <ul class="pagination mb-0">
+                                    <!-- Previous Page Link -->
+                                    <li class="page-item {{ $pagination['current_page'] == 1 ? 'disabled' : '' }}">
+                                        <a class="page-link" href="?page={{ $pagination['current_page'] - 1 }}&limit={{ $pagination['per_page'] }}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+
+                                    <!-- Page Numbers -->
+                                    @for($i = 1; $i <= $pagination['last_page']; $i++)
+                                        <li class="page-item {{ $pagination['current_page'] == $i ? 'active' : '' }}">
+                                            <a class="page-link" href="?page={{ $i }}&limit={{ $pagination['per_page'] }}">{{ $i }}</a>
+                                        </li>
+                                    @endfor
+
+                                    <!-- Next Page Link -->
+                                    <li class="page-item {{ $pagination['current_page'] == $pagination['last_page'] ? 'disabled' : '' }}">
+                                        <a class="page-link" href="?page={{ $pagination['current_page'] + 1 }}&limit={{ $pagination['per_page'] }}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    @endif                           
                     </div>
                 </div>
             </div>

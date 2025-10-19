@@ -21,7 +21,7 @@
                 <h4 class="page-title">Chat</h4>
                 <div class="">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Creative AI </a>
+                        <li class="breadcrumb-item"><a href="#">Evalia </a>
                         </li><!--end nav-item-->
                         <li class="breadcrumb-item"><a href="#">Dashboard</a>
                         </li><!--end nav-item-->

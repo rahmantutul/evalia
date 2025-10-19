@@ -9,7 +9,7 @@
                         </button>
                     </li> 
                     <li class="mx-2 welcome-text">
-                        <h5 class="mb-0 fw-semibold text-truncate">Hello, {{ Auth::user()->name }}!</h5>
+                        <h5 class="mb-0 fw-semibold text-truncate">Hello,!</h5>
                     </li>                   
                 </ul>
                 <ul class="topbar-item list-unstyled d-inline-flex align-items-center mb-0">
@@ -24,8 +24,8 @@
                                     <img src="{{ auth()->user()->image ? Storage::url(auth()->user()->image) : asset('images/default-avatar.jpg') }}" alt="" class="thumb-md rounded-circle">
                                 </div>
                                 <div class="flex-grow-1 ms-2 text-truncate align-self-center">
-                                    <h6 class="my-0 fw-medium text-dark fs-13">{{ Auth::user()->name }}</h6>
-                                    <small class="text-muted mb-0">{{ Auth::user()->email }}</small>
+                                    <h6 class="my-0 fw-medium text-dark fs-13"></h6>
+                                    <small class="text-muted mb-0"></small>
                                 </div><!--end media-body-->
                             </div>
                             <div class="dropdown-divider mt-0"></div>

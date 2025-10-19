@@ -45,7 +45,7 @@
                 <h4 class="page-title">Profile</h4>
                 <div class="">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Creative AI</a></li>
+                        <li class="breadcrumb-item"><a href="#">Evalia</a></li>
                         <li class="breadcrumb-item active">Profile Settings</li>
                     </ol>
                 </div>                            

@@ -84,13 +84,12 @@
                                                 <a href="{{ route('user.knowledgeBase.edit', $entry['id']) }}" class="btn btn-sm btn-light border" data-bs-toggle="tooltip" title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form action="{{ route('user.knowledgeBase.delete', $entry['id']) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this entry?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light border" data-bs-toggle="tooltip" title="Delete">
-                                                        <i class="fas fa-trash text-danger"></i>
-                                                    </button>
-                                                </form>
+                                                <a href="{{ route('user.knowledgeBase.delete', ['id' => $entry['notebook_id'], 'company_id' => $entry['company_id']]) }}" 
+                                                    class="btn btn-sm btn-icon btn-outline-secondary" 
+                                                    data-bs-toggle="tooltip" title="Delete"
+                                                    onclick="return confirm('Are you sure you want to delete this entry?')">
+                                                    <i class="fas fa-trash text-danger"></i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>

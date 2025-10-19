@@ -230,7 +230,7 @@
                 <h4 class="page-title">Pricing</h4>
                 <div class="">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Creative AI</a>
+                        <li class="breadcrumb-item"><a href="#">Evalia</a>
                         </li><!--end nav-item-->
                         <li class="breadcrumb-item"><a href="#">Pages</a>
                         </li><!--end nav-item-->
@@ -290,7 +290,7 @@
                     <th>
                         <div class="pricing-card position-relative">
                             <div class="plan-title">Free</div>
-                            <div class="plan-subtitle">Exploring Creative AI</div>
+                            <div class="plan-subtitle">Exploring Evalia</div>
                             <div class="plan-price">SAR 0<span class="price-period">/month</span></div>
                             <button class="btn btn-plan btn-secondary">Current Plan</button>
                         </div>
