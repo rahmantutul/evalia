@@ -13,6 +13,10 @@ use Illuminate\Support\Str;
 
 class CompanyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth.api');
+    }
     private function getToken()
     {
         return session('user_access_token');
@@ -61,7 +65,7 @@ class CompanyController extends Controller
         return view('user.company.company_create', compact('groups'));
     }
 
-    public function companyDetails($id)
+    public function companyDetails($id, Request $request)
     {
         $response = Http::withHeaders($this->getAuthHeaders())
             ->get('http://35.153.178.201:8080/get_company_details', [
@@ -77,24 +81,82 @@ class CompanyController extends Controller
 
         $taskList = $response_audio->successful() ? ($response_audio->json()['tasks'] ?? []) : [];
 
+        // Apply filters
+        $filteredTasks = $this->applyFilters($taskList, $request);
+
+        // Sort tasks by created_at in descending order (latest first)
+        usort($filteredTasks, function($a, $b) {
+            $dateA = strtotime($a['created_at'] ?? 0);
+            $dateB = strtotime($b['created_at'] ?? 0);
+            return $dateB - $dateA; // Descending order
+        });
+
         $page = Paginator::resolveCurrentPage(); 
-        $perPage = 10;
+        $perPage = 5;
         $offset = ($page - 1) * $perPage;
 
-        $pagedTasks = array_slice($taskList, $offset, $perPage);
+        $pagedTasks = array_slice($filteredTasks, $offset, $perPage);
 
         $paginatedTasks = new LengthAwarePaginator(
             $pagedTasks,
-            count($taskList),
+            count($filteredTasks),
             $perPage,
             $page,
-            ['path' => Paginator::resolveCurrentPath()] 
+            [
+                'path' => route('user.company.view', ['id' => $id]),
+                'query' => $request->query()
+            ]
         );
         
         return view('user.company.company_details', [
             'company' => $company,
             'taskList' => $paginatedTasks,
+            'company_id' => $id,
         ]);
+    }
+
+    private function applyFilters($tasks, $request)
+    {
+        $status = $request->get('status', 'all');
+        $time_range = $request->get('time_range', 'all');
+
+        return collect($tasks)->filter(function($task) use ($status, $time_range) {
+            // Status filter
+            if ($status !== 'all' && $task['status'] !== $status) {
+                return false;
+            }
+
+            // Time range filter
+            if ($time_range !== 'all') {
+                $taskDate = strtotime($task['created_at']);
+                $now = time();
+                
+                switch ($time_range) {
+                    case 'today':
+                        $startOfDay = strtotime('today');
+                        if ($taskDate < $startOfDay) return false;
+                        break;
+                        
+                    case 'yesterday':
+                        $startOfYesterday = strtotime('yesterday');
+                        $endOfYesterday = strtotime('today') - 1;
+                        if ($taskDate < $startOfYesterday || $taskDate > $endOfYesterday) return false;
+                        break;
+                        
+                    case 'last7':
+                        $sevenDaysAgo = strtotime('-7 days');
+                        if ($taskDate < $sevenDaysAgo) return false;
+                        break;
+                        
+                    case 'last30':
+                        $thirtyDaysAgo = strtotime('-30 days');
+                        if ($taskDate < $thirtyDaysAgo) return false;
+                        break;
+                }
+            }
+
+            return true;
+        })->values()->all();
     }
 
     public function companyDelete($id)

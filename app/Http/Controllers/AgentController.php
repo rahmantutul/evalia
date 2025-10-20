@@ -12,6 +12,7 @@ class AgentController extends Controller
 
     public function __construct(ExternalApiService $apiService)
     {
+        $this->middleware('auth.api');
         $this->apiService = $apiService;
     }
 
@@ -27,7 +28,6 @@ class AgentController extends Controller
         }
 
         $agentsResult = $this->apiService->getAgentsList();
-        
         if (!$agentsResult['success']) {
             return back()->with('error', $agentsResult['error']);
         }
@@ -89,7 +89,7 @@ class AgentController extends Controller
 
         $summary = $summaryResult['data'];
         $agents = $agentsResult['agents'];
-
+        
         return view('user.agents.index', compact('summary', 'agents'));
     }
     public function getPerformanceData($agentId)

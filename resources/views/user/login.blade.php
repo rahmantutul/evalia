@@ -111,12 +111,11 @@
                         Sign in
                     </button>
                 </form>
-
-                <div class="mt-6 text-center text-sm">
+                {{-- <div class="mt-6 text-center text-sm">
                     <p class="text-gray-600">New to Evalia ? 
                         <a href="{{ route('register') }}" class="linkedin-blue font-medium">Join now</a>
                     </p>
-                </div>
+                </div>  --}}
             </div>
         </div>
     </div>

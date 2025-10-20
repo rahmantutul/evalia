@@ -12,6 +12,7 @@ class UserController extends Controller
 
     public function __construct(ExternalApiService $apiService)
     {
+        $this->middleware('auth.api');
         $this->apiService = $apiService;
     }
 

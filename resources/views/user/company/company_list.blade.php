@@ -33,7 +33,8 @@
         }
 
         .table td .btn-group {
-            float: right;
+            display: flex;
+            float: left;
         }
         
         /* Sticky Statistics Bar Styles */
@@ -251,7 +252,7 @@
                         <table class="table datatable mb-0" id="datatable_1">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Company ID</th>
+                                    {{--  <th>Company ID</th>  --}}
                                     <th>Company Name</th>
                                     <th>Industry</th>
                                     <th>Agents</th>
@@ -273,7 +274,7 @@
                                         $totalAgents += $agents;
                                     @endphp
                                     <tr>
-                                        <td>{{ $company['id'] }}</td>
+                                        {{--  <td>{{ $company['id'] }}</td>  --}}
                                         <td>{{ $company['name'] }}</td>
                                         <td>{{ $industry }}</td>
                                         <td>{{ $agents }}</td>

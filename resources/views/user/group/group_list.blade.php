@@ -46,7 +46,7 @@
         }
 
         .table td .btn-group {
-            float: right;
+            float: left;
         }
     </style>
      <style>
@@ -141,7 +141,7 @@
                        <table class="table mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Group ID</th>
+                                {{--  <th>Group ID</th>  --}}
                                 <th>Group Name</th>
                                 <th>Group description</th>
                                 <th>Status</th>
@@ -152,7 +152,7 @@
                             @if(count($paginatedGroups) > 0)
                                 @foreach($paginatedGroups as $group)
                                     <tr>
-                                        <td>{{ $group['group_id'] }}</td>
+                                        {{--  <td>{{ $group['group_id'] }}</td>  --}}
                                         <td>{{ $group['group_name'] }}</td> 
                                         <td>{{ $group['description'] }}</td> 
                                         <td>

@@ -17,6 +17,7 @@ class RoleController extends Controller
 
     public function __construct(ExternalApiService $apiService)
     {
+        $this->middleware('auth.api');
         $this->apiService = $apiService;
         
         // Make sure this is correct

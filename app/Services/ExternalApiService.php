@@ -27,42 +27,66 @@ class ExternalApiService
     /**
      * Login user
      */
-    public function login($email, $password)
-    {
-        
-        try {
+public function login($email, $password)
+{
+    try {
+        $response = Http::timeout($this->timeout)
+            ->post($this->baseUrl . '/auth/token', [
+                'username' => $email,
+                'password' => $password
+            ]);
+
+        if ($response->successful()) {
+            $token = $response->json('access_token');
             
-            $response = Http::timeout($this->timeout)
-                ->post($this->baseUrl . '/auth/token', [
-                    'username' => $email,
-                    'password' => $password
-                ]);
-
-            if ($response->successful()) {
-                $token = $response->json('access_token');
-                
-                session(['user_access_token' => $token]);
-                
-                return [
-                    'success' => true,
-                    'access_token' => $token,
-                    'token_type' => $response->json('token_type')
-                ];
-            }
-
-            $error = $this->parseError($response);
+            session(['user_access_token' => $token]);
+            
             return [
-                'success' => false,
-                'error' => $error
-            ];
-
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
+                'success' => true,
+                'access_token' => $token,
+                'token_type' => $response->json('token_type')
             ];
         }
+
+        // Handle 401 error specifically
+        if ($response->status() === 401) {
+            $errorData = $response->json();
+            return [
+                'success' => false,
+                'error' => $errorData['detail'] ?? 'Invalid username or password'
+            ];
+        }
+
+        // Handle other client errors (4xx)
+        if ($response->clientError()) {
+            $errorData = $response->json();
+            return [
+                'success' => false,
+                'error' => $errorData['detail'] ?? $errorData['message'] ?? 'Request failed'
+            ];
+        }
+
+        // Handle server errors (5xx)
+        if ($response->serverError()) {
+            return [
+                'success' => false,
+                'error' => 'Server error, please try again later'
+            ];
+        }
+
+        // Handle other errors
+        return [
+            'success' => false,
+            'error' => 'Login failed'
+        ];
+
+    } catch (\Exception $e) {
+        return [
+            'success' => false,
+            'error' => 'Service unavailable: ' . $e->getMessage()
+        ];
     }
+}
 
     /**
      * Get current user profile

@@ -39,17 +39,20 @@ class ApiAuthController extends Controller
         }
 
         $result = $this->apiService->login($request->username, $request->password);
-    
+
         if ($result['success']) {
             $userResult = $this->apiService->getCurrentUser();
         
             if ($userResult['success']) {
                 session(['user' => $userResult['user']]);
                 return redirect('/user-dashboard')->with('success', 'Login successful!');
+            } else {
+                return back()->withErrors(['username' => 'Failed to retrieve user information.'])->withInput();
             }
         }
 
-        return back()->withErrors(['username' => $result['error'] ?? 'Login failed'])->withInput();
+        // Use the detailed error message from API
+        return back()->withErrors(['username' => $result['error']])->withInput();
     }
 
     /**

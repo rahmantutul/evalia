@@ -30,7 +30,7 @@
                         </div>
                         <div class="dropdown-divider mt-0"></div>
                         <small class="text-muted px-2 pb-1 d-block">Account</small>
-                        <a class="dropdown-item" href="{{ route('user.profile') }}">
+                        <a class="dropdown-item" href="{{ route('users.edit', session('user.id')) }}">
                             <i class="las la-cog fs-18 me-1 align-text-bottom"></i>Account Settings
                         </a>
                         <a class="dropdown-item text-danger" href="#"

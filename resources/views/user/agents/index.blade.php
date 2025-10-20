@@ -1,636 +1,526 @@
 @extends('user.layouts.app')
 @push('styles')
 <style>
-    /* Expandable row styles */
-    .expandable-row {
-        cursor: pointer;
-        transition: all 0.2s ease;
+    /* Compact Design System */
+    :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8fafc;
+        --border-color: #e5e7eb;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --blue: #3b82f6;
+        --green: #10b981;
+        --amber: #f59e0b;
     }
 
-    .expandable-row:hover {
-        background-color: #fafbfc !important;
-    }
-
-    .expandable-row.expanded {
-        background-color: #f8fafc !important;
-    }
-
-    .expand-icon {
-        transition: transform 0.2s ease;
-        font-size: 11px;
-        color: #6b7280;
-    }
-
-    .expandable-row.expanded .expand-icon {
-        transform: rotate(90deg);
-        color: #3b82f6;
-    }
-
-    .performance-details {
-        display: none;
-        background: #fafbfc;
-    }
-
-    .expandable-row.expanded + .performance-details {
-        display: table-row;
-        animation: fadeIn 0.2s ease;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    .performance-metrics {
-        padding: 20px;
-    }
-
-    .metric-card {
-        background: white;
+    /* Stats Bar - Ultra Compact */
+    .stats-bar {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
         border-radius: 8px;
         padding: 16px;
-        border: 1px solid #f1f5f9;
-        height: 100%;
+        margin-bottom: 20px;
     }
 
-    .metric-value {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 4px;
-        color: #1f2937;
-    }
-
-    .metric-label {
-        font-size: 0.8rem;
-        color: #6b7280;
-        font-weight: 500;
-    }
-
-    .progress {
-        height: 6px;
-        border-radius: 3px;
-        background-color: #f3f4f6;
-        margin-top: 8px;
-    }
-
-    .progress-bar {
-        border-radius: 3px;
-    }
-
-    /* Compact Statistics */
     .stat-item {
-        padding: 12px 0;
-        border-right: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-right: 1px solid var(--border-color);
     }
 
-    .stat-item:last-child {
-        border-right: none;
-    }
+    .stat-item:last-child { border-right: none; }
 
     .stat-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
-        background: #f8fafc;
+        font-size: 13px;
+        background: var(--bg-secondary);
+        flex-shrink: 0;
     }
 
     .stat-value {
-        font-size: 1.25rem;
+        font-size: 1.1rem;
         font-weight: 600;
-        color: #1f2937;
+        color: var(--text-primary);
         line-height: 1.2;
     }
 
     .stat-label {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    /* Lightweight Table */
+    .table-compact {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table-compact thead th {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-weight: 600;
         font-size: 0.75rem;
-        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table-compact tbody td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .table-compact tbody tr:last-child td { border-bottom: none; }
+
+    /* Expandable Rows - Minimal */
+    .expand-row {
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+
+    .expand-row:hover { background: var(--bg-secondary); }
+    .expand-row.active { background: #eff6ff; }
+
+    .expand-icon {
+        transition: transform 0.2s;
+        font-size: 10px;
+        color: var(--text-secondary);
+    }
+
+    .expand-row.active .expand-icon {
+        transform: rotate(90deg);
+        color: var(--blue);
+    }
+
+    .details-row {
+        display: none;
+        background: var(--bg-secondary);
+    }
+
+    .expand-row.active + .details-row {
+        display: table-row;
+    }
+
+    /* Performance Metrics - Streamlined */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .metric-box {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 12px;
+    }
+
+    .metric-box-value {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .metric-box-label {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .progress-slim {
+        height: 4px;
+        border-radius: 2px;
+        background: #f3f4f6;
+        margin-top: 6px;
+        overflow: hidden;
+    }
+
+    .progress-slim-bar {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.3s;
+    }
+
+    /* History Table - Minimal */
+    .history-table {
+        width: 100%;
+        font-size: 0.8rem;
+        margin-top: 16px;
+    }
+
+    .history-table th {
+        background: var(--bg-primary);
+        padding: 8px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.3px;
+    }
+
+    .history-table td {
+        padding: 8px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Badges - Minimal */
+    .badge-sm {
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
         font-weight: 500;
     }
 
-    /* Professional table styling */
-    .table-professional {
-        border: 1px solid #f1f5f9;
-    }
-
-    .table-professional thead th {
-        background: #f8fafc;
-        color: #374151;
-        border-bottom: 1px solid #e5e7eb;
-        padding: 12px 16px;
+    /* Status Badges */
+    .status-badge {
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
         font-weight: 600;
-        font-size: 0.8rem;
-        text-transform: none;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
     }
 
-    .table-professional tbody td {
-        padding: 14px 16px;
-        border-bottom: 1px solid #f1f5f9;
-        vertical-align: middle;
-        color: #4b5563;
+    .status-active {
+        background: #d1fae5;
+        color: #065f46;
     }
 
-    .table-professional tbody tr:last-child td {
-        border-bottom: none;
+    .status-inactive {
+        background: #fee2e2;
+        color: #991b1b;
     }
 
-    .btn-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 6px;
-        color: #6b7280;
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        transition: all 0.15s ease;
-        text-decoration: none;
-        font-size: 13px;
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
     }
 
-    .btn-icon:hover {
-        background: #3b82f6;
-        color: white;
-        border-color: #3b82f6;
-        transform: none;
-        box-shadow: 0 1px 2px rgba(59, 130, 246, 0.2);
-    }
-
-    /* Performance table */
-    .performance-table {
-        background: white;
-        border-radius: 8px;
-        border: 1px solid #f1f5f9;
-    }
-
-    .performance-table th {
-        background: #f8fafc;
-        font-weight: 600;
-        color: #374151;
-        padding: 10px 12px;
-        font-size: 0.8rem;
-    }
-
-    .performance-table td {
-        padding: 10px 12px;
-        border-bottom: 1px solid #f1f5f9;
-        font-size: 0.85rem;
-    }
-
-    .performance-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    /* Loading animation */
-    .loading-spinner {
+    /* Loading State */
+    .loader {
         border: 2px solid #f3f4f6;
-        border-top: 2px solid #3b82f6;
+        border-top-color: var(--blue);
         border-radius: 50%;
-        width: 24px;
-        height: 24px;
-        animation: spin 1s linear infinite;
-        margin: 0 auto 8px;
+        width: 20px;
+        height: 20px;
+        animation: spin 0.8s linear infinite;
+        margin: 16px auto;
     }
 
     @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        to { transform: rotate(360deg); }
     }
 
-    /* Badge styles */
-    .badge-light {
-        background: #f8fafc;
-        color: #4b5563;
-        border: 1px solid #e5e7eb;
-        font-weight: 500;
-        font-size: 0.75rem;
-    }
-
+    /* Responsive */
     @media (max-width: 768px) {
-        .stat-item {
+        .stats-bar { padding: 12px; }
+        .stat-item { 
             border-right: none;
-            border-bottom: 1px solid #f1f5f9;
-            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 8px;
         }
-        
-        .stat-item:last-child {
-            border-bottom: none;
-        }
-        
-        .performance-metrics {
-            padding: 16px;
+        .stat-item:last-child { border-bottom: none; }
+        .metrics-grid { 
+            grid-template-columns: 1fr;
+            padding: 12px;
         }
     }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid">
-    <!-- Compact Statistics Bar -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 bg-white">
-                <div class="card-body py-3">
-                    <div class="row g-0">
-                        <!-- Total Agents -->
-                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 stat-item">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-icon text-blue-600 me-3">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="stat-value" id="totalAgents">{{ $summary['total_agents'] ?? 0 }}</div>
-                                    <div class="stat-label">Total Agents</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Active Agents -->
-                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 stat-item">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-icon text-green-600 me-3">
-                                    <i class="fas fa-user-check"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="stat-value" id="activeAgents">{{ $summary['active_agents'] ?? 0 }}</div>
-                                    <div class="stat-label">Active</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Average Rating -->
-                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 stat-item">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-icon text-amber-500 me-3">
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="stat-value" id="averageRating">{{ number_format($summary['avg_rating'] ?? 0, 1) }}</div>
-                                    <div class="stat-label">Avg Rating</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Total Calls -->
-                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 stat-item">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-icon text-cyan-600 me-3">
-                                    <i class="fas fa-phone-alt"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="stat-value" id="totalCalls">{{ $summary['total_calls'] ?? 0 }}</div>
-                                    <div class="stat-label">Total Calls</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Success Rate -->
-                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 stat-item">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-icon text-emerald-600 me-3">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="stat-value" id="successRate">{{ number_format($summary['success_rate'] ?? 0, 1) }}%</div>
-                                    <div class="stat-label">Success Rate</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Response Time -->
-                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 stat-item">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-icon text-slate-600 me-3">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="stat-value" id="avgResponseTime">{{ number_format($summary['avg_response_time'] ?? 0, 1) }}s</div>
-                                    <div class="stat-label">Avg Response</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<div class="container-fluid px-3">
+    <!-- Compact Stats -->
+    <div class="stats-bar">
+        <div class="row g-0">
+            <div class="col-xl-2 col-lg-4 col-6 stat-item">
+                <div class="stat-icon text-primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="totalAgents">{{ $summary['total_agents'] ?? 0 }}</div>
+                    <div class="stat-label">Agents</div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-6 stat-item">
+                <div class="stat-icon text-success">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="activeAgents">{{ $summary['active_agents'] ?? 0 }}</div>
+                    <div class="stat-label">Active</div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-6 stat-item">
+                <div class="stat-icon text-warning">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="avgRating">{{ number_format($summary['avg_rating'] ?? 0, 1) }}</div>
+                    <div class="stat-label">Rating</div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-6 stat-item">
+                <div class="stat-icon text-info">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="totalCalls">{{ $summary['total_calls'] ?? 0 }}</div>
+                    <div class="stat-label">Calls</div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-6 stat-item">
+                <div class="stat-icon text-success">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="successRate">{{ number_format($summary['success_rate'] ?? 0, 1) }}%</div>
+                    <div class="stat-label">Success</div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-6 stat-item">
+                <div class="stat-icon text-secondary">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="avgTime">{{ number_format($summary['avg_response_time'] ?? 0, 1) }}s</div>
+                    <div class="stat-label">Response</div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Agent List -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card border-0 bg-white">
-                <div class="card-header bg-transparent border-0 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0 text-slate-800 fw-semibold">
-                            Agent List
-                        </h5>
-                        <a href="{{ route('user.agents.dashboard') }}" class="btn btn-light btn-sm border">
-                            <i class="fas fa-chart-bar me-1"></i>Dashboard
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body pt-0">
-                    <div class="table-responsive">
-                        @if(session('success'))
-                            <div class="alert alert-success alert-dismissible fade show border-0 mb-3" role="alert">
-                                <i class="fas fa-check-circle me-2"></i>
-                                {{ session('success') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        @endif 
+    <div class="table-compact">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-semibold">Agent Performance</h6>
+            <a href="{{ route('user.agents.dashboard') }}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-chart-bar me-1"></i>Dashboard
+            </a>
+        </div>
 
-                        @if(session('error'))
-                            <div class="alert alert-danger alert-dismissible fade show border-0 mb-3" role="alert">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                {{ session('error') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        @endif
-
-                        <table class="table table-professional mb-0" id="agentsTable">
-                            <thead>
-                                <tr>
-                                    <th width="40"></th>
-                                    <th>Agent ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Company</th>
-                                    <th width="100" class="text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($agents as $agent)
-                                <!-- Main Agent Row -->
-                                <tr class="expandable-row" data-agent-id="{{ $agent['id'] }}">
-                                    <td>
-                                        <i class="fas fa-chevron-right expand-icon"></i>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-light">
-                                            {{ $agent['agent_id_display'] }}
-                                        </span>
-                                    </td>
-                                    <td class="fw-medium text-slate-800">{{ $agent['name'] }}</td>
-                                    <td class="text-slate-600">{{ $agent['email'] }}</td>
-                                    <td class="text-slate-600">
-                                        {{ $agent['phone'] ?? 'N/A' }}
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-light">
-                                            {{ $agent['company'] }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-1">
-                                            <a href="{{ route('user.agents.show', $agent['id']) }}" class="btn btn-icon" title="View Details">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('user.agents.performance', $agent['id']) }}" class="btn btn-icon" title="Performance">
-                                                <i class="fas fa-chart-line"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- Performance Details Row -->
-                                <tr class="performance-details">
-                                    <td colspan="7">
-                                        <div class="performance-metrics" id="performance-{{ $agent['id'] }}">
-                                            <div class="text-center py-4">
-                                                <div class="loading-spinner"></div>
-                                                <p class="mt-2 text-slate-500 mb-0 text-sm">Loading performance data...</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="7" class="text-center py-5">
-                                        <div class="text-slate-500">
-                                            <i class="fas fa-users fa-2x mb-3 opacity-50"></i>
-                                            <p class="mb-0">No agents found</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>                                             
-                    </div>
-                </div>
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show m-3 mb-0" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-        </div>       
+        @endif
+
+        <table class="table table-compact mb-0">
+            <thead>
+                <tr>
+                    <th width="30"></th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Company</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($agents as $agent)
+                <tr class="expand-row" data-id="{{ $agent['id'] }}">
+                    <td><i class="fas fa-chevron-right expand-icon"></i></td>
+                    <td><span class="badge-sm">{{ $agent['agent_id_display'] }}</span></td>
+                    <td class="fw-medium text-dark">{{ $agent['name'] }}</td>
+                    <td>{{ $agent['email'] }}</td>
+                    <td>{{ $agent['phone'] ?? 'N/A' }}</td>
+                    <td>
+                        @php
+                            $status = $agent['status'] ?? 'active';
+                            $statusClass = $status === 'active' ? 'status-active' : ($status === 'pending' ? 'status-pending' : 'status-inactive');
+                        @endphp
+                        <span class="status-badge {{ $statusClass }}">{{ ucfirst($status) }}</span>
+                    </td>
+                    <td><span class="badge-sm">{{ $agent['company'] }}</span></td>
+                </tr>
+                
+                <tr class="details-row">
+                    <td colspan="7">
+                        <div id="perf-{{ $agent['id'] }}">
+                            <div class="loader"></div>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        <i class="fas fa-inbox fa-2x mb-2 opacity-25"></i>
+                        <p class="mb-0">No agents found</p>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Simple counter animation
-        function animateCounter(elementId, finalValue, suffix = '', isDecimal = false) {
-            const element = document.getElementById(elementId);
-            if (!element) return;
-            
-            let current = 0;
-            const increment = finalValue / 30;
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= finalValue) {
-                    current = finalValue;
-                    clearInterval(timer);
-                }
-                
-                if (isDecimal) {
-                    element.textContent = current.toFixed(1) + suffix;
-                } else if (suffix === '%') {
-                    element.textContent = Math.floor(current) + suffix;
-                } else {
-                    element.textContent = Math.floor(current);
-                }
-            }, 40);
-        }
-
-        // Get actual values from the server
-        const stats = {
-            totalAgents: {{ $summary['total_agents'] ?? 0 }},
-            activeAgents: {{ $summary['active_agents'] ?? 0 }},
-            averageRating: {{ $summary['avg_rating'] ?? 0 }},
-            totalCalls: {{ $summary['total_calls'] ?? 0 }},
-            successRate: {{ $summary['success_rate'] ?? 0 }},
-            avgResponseTime: {{ $summary['avg_response_time'] ?? 0 }}
-        };
-
-        // Start animations
-        animateCounter('totalAgents', stats.totalAgents);
-        animateCounter('activeAgents', stats.activeAgents);
-        animateCounter('averageRating', parseFloat(stats.averageRating), '', true);
-        animateCounter('totalCalls', stats.totalCalls);
-        animateCounter('successRate', stats.successRate, '%');
-        animateCounter('avgResponseTime', stats.avgResponseTime, 's');
-
-        // Expandable row functionality
-        const expandableRows = document.querySelectorAll('.expandable-row');
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate counters
+    function animate(id, val, suffix = '', decimals = 0) {
+        const el = document.getElementById(id);
+        if (!el) return;
         
-        expandableRows.forEach(row => {
-            row.addEventListener('click', function(e) {
-                if (e.target.closest('.btn-icon')) {
-                    return;
-                }
+        let curr = 0;
+        const step = val / 20;
+        const timer = setInterval(() => {
+            curr += step;
+            if (curr >= val) {
+                curr = val;
+                clearInterval(timer);
+            }
+            el.textContent = decimals ? curr.toFixed(decimals) + suffix : Math.floor(curr) + suffix;
+        }, 50);
+    }
 
-                const agentId = this.getAttribute('data-agent-id');
-                const isExpanded = this.classList.contains('expanded');
-                
-                // Close all other expanded rows
-                document.querySelectorAll('.expandable-row.expanded').forEach(expandedRow => {
-                    if (expandedRow !== this) {
-                        expandedRow.classList.remove('expanded');
-                    }
-                });
-                
-                // Toggle current row
-                this.classList.toggle('expanded');
-                
-                // Load performance data if expanding
-                if (!isExpanded) {
-                    loadPerformanceData(agentId);
-                }
-            });
+    // Init animations
+    animate('totalAgents', {{ $summary['total_agents'] ?? 0 }});
+    animate('activeAgents', {{ $summary['active_agents'] ?? 0 }});
+    animate('avgRating', {{ $summary['avg_rating'] ?? 0 }}, '', 1);
+    animate('totalCalls', {{ $summary['total_calls'] ?? 0 }});
+    animate('successRate', {{ $summary['success_rate'] ?? 0 }}, '%', 1);
+    animate('avgTime', {{ $summary['avg_response_time'] ?? 0 }}, 's', 1);
+
+    // Expandable rows
+    document.querySelectorAll('.expand-row').forEach(row => {
+        row.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const wasActive = this.classList.contains('active');
+            
+            // Close others
+            document.querySelectorAll('.expand-row.active').forEach(r => r.classList.remove('active'));
+            
+            // Toggle current
+            if (!wasActive) {
+                this.classList.add('active');
+                loadPerformance(id);
+            }
         });
-
-        // Load performance data via AJAX
-        function loadPerformanceData(agentId) {
-            const performanceContainer = document.getElementById(`performance-${agentId}`);
-            
-            const url = "{{ route('agents.performance.data', ['agentId' => ':agentId']) }}".replace(':agentId', agentId);
-            
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        performanceContainer.innerHTML = createPerformanceHTML(data.performance);
-                    } else {
-                        performanceContainer.innerHTML = `
-                            <div class="text-center py-4 text-slate-500">
-                                <i class="fas fa-exclamation-triangle fa-lg mb-3 opacity-50"></i>
-                                <p class="mb-0 text-sm">Failed to load performance data</p>
-                            </div>
-                        `;
-                    }
-                })
-                .catch(error => {
-                    performanceContainer.innerHTML = `
-                        <div class="text-center py-4 text-slate-500">
-                            <i class="fas fa-exclamation-triangle fa-lg mb-3 opacity-50"></i>
-                            <p class="mb-0 text-sm">Error loading data</p>
-                        </div>
-                    `;
-                });
-        }
-
-        // Create performance HTML
-        function createPerformanceHTML(performance) {
-            const current = performance.current_scores || {};
-            const history = performance.performance_history || [];
-            
-            return `
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <h6 class="mb-3 text-slate-800 fw-semibold text-sm">Current Performance</h6>
-                    </div>
-                </div>
-                <div class="row g-3 mb-4">
-                    <div class="col-xl-3 col-lg-6">
-                        <div class="metric-card">
-                            <div class="metric-value text-blue-600">${current.overall_score ? current.overall_score.toFixed(1) : '0.0'}</div>
-                            <div class="metric-label">Overall Score</div>
-                            <div class="progress">
-                                <div class="progress-bar bg-blue-500" style="width: ${current.overall_score || 0}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-lg-6">
-                        <div class="metric-card">
-                            <div class="metric-value text-green-600">${current.answer_accuracy || 0}%</div>
-                            <div class="metric-label">Answer Accuracy</div>
-                            <div class="progress">
-                                <div class="progress-bar bg-green-500" style="width: ${current.answer_accuracy || 0}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-lg-6">
-                        <div class="metric-card">
-                            <div class="metric-value text-cyan-600">${current.response_speed || 0}%</div>
-                            <div class="metric-label">Response Speed</div>
-                            <div class="progress">
-                                <div class="progress-bar bg-cyan-500" style="width: ${current.response_speed || 0}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-lg-6">
-                        <div class="metric-card">
-                            <div class="metric-value text-amber-500">${current.customer_satisfaction || 0}%</div>
-                            <div class="metric-label">Customer Satisfaction</div>
-                            <div class="progress">
-                                <div class="progress-bar bg-amber-500" style="width: ${current.customer_satisfaction || 0}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                ${history.length > 0 ? `
-                <div class="row">
-                    <div class="col-12">
-                        <h6 class="mb-3 text-slate-800 fw-semibold text-sm">Recent Performance</h6>
-                        <div class="performance-table">
-                            <table class="table table-sm mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Period</th>
-                                        <th>Overall</th>
-                                        <th>Accuracy</th>
-                                        <th>Speed</th>
-                                        <th>Satisfaction</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${history.slice(0, 3).map(item => `
-                                        <tr>
-                                            <td class="fw-medium text-slate-700">${item.period || 'N/A'}</td>
-                                            <td><span class="badge badge-light">${item.overall_score ? item.overall_score.toFixed(1) : '0.0'}</span></td>
-                                            <td class="text-slate-600">${item.answer_accuracy || 0}%</td>
-                                            <td class="text-slate-600">${item.response_speed || 0}%</td>
-                                            <td class="text-slate-600">${item.customer_satisfaction || 0}%</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                ` : '<div class="text-center text-slate-500 text-sm py-3">No performance history available</div>'}
-            `;
-        }
-
-        // Initialize DataTable with minimal configuration
-        if ($.fn.DataTable) {
-            $('#agentsTable').DataTable({
-                pageLength: 10,
-                responsive: true,
-                order: [[1, 'asc']],
-                language: {
-                    search: "",
-                    searchPlaceholder: "Search agents...",
-                    lengthMenu: "_MENU_",
-                    info: "Showing _START_ to _END_ of _TOTAL_ agents",
-                    infoEmpty: "No agents found",
-                    infoFiltered: "(filtered from _MAX_ total agents)"
-                }
-            });
-        }
     });
+
+    // Load performance
+    function loadPerformance(id) {
+        const container = document.getElementById(`perf-${id}`);
+        const url = "{{ route('agents.performance.data', ['agentId' => ':id']) }}".replace(':id', id);
+        
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                container.innerHTML = data.success ? buildHTML(data.performance) : 
+                    '<p class="text-center text-muted py-3 mb-0">Failed to load data</p>';
+            })
+            .catch(() => {
+                container.innerHTML = '<p class="text-center text-muted py-3 mb-0">Error loading data</p>';
+            });
+    }
+
+    // Build performance HTML
+    function buildHTML(perf) {
+        const curr = perf.current_scores || {};
+        const hist = perf.performance_history || [];
+        
+        return `
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="metric-box-value text-primary">${(curr.overall_score || 0).toFixed(1)}</div>
+                    <div class="metric-box-label">Overall Score</div>
+                    <div class="progress-slim">
+                        <div class="progress-slim-bar bg-primary" style="width:${curr.overall_score || 0}%"></div>
+                    </div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-box-value text-success">${curr.answer_accuracy || 0}%</div>
+                    <div class="metric-box-label">Accuracy</div>
+                    <div class="progress-slim">
+                        <div class="progress-slim-bar bg-success" style="width:${curr.answer_accuracy || 0}%"></div>
+                    </div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-box-value text-info">${curr.response_speed || 0}%</div>
+                    <div class="metric-box-label">Speed</div>
+                    <div class="progress-slim">
+                        <div class="progress-slim-bar bg-info" style="width:${curr.response_speed || 0}%"></div>
+                    </div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-box-value text-warning">${curr.customer_satisfaction || 0}%</div>
+                    <div class="metric-box-label">Satisfaction</div>
+                    <div class="progress-slim">
+                        <div class="progress-slim-bar bg-warning" style="width:${curr.customer_satisfaction || 0}%"></div>
+                    </div>
+                </div>
+            </div>
+            ${hist.length ? `
+            <div class="px-3 pb-3">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Overall</th>
+                            <th>Accuracy</th>
+                            <th>Speed</th>
+                            <th>Satisfaction</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${hist.slice(0, 3).map(h => `
+                            <tr>
+                                <td class="fw-medium">${h.period || 'N/A'}</td>
+                                <td>${(h.overall_score || 0).toFixed(1)}</td>
+                                <td>${h.answer_accuracy || 0}%</td>
+                                <td>${h.response_speed || 0}%</td>
+                                <td>${h.customer_satisfaction || 0}%</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            ` : ''}
+        `;
+    }
+
+    // DataTable (if available)
+    if ($.fn.DataTable) {
+        $('.table-compact').DataTable({
+            pageLength: 10,
+            responsive: true,
+            order: [[1, 'asc']],
+            language: {
+                search: "",
+                searchPlaceholder: "Search...",
+                lengthMenu: "_MENU_",
+                info: "_START_-_END_ of _TOTAL_"
+            }
+        });
+    }
+});
 </script>
 @endpush

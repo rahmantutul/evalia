@@ -178,14 +178,14 @@
                                         <select name="group_id" id="" class="form-control" required>
                                             <option value="">--Select a group--</option>
                                             @foreach ($groups as $item)
-                                                <option selected value="{{ $item['group_id'] }}">{{ $item['group_name'] }}</option>
+                                                <option {{ ($item['group_id'] == $company['group_id'] ) ? 'selected' : '' }} value="{{ $item['group_id'] }}">{{ $item['group_name'] }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="company_name" class="form-label">Company Name:</label>
                                         <input type="text" class="form-control" id="company_name" name="company_name" 
-                                            value="Test Company" required>
+                                            value="{{ $company['company_name'] }}" required>
                                         <div class="invalid-feedback">Please provide a company name.</div>
                                     </div>
                                     <div class="col-md-4">

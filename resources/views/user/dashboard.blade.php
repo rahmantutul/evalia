@@ -264,12 +264,12 @@
         
         companyPerformance: function(sortBy) {
             const companies = [
-                { name: "TechCorp Inc.",id: "hassan-test-2",  score: 94.2, trend: 3.2, calls: 187 },
-                { name: "Global Solutions",id: "hassan-test-1",  score: 89.5, trend: 1.1, calls: 156 },
-                { name: "Innovate LLC", id: "IMILE",  score: 87.8, trend: 0.0, calls: 132 },
-                { name: "DataSystems",  id: "NCC", score: 76.4, trend: -2.4, calls: 98 },
-                { name: "FutureTech", id: "20250704062737", score: 91.2, trend: 2.1, calls: 143 },
-                { name: "CloudMasters", id: "IMILE", score: 83.7, trend: -1.2, calls: 121 }
+                { name: "TechCorp Inc.",id: "hassan",  score: 94.2, trend: 3.2, calls: 187 },
+                { name: "Global Solutions",id: "hassan",  score: 89.5, trend: 1.1, calls: 156 },
+                { name: "Innovate LLC", id: "hassan",  score: 87.8, trend: 0.0, calls: 132 },
+                { name: "DataSystems",  id: "hassan", score: 76.4, trend: -2.4, calls: 98 },
+                { name: "FutureTech", id: "hassan", score: 91.2, trend: 2.1, calls: 143 },
+                { name: "CloudMasters", id: "hassan", score: 83.7, trend: -1.2, calls: 121 }
             ];
             
             // Sort based on selection
@@ -651,7 +651,7 @@
                     <div class="d-flex align-items-center">
                         <img src="${agent.avatar}" class="avatar-sm me-3">
                         <div class="flex-grow-1">
-                            <h6 class="mb-0"><a style="color: #000;" href="{{ route('user.agent.details') }}"> ${agent.name}</a> ${isTopPerformer ? '<span class="top-performer-badge ms-2">Top Performer</span>' : ''} ${isLowPerformer ? '<span class="needs-improvement-badge ms-2">Needs Coaching</span>' : ''}</h6>
+                            <h6 class="mb-0"><a style="color: #000;" href="{{ route('user.agents.index') }}"> ${agent.name}</a> ${isTopPerformer ? '<span class="top-performer-badge ms-2">Top Performer</span>' : ''} ${isLowPerformer ? '<span class="needs-improvement-badge ms-2">Needs Coaching</span>' : ''}</h6>
                             <small class="text-muted">${agent.company} • ${agent.calls} calls</small>
                         </div>
                         <div class="text-end">

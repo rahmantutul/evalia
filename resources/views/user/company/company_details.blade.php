@@ -162,37 +162,162 @@
         <!-- Performance Tables -->
         <div class="row g-4">
             <div class="col-md-6">
-                <div class="dashboard-card h-100 shadow-soft">
-                    <div class="card-header bg-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="fw-bold mb-0">Company Performance</h6>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="companySortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    By Score
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="companySortDropdown">
-                                    <li><a class="dropdown-item company-sort active" href="#" data-sort="score">By Score</a></li>
-                                    <li><a class="dropdown-item company-sort" href="#" data-sort="volume">By Call Volume</a></li>
-                                    <li><a class="dropdown-item company-sort" href="#" data-sort="improvement">By Improvement</a></li>
-                                </ul>
+                <div class="card border-0 shadow-sm overflow-hidden">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <h5 class="mb-0 fw-600 d-flex align-items-center">
+                                <i class="bi bi-clock-history text-primary me-2"></i>
+                                Recent Analyses
+                            </h5>
+                            
+                            <!-- Filter Controls -->
+                            <div class="d-flex flex-wrap gap-2">
+                                <!-- Status Filter -->
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="statusFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-filter me-1"></i>
+                                        Status: {{ request('status', 'all') === 'all' ? 'All' : ucfirst(request('status')) }}
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="statusFilterDropdown">
+                                        <li><a class="dropdown-item status-filter {{ request('status', 'all') === 'all' ? 'active' : '' }}" 
+                                            href="{{ route('user.company.view', ['id' => $company_id, 'status' => 'all', 'time_range' => request('time_range', 'all')]) }}" 
+                                            data-status="all">All Status</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item status-filter {{ request('status') === 'completed' ? 'active' : '' }}" 
+                                            href="{{ route('user.company.view', ['id' => $company_id, 'status' => 'completed', 'time_range' => request('time_range', 'all')]) }}" 
+                                            data-status="completed">Completed</a></li>
+                                        <li><a class="dropdown-item status-filter {{ request('status') === 'processing' ? 'active' : '' }}" 
+                                            href="{{ route('user.company.view', ['id' => $company_id, 'status' => 'processing', 'time_range' => request('time_range', 'all')]) }}" 
+                                            data-status="processing">Processing</a></li>
+                                        <li><a class="dropdown-item status-filter {{ request('status') === 'failed' ? 'active' : '' }}" 
+                                            href="{{ route('user.company.view', ['id' => $company_id, 'status' => 'failed', 'time_range' => request('time_range', 'all')]) }}" 
+                                            data-status="failed">Failed</a></li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- Time Filter -->
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="timeFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        Time: 
+                                        @switch(request('time_range', 'all'))
+                                            @case('today') Today @break
+                                            @case('yesterday') Yesterday @break
+                                            @case('last7') Last 7 Days @break
+                                            @case('last30') Last 30 Days @break
+                                            @default All Time
+                                        @endswitch
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="timeFilterDropdown">
+                                        <li><a class="dropdown-item time-filter {{ request('time_range', 'all') === 'all' ? 'active' : '' }}" 
+                                            href="{{ route('user.company.view', ['id' => $company_id, 'status' => request('status', 'all'), 'time_range' => 'all']) }}" 
+                                            data-time="all">All Time</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item time-filter {{ request('time_range') === 'today' ? 'active' : '' }}" 
+                                            href="{{ route('user.company.view', ['id' => $company_id, 'status' => request('status', 'all'), 'time_range' => 'today']) }}" 
+                                            data-time="today">Today</a></li>
+                                        <li><a class="dropdown-item time-filter {{ request('time_range') === 'yesterday' ? 'active' : '' }}" 
+                                            href="{{ route('user.company.view', ['id' => $company_id, 'status' => request('status', 'all'), 'time_range' => 'yesterday']) }}" 
+                                            data-time="yesterday">Yesterday</a></li>
+                                        <li><a class="dropdown-item time-filter {{ request('time_range') === 'last7' ? 'active' : '' }}" 
+                                            href="{{ route('user.company.view', ['id' => $company_id, 'status' => request('status', 'all'), 'time_range' => 'last7']) }}" 
+                                            data-time="last7">Last 7 Days</a></li>
+                                        <li><a class="dropdown-item time-filter {{ request('time_range') === 'last30' ? 'active' : '' }}" 
+                                            href="{{ route('user.company.view', ['id' => $company_id, 'status' => request('status', 'all'), 'time_range' => 'last30']) }}" 
+                                            data-time="last30">Last 30 Days</a></li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- Clear Filters -->
+                                @if(request('status') || request('time_range'))
+                                <a href="{{ route('user.company.view', ['id' => $company_id]) }}" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-times me-1"></i>
+                                    Clear Filters
+                                </a>
+                                @endif
                             </div>
                         </div>
                     </div>
+                    
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-sm table-hover mb-0" id="companyTable">
-                                <thead class="bg-light">
+                            <table class="table mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <th class="ps-4">Company</th>
-                                        <th>Score</th>
-                                        <th>Trend</th>
-                                        <th class="pe-4">Calls</th>
+                                        <th>ID</th>
+                                        <th>Status</th>
+                                        <th>Created At</th>
+                                        <th class="text-end pe-4">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Will be populated dynamically -->
+                                    @foreach ($taskList as $task)
+                                        <tr>
+                                            <td class="ps-4 fw-500">#{{ $task['id'] }}</td>
+                                            <td>
+                                                <span class="badge bg-opacity-10 
+                                                    @if($task['status'] === 'completed') bg-success text-success 
+                                                    @elseif($task['status'] === 'processing') bg-warning text-warning 
+                                                    @else bg-danger text-danger @endif
+                                                    rounded-pill py-1 px-3">
+                                                    {{ ucfirst($task['status']) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <span class="fw-500 small">
+                                                        {{ \Carbon\Carbon::parse($task['created_at'])->format('M j, Y') }}
+                                                    </span>
+                                                    <span class="text-muted small">
+                                                        {{ \Carbon\Carbon::parse($task['created_at'])->format('g:i A') }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="pe-4 text-end">
+                                                <div class="d-flex justify-content-end gap-2">
+                                                    <!-- View Button -->
+                                                    <a href="{{ route('user.task.details',$task['id']) }}" 
+                                                    class="btn btn-sm btn-outline-primary" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    
+                                                    <!-- Delete Button -->
+                                                    <a href="{{ route('user.task.delete',$task['id']) }}" 
+                                                    class="btn btn-sm  btn-outline-danger" title="Delete Task"
+                                                    onclick="return confirm('Are you sure to delete this task?')">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </a>
+                                                    
+                                                    <!-- Re-run Button -->
+                                                    <button class="btn btn-sm btn-outline-secondary"  title="Re-run Task">
+                                                        <i class="fas fa-redo"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                    
+                                    @if($taskList->count() == 0)
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-muted">
+                                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                                <p class="mb-0">No tasks found matching your filters</p>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-white border-top py-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted small">
+                                Showing {{ $taskList->firstItem() }} to {{ $taskList->lastItem() }} of {{ $taskList->total() }} entries
+                            </div>
+                            <div>
+                                {{ $taskList->appends(request()->query())->links('pagination::bootstrap-4') }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -222,83 +347,7 @@
             </div>
         </div>
     </div>
-    <div class="container-fluid p-3">
-        <div class="row">
-            <!-- Recent Analyses Section -->
-            <div class="card border-0 shadow-sm overflow-hidden">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom py-2">
-                    <h5 class="mb-0 fw-600 d-flex align-items-center">
-                        <i class="bi bi-clock-history text-primary me-2"></i>
-                        Recent Analyses
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Status</th>
-                                    <th>Duration</th>
-                                    <th>Created At</th>
-                                    <th class="text-end pe-4">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($taskList as $task)
-                                    <tr>
-                                        <td class="ps-4 fw-500">#{{ $task['id'] }}</td>
-                                        <td>
-                                            <span class="badge bg-opacity-10 
-                                                @if($task['status'] === 'completed') bg-success text-success 
-                                                @elseif($task['status'] === 'processing') bg-warning text-warning 
-                                                @else bg-danger text-danger @endif
-                                                rounded-pill py-1 px-3">
-                                                {{ ucfirst($task['status']) }}
-                                            </span>
-                                        </td>
-                                        <td>@if(isset($task['duration'])) {{ $task['duration'] }} min @else -- @endif</td>
-                                        <td>{{ \Carbon\Carbon::parse($task['created_at'])->format('M d, Y h:i A') }}</td>
-                                        <td class="pe-4 text-end">
-                                            <div class="d-flex justify-content-end gap-2">
-                                                <!-- View Button -->
-                                                <a href="{{ route('user.task.details',$task['id']) }}" 
-                                                class="btn btn-sm btn-outline-primary" title="View Details">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                
-                                                <!-- Delete Button -->
-                                                <a href="{{ route('user.task.delete',$task['id']) }}" 
-                                                class="btn btn-sm  btn-outline-danger" title="Delete Task"
-                                                onclick="return confirm('Are you sure to delete this task?')">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </a>
-                                                
-                                                <!-- Re-run Button -->
-                                                <button class="btn btn-sm btn-outline-secondary"  title="Re-run Task">
-                                                    <i class="fas fa-redo"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer bg-white border-top py-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="text-muted small">
-                            Showing {{ $taskList->firstItem() }} to {{ $taskList->lastItem() }} of {{ $taskList->total() }} entries
-                        </div>
-                        <div>
-                            {{ $taskList->links('pagination::bootstrap-4') }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Modal -->
     <div class="modal fade" id="audioUploadModal" tabindex="-1" aria-labelledby="audioUploadModalLabel" aria-hidden="true">
@@ -463,28 +512,6 @@
             };
         },
         
-        companyPerformance: function(sortBy) {
-            const companies = [
-                { name: "TechCorp Inc.", score: 94.2, trend: 3.2, calls: 187 },
-                { name: "Global Solutions", score: 89.5, trend: 1.1, calls: 156 },
-                { name: "Innovate LLC", score: 87.8, trend: 0.0, calls: 132 },
-                { name: "DataSystems", score: 76.4, trend: -2.4, calls: 98 },
-                { name: "FutureTech", score: 91.2, trend: 2.1, calls: 143 },
-                { name: "CloudMasters", score: 83.7, trend: -1.2, calls: 121 }
-            ];
-            
-            // Sort based on selection
-            if (sortBy === 'score') {
-                companies.sort((a, b) => b.score - a.score);
-            } else if (sortBy === 'volume') {
-                companies.sort((a, b) => b.calls - a.calls);
-            } else if (sortBy === 'improvement') {
-                companies.sort((a, b) => b.trend - a.trend);
-            }
-            
-            return companies;
-        },
-        
         agentPerformance: function(sortBy) {
             const agents = [
                 { 
@@ -614,7 +641,6 @@
         updateKpiCards();
         updateTrendChart();
         updateSentimentChart();
-        updateCompanyTable();
         updateAgentPerformance();
     }
 
