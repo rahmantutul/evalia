@@ -226,6 +226,7 @@ class RoleController extends Controller
         }
 
         $roles = $result['data'] ?? [];
+        
         return view('user.roles.index', compact('roles'));
     }
 
@@ -317,6 +318,8 @@ class RoleController extends Controller
     {
         // Check authentication for AJAX too
         $token = $this->getToken();
+
+        
         if (!$token) {
             return response()->json([
                 'success' => false,
@@ -334,7 +337,7 @@ class RoleController extends Controller
         }
 
         $result = $this->makeRequest('get', "/roles/{$id}");
-
+        
         if (!$result['success']) {
             return response()->json([
                 'success' => false,
@@ -370,10 +373,13 @@ class RoleController extends Controller
 
         $validator = Validator::make($request->all(), [
             'permission_ids' => 'required|array|min:1',
-            'permission_ids.*' => 'string'
+            'permission_ids.*' => 'string',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
         ], [
             'permission_ids.required' => 'Please select at least one permission.',
             'permission_ids.min' => 'Please select at least one permission.',
+            'name.required' => 'Role name is required.',
         ]);
 
         if ($validator->fails()) {
@@ -390,17 +396,40 @@ class RoleController extends Controller
                 ->with('open_edit_modal', $id);
         }
 
-        $permissionData = ['permission_ids' => array_values($validPermissions)];
-        $result = $this->makeRequest('put', "/roles/{$id}", $permissionData);
+        // Update role details (name and description)
+        $roleData = [
+            'name' => $request->name,
+            'description' => $request->description
+        ];
 
-        if (!$result['success']) {
+        $roleDetailsResult = $this->makeRequest('patch', "/roles/{$id}/details", $roleData);
+
+        if (!$roleDetailsResult['success']) {
             $errorData = [
-                'error' => $result['error'],
+                'error' => $roleDetailsResult['error'],
                 'open_edit_modal' => $id
             ];
 
-            if (isset($result['request_id'])) {
-                $errorData['request_id'] = $result['request_id'];
+            if (isset($roleDetailsResult['request_id'])) {
+                $errorData['request_id'] = $roleDetailsResult['request_id'];
+            }
+
+            return redirect()->route('roles.index')
+                ->with($errorData);
+        }
+
+        // Update permissions
+        $permissionData = ['permission_ids' => array_values($validPermissions)];
+        $permissionResult = $this->makeRequest('put', "/roles/{$id}", $permissionData);
+
+        if (!$permissionResult['success']) {
+            $errorData = [
+                'error' => $permissionResult['error'],
+                'open_edit_modal' => $id
+            ];
+
+            if (isset($permissionResult['request_id'])) {
+                $errorData['request_id'] = $permissionResult['request_id'];
             }
 
             return redirect()->route('roles.index')
@@ -408,7 +437,7 @@ class RoleController extends Controller
         }
 
         return redirect()->route('roles.index')
-            ->with('success', 'Role permissions updated successfully!');
+            ->with('success', 'Role details and permissions updated successfully!');
     }
 
     /**

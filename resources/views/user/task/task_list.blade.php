@@ -123,7 +123,40 @@
                                     </div>
 
                                 </div>
-
+                                {{-- Agent Selection Dropdown --}}
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-header bg-white border-0 py-2">
+                                                <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
+                                                    <span class="bg-info bg-opacity-10 text-info p-2 me-2 rounded">
+                                                        <i class="fas fa-user-tie"></i>
+                                                    </span>
+                                                    Select Agent
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group">
+                                                    <label for="agent_id" class="form-label fw-500 mb-2">Choose an agent for this analysis</label>
+                                                    <select name="agent_id" id="agent_id" class="form-select form-select-lg py-3 select2" required>
+                                                        <option value="">-- Select Agent --</option>
+                                                            @foreach($companyAgents as $agent)
+                                                                <option value="{{ $agent['id'] }}">
+                                                                    {{ $agent['agent_id_display'] }} - {{ $agent['name'] }} 
+                                                                    @if($agent['email'])
+                                                                        ({{ $agent['email'] }})
+                                                                    @endif
+                                                                </option>
+                                                            @endforeach
+                                                    </select>
+                                                    @error('agent_id')
+                                                        <div class="text-danger small mt-2">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <!-- Hidden company_id -->
                                 <input type="hidden" name="company_id" value="{{ $company_id }}">
 
@@ -138,168 +171,85 @@
                         </div>
                     </div>
                 </div>                               
-                <div class="card border-0 shadow-sm overflow-hidden">
-                    <div class="card-header bg-white border-bottom py-3">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                            <!-- Filter Controls -->
-                            <div class="d-flex flex-wrap gap-2">
-                                <!-- Status Filter -->
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="statusFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-filter me-1"></i>
-                                        Status: {{ request('status', 'all') === 'all' ? 'All' : ucfirst(request('status')) }}
-                                    </button>
-                                    <ul class="dropdown-menu" aria-labelledby="statusFilterDropdown">
-                                        <li><a class="dropdown-item status-filter {{ request('status', 'all') === 'all' ? 'active' : '' }}" 
-                                            href="{{ route('user.task.list', ['companyId' => $company_id, 'status' => 'all', 'time_range' => request('time_range', 'all')]) }}" 
-                                            data-status="all">All Status</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item status-filter {{ request('status') === 'completed' ? 'active' : '' }}" 
-                                            href="{{ route('user.task.list', ['companyId' => $company_id, 'status' => 'completed', 'time_range' => request('time_range', 'all')]) }}" 
-                                            data-status="completed">Completed</a></li>
-                                        <li><a class="dropdown-item status-filter {{ request('status') === 'processing' ? 'active' : '' }}" 
-                                            href="{{ route('user.task.list', ['companyId' => $company_id, 'status' => 'processing', 'time_range' => request('time_range', 'all')]) }}" 
-                                            data-status="processing">Processing</a></li>
-                                        <li><a class="dropdown-item status-filter {{ request('status') === 'failed' ? 'active' : '' }}" 
-                                            href="{{ route('user.task.list', ['companyId' => $company_id, 'status' => 'failed', 'time_range' => request('time_range', 'all')]) }}" 
-                                            data-status="failed">Failed</a></li>
-                                    </ul>
-                                </div>
-                                
-                                <!-- Time Filter -->
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="timeFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-calendar me-1"></i>
-                                        Time: 
-                                        @switch(request('time_range', 'all'))
-                                            @case('today') Today @break
-                                            @case('yesterday') Yesterday @break
-                                            @case('last7') Last 7 Days @break
-                                            @case('last30') Last 30 Days @break
-                                            @default All Time
-                                        @endswitch
-                                    </button>
-                                    <ul class="dropdown-menu" aria-labelledby="timeFilterDropdown">
-                                        <li><a class="dropdown-item time-filter {{ request('time_range', 'all') === 'all' ? 'active' : '' }}" 
-                                            href="{{ route('user.task.list', ['companyId' => $company_id, 'status' => request('status', 'all'), 'time_range' => 'all']) }}" 
-                                            data-time="all">All Time</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item time-filter {{ request('time_range') === 'today' ? 'active' : '' }}" 
-                                            href="{{ route('user.task.list', ['companyId' => $company_id, 'status' => request('status', 'all'), 'time_range' => 'today']) }}" 
-                                            data-time="today">Today</a></li>
-                                        <li><a class="dropdown-item time-filter {{ request('time_range') === 'yesterday' ? 'active' : '' }}" 
-                                            href="{{ route('user.task.list', ['companyId' => $company_id, 'status' => request('status', 'all'), 'time_range' => 'yesterday']) }}" 
-                                            data-time="yesterday">Yesterday</a></li>
-                                        <li><a class="dropdown-item time-filter {{ request('time_range') === 'last7' ? 'active' : '' }}" 
-                                            href="{{ route('user.task.list', ['companyId' => $company_id, 'status' => request('status', 'all'), 'time_range' => 'last7']) }}" 
-                                            data-time="last7">Last 7 Days</a></li>
-                                        <li><a class="dropdown-item time-filter {{ request('time_range') === 'last30' ? 'active' : '' }}" 
-                                            href="{{ route('user.task.list', ['companyId' => $company_id, 'status' => request('status', 'all'), 'time_range' => 'last30']) }}" 
-                                            data-time="last30">Last 30 Days</a></li>
-                                    </ul>
-                                </div>
-                                
-                                <!-- Clear Filters -->
-                                @if(request('status') || request('time_range'))
-                                <a href="{{ route('user.task.list', ['companyId' => $company_id]) }}" class="btn btn-sm btn-outline-danger">
-                                    <i class="fas fa-times me-1"></i>
-                                    Clear Filters
-                                </a>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Status</th>
-                                        <th>Duration</th>
-                                        <th>Created At</th>
-                                        <th class="text-end pe-4">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($taskList as $task)
-                                        <tr>
-                                            <td class="ps-4 fw-500">#{{ $task['id'] }}</td>
-                                            <td>
-                                                <span class="badge bg-opacity-10 
-                                                    @if($task['status'] === 'completed') bg-success text-success 
-                                                    @elseif($task['status'] === 'processing') bg-warning text-warning 
-                                                    @else bg-danger text-danger @endif
-                                                    rounded-pill py-1 px-3">
-                                                    {{ ucfirst($task['status']) }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                @if(isset($task['duration'])) 
-                                                    <span class="d-flex align-items-center">
-                                                        <i class="fas fa-clock text-muted me-1 small"></i>
-                                                        {{ $task['duration'] }} min
-                                                    </span>
-                                                @else 
-                                                    <span class="text-muted">--</span>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Status</th>
+                                    <th>Duration</th>
+                                    <th>Created At</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="taskTableBody">
+                                @foreach ($taskList as $task)
+                                    <tr id="task-{{ $task['id'] }}">
+                                        <td class="ps-4 fw-500">#{{ $task['id'] }}</td>
+                                        <td>
+                                            <span class="badge bg-opacity-10 
+                                                @if($task['status'] === 'completed') bg-success text-success 
+                                                @elseif($task['status'] === 'processing') bg-warning text-warning 
+                                                @elseif($task['status'] === 'running') bg-info text-info
+                                                @else bg-danger text-danger @endif
+                                                rounded-pill py-1 px-3 d-flex align-items-center" style="width: fit-content;">
+                                                @if($task['status'] === 'running')
+                                                    <div class="spinner-border spinner-border-sm me-1" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
                                                 @endif
-                                            </td>
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    <span class="fw-500 small">
-                                                        {{ \Carbon\Carbon::parse($task['created_at'])->format('M j, Y') }}
-                                                    </span>
-                                                    <span class="text-muted small">
-                                                        {{ \Carbon\Carbon::parse($task['created_at'])->format('g:i A') }}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td class="pe-4 text-end">
-                                                <div class="d-flex justify-content-end gap-2">
-                                                    <!-- View Button -->
+                                                {{ ucfirst($task['status']) }}
+                                            </span>
+                                        </td>
+                                        <td>@if(isset($task['duration'])) {{ $task['duration'] }} min @else -- @endif</td>
+                                        <td>{{ \Carbon\Carbon::parse($task['created_at'])->format('M d, Y h:i A') }}</td>
+                                        <td class="pe-4 text-end">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <!-- View Button - Disabled when running -->
+                                                @if($task['status'] === 'running')
+                                                    <button class="btn btn-sm btn-icon btn-outline-secondary" disabled
+                                                            data-bs-toggle="tooltip" title="View unavailable while running">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                @else
                                                     <a href="{{ route('user.task.details',$task['id']) }}" 
-                                                    class="btn btn-sm btn-outline-primary" title="View Details">
+                                                    class="btn btn-sm btn-icon btn-outline-primary" 
+                                                    data-bs-toggle="tooltip" title="View Details">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    
-                                                    <!-- Delete Button -->
-                                                    <a href="{{ route('user.task.delete',$task['id']) }}" 
-                                                    class="btn btn-sm  btn-outline-danger" title="Delete Task"
-                                                    onclick="return confirm('Are you sure to delete this task?')">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </a>
-                                                    
-                                                    <!-- Re-run Button -->
-                                                    <button class="btn btn-sm btn-outline-secondary"  title="Re-run Task">
-                                                        <i class="fas fa-redo"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                    
-                                    @if($taskList->count() == 0)
-                                        <tr>
-                                            <td colspan="5" class="text-center py-4 text-muted">
-                                                <i class="fas fa-inbox fa-2x mb-2"></i>
-                                                <p class="mb-0">No tasks found matching your filters</p>
-                                            </td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
+                                                @endif
+                                                
+                                                <!-- Delete Button -->
+                                                <a href="{{ route('user.task.delete',$task['id']) }}" 
+                                                class="btn btn-sm btn-icon btn-outline-danger" 
+                                                data-bs-toggle="tooltip" title="Delete Task"
+                                                onclick="return confirm('Are you sure to delete this task?')">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </a>
+                                                
+                                                <!-- Re-evaluate Button -->
+                                                <a href="{{ route('user.company.evaluate',$task['id']) }}" 
+                                                class="btn btn-sm btn-icon btn-outline-secondary" 
+                                                data-bs-toggle="tooltip" title="Re-Evaluate"
+                                                onclick="return confirm('Are you sure to re-evaluate this?')">
+                                                    <i class="fas fa-redo"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                    
-                    <div class="card-footer bg-white border-top py-2">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="text-muted small">
-                                Showing {{ $taskList->firstItem() }} to {{ $taskList->lastItem() }} of {{ $taskList->total() }} entries
-                            </div>
-                            <div>
-                                {{ $taskList->appends(request()->query())->links('pagination::bootstrap-4') }}
-                            </div>
+                </div>
+                <div class="card-footer bg-white border-top py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">
+                            Showing {{ $taskList->firstItem() }} to {{ $taskList->lastItem() }} of {{ $taskList->total() }} entries
+                        </div>
+                        <div>
+                            {{ $taskList->links('pagination::bootstrap-4') }}
                         </div>
                     </div>
                 </div>

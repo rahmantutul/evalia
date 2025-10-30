@@ -212,64 +212,117 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-    // Dummy data generators
+    // Fixed data generators
     const generateDummyData = {
         kpiData: function(period) {
-            return {
-                totalCompanies: 24 + Math.floor(Math.random() * 5),
-                avgQualityScore: 85 + Math.random() * 10,
-                callsEvaluated: 1000 + Math.floor(Math.random() * 500),
-                avgResponseTime: 10 + Math.random() * 8
-            };
-        },
-        
-        trendData: function(granularity, period) {
-            let labels = [];
-            let data = [];
-            
-            if (granularity === 'daily') {
-                const days = period === 7 ? 7 : 30;
-                for (let i = days; i >= 1; i--) {
-                    labels.push(`Day ${i}`);
-                    data.push(80 + Math.random() * 15);
-                }
-            } else if (granularity === 'weekly') {
-                const weeks = period === 7 ? 1 : period === 30 ? 4 : 12;
-                for (let i = weeks; i >= 1; i--) {
-                    labels.push(`Week ${i}`);
-                    data.push(80 + Math.random() * 15);
-                }
+            // Calculate calls based on period
+            let callsEvaluated;
+            if (period === 7) {
+                callsEvaluated = 12; // Last 7 days
+            } else if (period === 30) {
+                callsEvaluated = 53; // Last 30 days (default)
             } else {
-                const months = period === 90 ? 3 : 6;
-                for (let i = months; i >= 1; i--) {
-                    labels.push(`Month ${i}`);
-                    data.push(80 + Math.random() * 15);
-                }
+                callsEvaluated = 158; // Last quarter (90 days)
             }
             
-            return { labels, data };
-        },
-        
-        sentimentData: function() {
-            const positive = 60 + Math.random() * 15;
-            const neutral = 20 + Math.random() * 10;
-            const negative = 100 - positive - neutral;
-            
             return {
-                positive: parseFloat(positive.toFixed(1)),
-                neutral: parseFloat(neutral.toFixed(1)),
-                negative: parseFloat(negative.toFixed(1))
+                totalCompanies: 7,
+                avgQualityScore: 89.2,
+                callsEvaluated: callsEvaluated,
+                avgResponseTime: 12.3
             };
         },
         
-        companyPerformance: function(sortBy) {
+    trendData: function(granularity, period) {
+        let labels = [];
+        let data = [];
+        
+        const now = new Date();
+        
+        if (granularity === 'daily') {
+            const days = period === 7 ? 7 : 30;
+            for (let i = days; i >= 1; i--) {
+                const date = new Date();
+                date.setDate(now.getDate() - i);
+                
+                // Show day name for recent dates, full date for older ones
+                if (i <= 7) {
+                    labels.push(date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
+                } else {
+                    labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                }
+                data.push(80 + Math.random() * 15);
+            }
+        } else if (granularity === 'weekly') {
+            const weeks = period === 7 ? 1 : period === 30 ? 4 : 12;
+            for (let i = weeks; i >= 1; i--) {
+                const date = new Date();
+                date.setDate(now.getDate() - (i * 7));
+                
+                const weekStart = new Date(date);
+                weekStart.setDate(date.getDate() - date.getDay());
+                
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                
+                // Format based on whether weeks span different months
+                if (weekStart.getMonth() === weekEnd.getMonth()) {
+                    labels.push(`${weekStart.toLocaleDateString('en-US', { month: 'short' })} ${weekStart.getDate()}-${weekEnd.getDate()}`);
+                } else {
+                    labels.push(`${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
+                }
+                data.push(80 + Math.random() * 15);
+            }
+        } else {
+            // Monthly granularity
+            const months = period === 90 ? 3 : 6;
+            for (let i = months; i >= 1; i--) {
+                const date = new Date();
+                date.setMonth(now.getMonth() - i);
+                
+                // Include year if it's different from current year
+                const showYear = date.getFullYear() !== now.getFullYear();
+                labels.push(date.toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    year: showYear ? 'numeric' : undefined 
+                }));
+                data.push(80 + Math.random() * 15);
+            }
+        }
+        
+        return { labels, data };
+    },
+        
+        sentimentData: function() {
+            return {
+                positive: 72.5,
+                neutral: 18.3,
+                negative: 9.2
+            };
+        },
+        
+        companyPerformance: function(sortBy, period) {
+            // Calculate total calls based on period
+            let totalCalls;
+            if (period === 7) {
+                totalCalls = 12;
+            } else if (period === 30) {
+                totalCalls = 53;
+            } else {
+                totalCalls = 158;
+            }
+            
+            // Distribute calls between 7 companies
+            const companyCalls = this.distributeCalls(totalCalls, 7);
+            
             const companies = [
-                { name: "TechCorp Inc.",id: "hassan",  score: 94.2, trend: 3.2, calls: 187 },
-                { name: "Global Solutions",id: "hassan",  score: 89.5, trend: 1.1, calls: 156 },
-                { name: "Innovate LLC", id: "hassan",  score: 87.8, trend: 0.0, calls: 132 },
-                { name: "DataSystems",  id: "hassan", score: 76.4, trend: -2.4, calls: 98 },
-                { name: "FutureTech", id: "hassan", score: 91.2, trend: 2.1, calls: 143 },
-                { name: "CloudMasters", id: "hassan", score: 83.7, trend: -1.2, calls: 121 }
+                { name: "TechCorp Inc.", id: "hassan", score: 94.2, trend: 3.2, calls: companyCalls[0] },
+                { name: "Global Solutions", id: "hassan", score: 89.5, trend: 1.1, calls: companyCalls[1] },
+                { name: "Innovate LLC", id: "hassan", score: 87.8, trend: 0.0, calls: companyCalls[2] },
+                { name: "DataSystems", id: "hassan", score: 76.4, trend: -2.4, calls: companyCalls[3] },
+                { name: "FutureTech", id: "hassan", score: 91.2, trend: 2.1, calls: companyCalls[4] },
+                { name: "CloudMasters", id: "hassan", score: 83.7, trend: -1.2, calls: companyCalls[5] },
+                { name: "NextGen Corp", id: "hassan", score: 88.9, trend: 1.5, calls: companyCalls[6] }
             ];
             
             // Sort based on selection
@@ -284,51 +337,59 @@
             return companies;
         },
         
-        agentPerformance: function(sortBy) {
+        agentPerformance: function(sortBy, period) {
+            // Calculate total calls based on period
+            let totalCalls;
+            if (period === 7) {
+                totalCalls = 12;
+            } else if (period === 30) {
+                totalCalls = 53;
+            } else {
+                totalCalls = 158;
+            }
+            
+            // Distribute calls between agents
+            const agentCalls = this.distributeCalls(totalCalls, 5);
+            
             const agents = [
                 { 
                     name: "Sarah Lee", 
-                    
                     company: "TechCorp Inc.", 
                     score: 97.4, 
                     trend: 4.2, 
-                    calls: 187,
+                    calls: agentCalls[0],
                     avatar: "https://ui-avatars.com/api/?name=Sarah+Lee&background=10B981&color=fff"
                 },
                 { 
                     name: "Michael Chen", 
-                   
                     company: "Global Solutions", 
                     score: 93.1, 
                     trend: 1.8, 
-                    calls: 156,
+                    calls: agentCalls[1],
                     avatar: "https://ui-avatars.com/api/?name=Michael+Chen&background=4F46E5&color=fff"
                 },
                 { 
                     name: "David Kim", 
-                    
                     company: "DataSystems", 
                     score: 72.5, 
                     trend: -3.1, 
-                    calls: 98,
+                    calls: agentCalls[2],
                     avatar: "https://ui-avatars.com/api/?name=David+Kim&background=EF4444&color=fff"
                 },
                 { 
                     name: "Emma Wilson", 
-                    
                     company: "FutureTech", 
                     score: 95.2, 
                     trend: 2.8, 
-                    calls: 134,
+                    calls: agentCalls[3],
                     avatar: "https://ui-avatars.com/api/?name=Emma+Wilson&background=8B5CF6&color=fff"
                 },
                 { 
                     name: "James Brown", 
-                    
                     company: "CloudMasters", 
                     score: 88.3, 
                     trend: -0.5, 
-                    calls: 112,
+                    calls: agentCalls[4],
                     avatar: "https://ui-avatars.com/api/?name=James+Brown&background=F59E0B&color=fff"
                 }
             ];
@@ -344,6 +405,28 @@
                 agents.sort((a, b) => b.score - a.score);
                 return agents;
             }
+        },
+        
+        // Helper function to distribute calls between entities
+        distributeCalls: function(totalCalls, numberOfEntities) {
+            const calls = [];
+            let remainingCalls = totalCalls;
+            
+            // Distribute calls with some variation
+            for (let i = 0; i < numberOfEntities - 1; i++) {
+                // Allocate between 10% and 25% of remaining calls
+                const maxAllocation = Math.min(Math.floor(remainingCalls * 0.25), Math.floor(remainingCalls / (numberOfEntities - i)));
+                const minAllocation = Math.max(1, Math.floor(remainingCalls * 0.1));
+                
+                const allocated = Math.floor(Math.random() * (maxAllocation - minAllocation + 1)) + minAllocation;
+                calls.push(allocated);
+                remainingCalls -= allocated;
+            }
+            
+            // Add remaining calls to the last entity
+            calls.push(remainingCalls);
+            
+            return calls;
         }
     };
 
@@ -427,6 +510,16 @@
         const kpiData = generateDummyData.kpiData(currentPeriod);
         const kpiCards = document.getElementById('kpiCards');
         
+        // Calculate trend text based on period
+        let trendText = '';
+        if (currentPeriod === 7) {
+            trendText = '+2 from last week';
+        } else if (currentPeriod === 30) {
+            trendText = '+2 from last month';
+        } else {
+            trendText = '+5 from last quarter';
+        }
+        
         kpiCards.innerHTML = `
             <div class="col-md-3">
                 <div class="dashboard-card h-100 shadow-soft">
@@ -435,7 +528,7 @@
                             <div>
                                 <p class="text-muted mb-1">Total Companies</p>
                                 <h3 class="metric-value mb-1">${kpiData.totalCompanies}</h3>
-                                <small class="text-muted">+${Math.floor(Math.random() * 5)} from last month</small>
+                                <small class="text-muted">${trendText}</small>
                             </div>
                             <div class="icon-circle bg-soft-primary">
                                 <i class="fas fa-building text-primary"></i>
@@ -452,7 +545,7 @@
                             <div>
                                 <p class="text-muted mb-1">Avg. Quality Score</p>
                                 <h3 class="metric-value mb-1">${kpiData.avgQualityScore.toFixed(1)}%</h3>
-                                <small class="trend-up"><i class="fas fa-arrow-up me-1"></i> ${(Math.random() * 3).toFixed(1)}% improvement</small>
+                                <small class="trend-up"><i class="fas fa-arrow-up me-1"></i> 2.1% improvement</small>
                             </div>
                             <div class="icon-circle bg-soft-success">
                                 <i class="fas fa-chart-line text-success"></i>
@@ -469,7 +562,7 @@
                             <div>
                                 <p class="text-muted mb-1">Calls Evaluated</p>
                                 <h3 class="metric-value mb-1">${kpiData.callsEvaluated}</h3>
-                                <small class="text-muted"><i class="fas fa-arrow-up text-success me-1"></i> ${Math.floor(Math.random() * 100)} this week</small>
+                                <small class="text-muted"><i class="fas fa-arrow-up text-success me-1"></i> ${Math.floor(kpiData.callsEvaluated * 0.3)} this period</small>
                             </div>
                             <div class="icon-circle bg-soft-info">
                                 <i class="fas fa-phone-alt text-info"></i>
@@ -486,7 +579,7 @@
                             <div>
                                 <p class="text-muted mb-1">Avg. Response Time</p>
                                 <h3 class="metric-value mb-1">${kpiData.avgResponseTime.toFixed(1)}s</h3>
-                                <small class="trend-down"><i class="fas fa-arrow-down me-1"></i> ${(Math.random() * 2).toFixed(1)}s faster</small>
+                                <small class="trend-down"><i class="fas fa-arrow-down me-1"></i> 1.2s faster</small>
                             </div>
                             <div class="icon-circle bg-soft-warning">
                                 <i class="fas fa-stopwatch text-warning"></i>
@@ -606,7 +699,7 @@
 
     // Update company table
     function updateCompanyTable() {
-        const companies = generateDummyData.companyPerformance(currentCompanySort);
+        const companies = generateDummyData.companyPerformance(currentCompanySort, currentPeriod);
         const tableBody = document.querySelector('#companyTable tbody');
         
         let html = '';
@@ -635,7 +728,7 @@
 
     // Update agent performance
     function updateAgentPerformance() {
-        const agents = generateDummyData.agentPerformance(currentAgentSort);
+        const agents = generateDummyData.agentPerformance(currentAgentSort, currentPeriod);
         const agentContainer = document.getElementById('agentPerformance');
         
         let html = '';
@@ -694,8 +787,8 @@
         const kpiData = generateDummyData.kpiData(currentPeriod);
         const trendData = generateDummyData.trendData(currentGranularity, currentPeriod);
         const sentimentData = generateDummyData.sentimentData();
-        const companies = generateDummyData.companyPerformance(currentCompanySort);
-        const agents = generateDummyData.agentPerformance(currentAgentSort);
+        const companies = generateDummyData.companyPerformance(currentCompanySort, currentPeriod);
+        const agents = generateDummyData.agentPerformance(currentAgentSort, currentPeriod);
         
         // Create workbook
         const wb = XLSX.utils.book_new();
@@ -703,10 +796,10 @@
         // Add KPIs sheet
         const kpiSheetData = [
             ['Metric', 'Value', 'Trend'],
-            ['Total Companies', kpiData.totalCompanies, `+${Math.floor(Math.random() * 5)} from last month`],
-            ['Average Quality Score', `${kpiData.avgQualityScore.toFixed(1)}%`, `${(Math.random() * 3).toFixed(1)}% improvement`],
-            ['Calls Evaluated', kpiData.callsEvaluated, `${Math.floor(Math.random() * 100)} this week`],
-            ['Average Response Time', `${kpiData.avgResponseTime.toFixed(1)}s`, `${(Math.random() * 2).toFixed(1)}s faster`]
+            ['Total Companies', kpiData.totalCompanies, `+2 from last period`],
+            ['Average Quality Score', `${kpiData.avgQualityScore.toFixed(1)}%`, `2.1% improvement`],
+            ['Calls Evaluated', kpiData.callsEvaluated, `${Math.floor(kpiData.callsEvaluated * 0.3)} this period`],
+            ['Average Response Time', `${kpiData.avgResponseTime.toFixed(1)}s`, `1.2s faster`]
         ];
         const kpiSheet = XLSX.utils.aoa_to_sheet(kpiSheetData);
         XLSX.utils.book_append_sheet(wb, kpiSheet, 'KPIs');

@@ -187,50 +187,7 @@
     </div>
 </div>
 
-<!-- View Role Modal -->
-<div class="modal fade" id="viewRoleModal" tabindex="-1" aria-labelledby="viewRoleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="viewRoleModalLabel">Role Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Role Name</label>
-                            <p class="form-control-static" id="viewRoleName"></p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Role ID</label>
-                            <p class="form-control-static" id="viewRoleId"></p>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Description</label>
-                            <p class="form-control-static" id="viewRoleDescription"></p>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Permissions</label>
-                            <div id="viewRolePermissions" class="permission-tags">
-                                <!-- Permissions will be loaded here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Edit Role Modal -->
 <div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true">
@@ -247,14 +204,20 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Role Name</label>
-                                <p class="form-control-static fw-semibold" id="editRoleName"></p>
+                                <label for="editRoleName" class="form-label">Role Name</label>
+                                <input type="text" class="form-control" id="editRoleName" name="name" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Role ID</label>
                                 <p class="form-control-static" id="editRoleId"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="editRoleDescription" class="form-label">Role Description</label>
+                                <textarea class="form-control" id="editRoleDescription" name="description" rows="3" placeholder="Enter role description"></textarea>
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -277,7 +240,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Permissions</button>
+                    <button type="submit" class="btn btn-primary">Update Role</button>
                 </div>
             </form>
         </div>
@@ -384,51 +347,16 @@ function renderPermissions(container, permissions, selectedPermissionIds) {
     container.innerHTML = html;
 }
 
-// View role details
-function viewRole(button) {
-    const roleId = button.getAttribute('data-role-id');
-    const roleName = button.getAttribute('data-role-name');
-    const roleDescription = button.getAttribute('data-role-description');
-
-    document.getElementById('viewRoleName').textContent = roleName;
-    document.getElementById('viewRoleId').textContent = roleId;
-    document.getElementById('viewRoleDescription').textContent = roleDescription || 'No description';
-
-    // Load role permissions for view - Use route with parameter
-    const url = '{{ route("roles.show", ":id") }}'.replace(':id', roleId);
-    fetch(url + '?ajax=1') // Add ajax parameter to trigger JSON response
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to fetch role details');
-            }
-            return response.json();
-        })
-        .then(data => {
-            const permissionsContainer = document.getElementById('viewRolePermissions');
-            if (data.role && data.role.permissions && data.role.permissions.length > 0) {
-                let permissionsHtml = '';
-                data.role.permissions.forEach(perm => {
-                    permissionsHtml += `<span class="badge bg-primary me-1 mb-1">${perm.name || perm}</span>`;
-                });
-                permissionsContainer.innerHTML = permissionsHtml;
-            } else {
-                permissionsContainer.innerHTML = '<span class="text-muted">No permissions assigned</span>';
-            }
-        })
-        .catch(error => {
-            console.error('Error loading role details:', error);
-            document.getElementById('viewRolePermissions').innerHTML = 
-                '<span class="text-danger">Failed to load permissions</span>';
-        });
-}
-
 // Edit role
 function editRole(button) {
     const roleId = button.getAttribute('data-role-id');
     const roleName = button.getAttribute('data-role-name');
+    const roleDescription = button.getAttribute('data-role-description') || '';
 
-    document.getElementById('editRoleName').textContent = roleName;
+    // Set form values
+    document.getElementById('editRoleName').value = roleName;
     document.getElementById('editRoleId').textContent = roleId;
+    document.getElementById('editRoleDescription').value = roleDescription;
     
     // Set form action using route
     const updateUrl = '{{ route("roles.update", ":id") }}'.replace(':id', roleId);

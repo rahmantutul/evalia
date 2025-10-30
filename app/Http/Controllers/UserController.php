@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\ExternalApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Http;
 class UserController extends Controller
 {
     protected $apiService;
@@ -15,7 +15,20 @@ class UserController extends Controller
         $this->middleware('auth.api');
         $this->apiService = $apiService;
     }
+private function getToken()
+    {
+        return session('user_access_token');
+    }
 
+    private function getAuthHeaders()
+    {
+        $token = $this->getToken();
+        return [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $token,
+        ];
+    }
     /**
      * Display listing of users
      */
@@ -33,7 +46,46 @@ class UserController extends Controller
 
         $users = $result['users'] ?? [];
         
-        return view('user.users.index', compact('users', 'page'));
+        // Fetch company details for each user
+        $usersWithCompanies = $this->getUsersWithCompanyDetails($users);
+        // dd($usersWithCompanies);
+        return view('user.users.index', compact('usersWithCompanies', 'page'));
+    }
+
+    private function getUsersWithCompanyDetails($users)
+    {
+        $usersWithCompanies = [];
+        
+        foreach ($users as $user) {
+            // Check if user has a company_id
+            if (isset($user['company_id']) && !empty($user['company_id'])) {
+                try {
+                    $response = Http::withHeaders($this->getAuthHeaders())
+                        ->get('http://35.153.178.201:8080/get_company_details', [
+                            'company_id' => $user['company_id']
+                        ]);
+                    
+                    if ($response->successful()) {
+                        $companyData = $response->json();
+                        $user['company_name'] = $companyData['data']['company_name'] ?? 'N/A';
+                        $user['company_details'] = $companyData;
+                    } else {
+                        $user['company_name'] = 'Company Not Found';
+                        $user['company_details'] = null;
+                    }
+                } catch (\Exception $e) {
+                    $user['company_name'] = 'Error Fetching Company';
+                    $user['company_details'] = null;
+                }
+            } else {
+                $user['company_name'] = 'No Company';
+                $user['company_details'] = null;
+            }
+            
+            $usersWithCompanies[] = $user;
+        }
+        
+        return $usersWithCompanies;
     }
 
     /**

@@ -98,10 +98,6 @@
         font-size: 12px;
         white-space: nowrap;
     }
-
-    .table td .btn-group {
-        float: right;
-    }
     
     /* Sticky Statistics Bar Styles */
     .sticky-top-bar {
@@ -143,10 +139,6 @@
     }
 </style>
 <style>
-.btn-group {
-    display: flex;
-    gap: 8px;
-}
 
 .btn-icon {
     display: flex;
@@ -205,7 +197,7 @@
                                     <i class="fas fa-users text-primary fs-5"></i>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h5 class="mb-0 fw-bold" id="totalUsers">{{ count($users) }}</h5>
+                                    <h5 class="mb-0 fw-bold" id="totalUsers">{{ count($usersWithCompanies) }}</h5>
                                     <small class="text-muted">Total Users</small>
                                 </div>
                             </div>
@@ -214,7 +206,7 @@
                         <!-- Dynamic Role Statistics -->
                         @php
                             // Get all unique roles from users
-                            $roles = collect($users)
+                            $roles = collect($usersWithCompanies)
                                 ->pluck('role.name')
                                 ->filter()
                                 ->unique()
@@ -246,7 +238,7 @@
                         @foreach($roles as $index => $roleName)
                             @php
                                 $roleKey = strtolower($roleName);
-                                $roleCount = collect($users)->filter(function($user) use ($roleName) {
+                                $roleCount = collect($usersWithCompanies)->filter(function($user) use ($roleName) {
                                     return ($user['role']['name'] ?? '') === $roleName;
                                 })->count();
                                 
@@ -285,7 +277,7 @@
                                 </div>
                                 <div class="flex-grow-1">
                                     <h5 class="mb-0 fw-bold" id="activeUsers">
-                                        {{ collect($users)->where('is_active', true)->count() }}
+                                        {{ collect($usersWithCompanies)->where('is_active', true)->count() }}
                                     </h5>
                                     <small class="text-muted">Active Users</small>
                                 </div>
@@ -299,7 +291,7 @@
                                 </div>
                                 <div class="flex-grow-1">
                                     <h5 class="mb-0 fw-bold" id="inactiveUsers">
-                                        {{ collect($users)->where('is_active', false)->count() }}
+                                        {{ collect($usersWithCompanies)->where('is_active', false)->count() }}
                                     </h5>
                                     <small class="text-muted">Inactive Users</small>
                                 </div>
@@ -357,7 +349,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($users as $user)
+                                @forelse($usersWithCompanies as $user)
                                 @php
                                     $roleName = $user['role']['name'] ?? 'user';
                                     $roleKey = strtolower($roleName);
@@ -371,7 +363,7 @@
                                             {{ $roleName }}
                                         </span>
                                     </td>
-                                    <td>{{ $user['company_id'] ?? 'N/A' }}</td>
+                                    <td>{{ $user['company_name'] ?? 'N/A' }}</td>
                                     <td>
                                         <span class="badge {{ $user['is_active'] ? 'bg-success' : 'bg-danger' }}">
                                             {{ $user['is_active'] ? 'Active' : 'Inactive' }}
@@ -395,12 +387,9 @@
                                                         </button>
                                                     </form>
                                                 @else
-                                                    <form action="{{ route('users.activate', $user['id']) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-icon" title="Activate">
-                                                            <i class="fas fa-user-check"></i>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" class="btn btn-icon btn-danger opacity-50" disabled title="User Deactivated">
+                                                        <i class="fas fa-user-slash"></i>
+                                                    </button>
                                                 @endif
                                             </div>
                                         </div>
@@ -426,9 +415,9 @@
 // Auto-update statistics with animation
 function updateStatistics() {
     const stats = [
-        { id: 'totalUsers', value: {{ count($users) }} },
-        { id: 'activeUsers', value: {{ collect($users)->where('is_active', true)->count() }} },
-        { id: 'inactiveUsers', value: {{ collect($users)->where('is_active', false)->count() }} },
+        { id: 'totalUsers', value: {{ count($usersWithCompanies) }} },
+        { id: 'activeUsers', value: {{ collect($usersWithCompanies)->where('is_active', true)->count() }} },
+        { id: 'inactiveUsers', value: {{ collect($usersWithCompanies)->where('is_active', false)->count() }} },
     ];
 
     stats.forEach(stat => {

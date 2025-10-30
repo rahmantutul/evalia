@@ -6,13 +6,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
-
+use App\Services\ExternalApiService;
 class TaskController extends Controller
 {
-    public function __construct()
+    protected $apiService;
+
+    public function __construct(ExternalApiService $apiService)
     {
         $this->middleware('auth.api');
+        $this->apiService = $apiService;
     }
+
     private function getToken()
     {
         return session('user_access_token');
@@ -51,7 +55,7 @@ class TaskController extends Controller
     $hasRunningTasks = collect($filteredTasks)->contains('status', 'running');
 
     $page = Paginator::resolveCurrentPage(); 
-    $perPage = 10;
+    $perPage = 100;
     $offset = ($page - 1) * $perPage;
 
     $pagedTasks = array_slice($filteredTasks, $offset, $perPage);
@@ -66,11 +70,17 @@ class TaskController extends Controller
             'query' => $request->query()
         ]
     );
-
+    $agentsResult = $this->apiService->getAgentsList();
+    
+    if (!$agentsResult['success']) {
+        return back()->with('error', $agentsResult['error']);
+    }
+    $companyAgents = $agentsResult['agents'];
     return view('user.task.task_list', [
         'company_id' => $companyId,
         'taskList' => $paginatedTasks,
         'hasRunningTasks' => $hasRunningTasks,
+        'companyAgents' => $companyAgents,
     ]);
 }
 
@@ -162,43 +172,53 @@ private function applyFilters($tasks, $request)
     {
         $request->validate([
             'company_id' => 'required|string',
+            'agent_id' => 'required|string',
             'agent_audio' => 'required|file|mimes:mp3,wav|max:51200',
             'customer_audio' => 'required|file|mimes:mp3,wav|max:51200',
             'combined_audio' => 'nullable|file|mimes:mp3,wav|max:102400',
         ]);
 
-        $response = Http::withHeaders([
-                'Accept' => 'application/json',
-                'Authorization' => 'Bearer ' . $this->getToken(),
-            ])
-            ->timeout(60)
-            ->retry(3, 100)
-            ->attach('agent_audio', 
-                fopen($request->file('agent_audio')->path(), 'r'),
-                $request->file('agent_audio')->getClientOriginalName()
-            )
-            ->attach('customer_audio', 
-                fopen($request->file('customer_audio')->path(), 'r'),
-                $request->file('customer_audio')->getClientOriginalName()
-            )
-            ->post('http://35.153.178.201:8080/background_processing_v2', [
-                'company_id' => $request->input('company_id'),
-            ]);
+        $http = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => 'Bearer ' . $this->getToken(),
+        ])
+        ->timeout(60)
+        ->retry(3, 100);
+
+        // Attach files before sending
+        $http->attach(
+            'agent_audio',
+            fopen($request->file('agent_audio')->path(), 'r'),
+            $request->file('agent_audio')->getClientOriginalName()
+        );
+
+        $http->attach(
+            'customer_audio',
+            fopen($request->file('customer_audio')->path(), 'r'),
+            $request->file('customer_audio')->getClientOriginalName()
+        );
 
         if ($request->hasFile('combined_audio')) {
-            $response = $response->attach('combined_audio', 
+            $http->attach(
+                'combined_audio',
                 fopen($request->file('combined_audio')->path(), 'r'),
                 $request->file('combined_audio')->getClientOriginalName()
             );
         }
 
+        // ✅ Now send the request only once
+        $response = $http->post('http://35.153.178.201:8080/background_processing_v2', [
+            'company_id' => $request->input('company_id'),
+            'agent_id' => $request->input('agent_id'),
+        ]);
+
         if ($response->successful()) {
-            sleep(5); 
-            return redirect()->back()->with('success', 'Audio analysis started successfully!');
+            return back()->with('success', 'Audio analysis started successfully!');
         }
 
-        return redirect()->back()->with('error', 'Failed to start audio analysis. API returned status: ' . $response->status());
+        return back()->with('error', 'Failed to start audio analysis. API returned status: ' . $response->status());
     }
+
 
     public function reEvaluateTask(string $taskUuid)
     {

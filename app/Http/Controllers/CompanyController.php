@@ -10,12 +10,15 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-
+use App\Services\ExternalApiService;
 class CompanyController extends Controller
 {
-    public function __construct()
+    protected $apiService;
+
+    public function __construct(ExternalApiService $apiService)
     {
         $this->middleware('auth.api');
+        $this->apiService = $apiService;
     }
     private function getToken()
     {
@@ -56,7 +59,14 @@ class CompanyController extends Controller
         if ($response->successful()) {
             $companies = $response->json()['data'] ?? [];
         }
-        return view('user.company.company_list', compact('companies'));
+        $agentsResult = $this->apiService->getAgentsList();
+        
+        if (!$agentsResult['success']) {
+            return back()->with('error', $agentsResult['error']);
+        }
+        $companyAgents = $agentsResult['agents'];
+
+        return view('user.company.company_list', compact('companies','companyAgents'));
     }
 
     public function companyCreate()

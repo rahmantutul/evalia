@@ -465,61 +465,149 @@
     // Dummy data generators
     const generateDummyData = {
         kpiData: function(period) {
+            // Calculate calls based on period
+            let callsEvaluated;
+            if (period === 7) {
+                callsEvaluated = 12; // Last 7 days
+            } else if (period === 30) {
+                callsEvaluated = 53; // Last 30 days (default)
+            } else {
+                callsEvaluated = 158; // Last quarter (90 days)
+            }
+            
             return {
-                totalCompanies: 24 + Math.floor(Math.random() * 5),
-                avgQualityScore: 85 + Math.random() * 10,
-                callsEvaluated: 1000 + Math.floor(Math.random() * 500),
-                avgResponseTime: 10 + Math.random() * 8
+                totalCompanies: 7,
+                avgQualityScore: 89.2,
+                callsEvaluated: callsEvaluated,
+                avgResponseTime: 12.3
             };
         },
         
         trendData: function(granularity, period) {
-            let labels = [];
-            let data = [];
+    let labels = [];
+    let data = [];
+    
+    const now = new Date();
+    
+    if (granularity === 'daily') {
+        const days = period === 7 ? 7 : 30;
+        for (let i = days; i >= 1; i--) {
+            const date = new Date();
+            date.setDate(now.getDate() - i);
             
-            if (granularity === 'daily') {
-                const days = period === 7 ? 7 : 30;
-                for (let i = days; i >= 1; i--) {
-                    labels.push(`Day ${i}`);
-                    data.push(80 + Math.random() * 15);
-                }
-            } else if (granularity === 'weekly') {
-                const weeks = period === 7 ? 1 : period === 30 ? 4 : 12;
-                for (let i = weeks; i >= 1; i--) {
-                    labels.push(`Week ${i}`);
-                    data.push(80 + Math.random() * 15);
-                }
+            // Show day name for recent dates, full date for older ones
+            if (i <= 7) {
+                labels.push(date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
             } else {
-                const months = period === 90 ? 3 : 6;
-                for (let i = months; i >= 1; i--) {
-                    labels.push(`Month ${i}`);
-                    data.push(80 + Math.random() * 15);
-                }
+                labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
             }
+            data.push(80 + Math.random() * 15);
+        }
+    } else if (granularity === 'weekly') {
+        const weeks = period === 7 ? 1 : period === 30 ? 4 : 12;
+        for (let i = weeks; i >= 1; i--) {
+            const date = new Date();
+            date.setDate(now.getDate() - (i * 7));
             
-            return { labels, data };
-        },
+            const weekStart = new Date(date);
+            weekStart.setDate(date.getDate() - date.getDay());
+            
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            
+            // Format based on whether weeks span different months
+            if (weekStart.getMonth() === weekEnd.getMonth()) {
+                labels.push(`${weekStart.toLocaleDateString('en-US', { month: 'short' })} ${weekStart.getDate()}-${weekEnd.getDate()}`);
+            } else {
+                labels.push(`${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
+            }
+            data.push(80 + Math.random() * 15);
+        }
+    } else {
+        // Monthly granularity
+        const months = period === 90 ? 3 : 6;
+        for (let i = months; i >= 1; i--) {
+            const date = new Date();
+            date.setMonth(now.getMonth() - i);
+            
+            // Include year if it's different from current year
+            const showYear = date.getFullYear() !== now.getFullYear();
+            labels.push(date.toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: showYear ? 'numeric' : undefined 
+            }));
+            data.push(80 + Math.random() * 15);
+        }
+    }
+    
+    return { labels, data };
+},
         
         sentimentData: function() {
-            const positive = 60 + Math.random() * 15;
-            const neutral = 20 + Math.random() * 10;
-            const negative = 100 - positive - neutral;
-            
             return {
-                positive: parseFloat(positive.toFixed(1)),
-                neutral: parseFloat(neutral.toFixed(1)),
-                negative: parseFloat(negative.toFixed(1))
+                positive: 72.5,
+                neutral: 18.3,
+                negative: 9.2
             };
         },
         
-        agentPerformance: function(sortBy) {
+        companyPerformance: function(sortBy, period) {
+            // Calculate total calls based on period
+            let totalCalls;
+            if (period === 7) {
+                totalCalls = 12;
+            } else if (period === 30) {
+                totalCalls = 53;
+            } else {
+                totalCalls = 158;
+            }
+            
+            // Distribute calls between 7 companies
+            const companyCalls = this.distributeCalls(totalCalls, 7);
+            
+            const companies = [
+                { name: "TechCorp Inc.", id: "hassan", score: 94.2, trend: 3.2, calls: companyCalls[0] },
+                { name: "Global Solutions", id: "hassan", score: 89.5, trend: 1.1, calls: companyCalls[1] },
+                { name: "Innovate LLC", id: "hassan", score: 87.8, trend: 0.0, calls: companyCalls[2] },
+                { name: "DataSystems", id: "hassan", score: 76.4, trend: -2.4, calls: companyCalls[3] },
+                { name: "FutureTech", id: "hassan", score: 91.2, trend: 2.1, calls: companyCalls[4] },
+                { name: "CloudMasters", id: "hassan", score: 83.7, trend: -1.2, calls: companyCalls[5] },
+                { name: "NextGen Corp", id: "hassan", score: 88.9, trend: 1.5, calls: companyCalls[6] }
+            ];
+            
+            // Sort based on selection
+            if (sortBy === 'score') {
+                companies.sort((a, b) => b.score - a.score);
+            } else if (sortBy === 'volume') {
+                companies.sort((a, b) => b.calls - a.calls);
+            } else if (sortBy === 'improvement') {
+                companies.sort((a, b) => b.trend - a.trend);
+            }
+            
+            return companies;
+        },
+        
+        agentPerformance: function(sortBy, period) {
+            // Calculate total calls based on period
+            let totalCalls;
+            if (period === 7) {
+                totalCalls = 12;
+            } else if (period === 30) {
+                totalCalls = 53;
+            } else {
+                totalCalls = 158;
+            }
+            
+            // Distribute calls between agents
+            const agentCalls = this.distributeCalls(totalCalls, 5);
+            
             const agents = [
                 { 
                     name: "Sarah Lee", 
                     company: "TechCorp Inc.", 
                     score: 97.4, 
                     trend: 4.2, 
-                    calls: 187,
+                    calls: agentCalls[0],
                     avatar: "https://ui-avatars.com/api/?name=Sarah+Lee&background=10B981&color=fff"
                 },
                 { 
@@ -527,7 +615,7 @@
                     company: "Global Solutions", 
                     score: 93.1, 
                     trend: 1.8, 
-                    calls: 156,
+                    calls: agentCalls[1],
                     avatar: "https://ui-avatars.com/api/?name=Michael+Chen&background=4F46E5&color=fff"
                 },
                 { 
@@ -535,7 +623,7 @@
                     company: "DataSystems", 
                     score: 72.5, 
                     trend: -3.1, 
-                    calls: 98,
+                    calls: agentCalls[2],
                     avatar: "https://ui-avatars.com/api/?name=David+Kim&background=EF4444&color=fff"
                 },
                 { 
@@ -543,7 +631,7 @@
                     company: "FutureTech", 
                     score: 95.2, 
                     trend: 2.8, 
-                    calls: 134,
+                    calls: agentCalls[3],
                     avatar: "https://ui-avatars.com/api/?name=Emma+Wilson&background=8B5CF6&color=fff"
                 },
                 { 
@@ -551,7 +639,7 @@
                     company: "CloudMasters", 
                     score: 88.3, 
                     trend: -0.5, 
-                    calls: 112,
+                    calls: agentCalls[4],
                     avatar: "https://ui-avatars.com/api/?name=James+Brown&background=F59E0B&color=fff"
                 }
             ];
@@ -567,6 +655,28 @@
                 agents.sort((a, b) => b.score - a.score);
                 return agents;
             }
+        },
+        
+        // Helper function to distribute calls between entities
+        distributeCalls: function(totalCalls, numberOfEntities) {
+            const calls = [];
+            let remainingCalls = totalCalls;
+            
+            // Distribute calls with some variation
+            for (let i = 0; i < numberOfEntities - 1; i++) {
+                // Allocate between 10% and 25% of remaining calls
+                const maxAllocation = Math.min(Math.floor(remainingCalls * 0.25), Math.floor(remainingCalls / (numberOfEntities - i)));
+                const minAllocation = Math.max(1, Math.floor(remainingCalls * 0.1));
+                
+                const allocated = Math.floor(Math.random() * (maxAllocation - minAllocation + 1)) + minAllocation;
+                calls.push(allocated);
+                remainingCalls -= allocated;
+            }
+            
+            // Add remaining calls to the last entity
+            calls.push(remainingCalls);
+            
+            return calls;
         }
     };
 

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use App\Services\ExternalApiService;
+
 class AgentController extends Controller
 {
     protected $apiService;
@@ -89,7 +90,6 @@ class AgentController extends Controller
 
         $summary = $summaryResult['data'];
         $agents = $agentsResult['agents'];
-        
         return view('user.agents.index', compact('summary', 'agents'));
     }
     public function getPerformanceData($agentId)
