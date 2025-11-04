@@ -19,6 +19,27 @@ class HomeController extends Controller
         return view('user.dashboard');
     }
 
+    public function setActiveProduct(Request $request)
+    {
+        $productId = $request->input('product_id');
+        
+        // 🔹 Clear previous product-specific session data
+        session()->forget([
+            'product_1_data',
+            'product_2_data',
+            'product_3_data',
+            'product_filters',
+            'product_settings',
+            'dashboard_state',
+            // Add any other product-specific session keys you use
+        ]);
+        
+        // 🔹 Set new active product
+        session(['active_product' => $productId]);
+        
+        return response()->json(['success' => true]);
+    }
+
 
     
     // public function profile()
