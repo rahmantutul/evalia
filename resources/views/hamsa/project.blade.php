@@ -1,7 +1,7 @@
 @extends('user.layouts.app')
 
 @section('content')
-{{--  <div class="container-fluid">
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-8">
             <div class="card">
@@ -148,5 +148,5 @@ function copyToClipboard(button) {
     }, 2000);
 }
 </script> 
-@endsection --}}
+@endsection
 @endsection

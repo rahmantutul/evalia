@@ -8,38 +8,16 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Exception;
-
-/**
- * Hamsa API Controller
- * 
- * Handles all web and API routes for Hamsa integration
- * 
- * @package App\Http\Controllers
- */
+use Illuminate\Pagination\LengthAwarePaginator;
 class HamsaController extends Controller
 {
-    /**
-     * @var HamsaService
-     */
     protected HamsaService $hamsaService;
 
-    /**
-     * Constructor with dependency injection
-     * 
-     * @param HamsaService $hamsaService
-     */
     public function __construct(HamsaService $hamsaService)
     {
         $this->hamsaService = $hamsaService;
     }
 
-    // ==================== WEB PAGES ====================
-
-    /**
-     * Show main dashboard with usage stats
-     * 
-     * @return View
-     */
     public function dashboard(): View
     {
         $usage = $this->hamsaService->makeRequest('get', '/usage/numbers');
@@ -53,103 +31,368 @@ class HamsaController extends Controller
         ]);
     }
 
-    /**
-     * Show transcription page
-     * 
-     * @return View
-     */
     public function transcribe(): View
     {
         return view('hamsa.transcribe');
     }
 
-    /**
-     * Show text-to-speech page
-     * 
-     * @return View
-     */
-    public function tts(): View
-    {
-        return view('hamsa.tts');
-    }
 
-    /**
-     * Show translation page
-     * 
-     * @return View
-     */
-    public function translate(): View
-    {
-        return view('hamsa.translate');
-    }
-
-    /**
-     * Show speech-to-speech page
-     * 
-     * @return View
-     */
     public function sts(): View
     {
         return view('hamsa.sts');
     }
 
-    /**
-     * Show AI generation page
-     * 
-     * @return View
-     */
     public function aiGenerate(): View
     {
         return view('hamsa.ai-generate');
     }
 
-    /**
-     * Show voice agents list
-     * 
-     * @return View
-     */
-    public function voiceAgents(): View
-    {
-        $result = $this->hamsaService->makeRequest('get', '/voice-agents');
-        $agents = $result['success'] ? ($result['data']['results'] ?? $result['data']) : [];
 
-        return view('hamsa.voice-agents', [
-            'agents' => $agents,
-            'error' => !$result['success'] ? $result['error'] : null,
+
+    public function jobs(Request $request): View
+    {
+        $projectId = '605ee5e1-3e22-41df-aa95-5d705a359dbd';
+        
+        $queryParams = [
+            'projectId' => $projectId
+        ];
+
+        $take = 30;
+        $page = max(1, (int) $request->get('page', 1));
+        
+        $skip = $page;
+
+        $requestBody = [
+            'take' => $take,
+            'skip' => $skip,
+            'sort' => [
+                'field' => 'createdAt',
+                'direction' => 'desc'
+            ]
+        ];
+
+        if ($request->filled('search')) {
+            $requestBody['search'] = $request->get('search');
+        }
+
+        if ($request->filled('status')) {
+            $requestBody['status'] = $request->get('status');
+        }
+
+        if ($request->filled('type')) {
+            $requestBody['type'] = $request->get('type');
+        }
+
+        $endpoint = '/jobs/all?' . http_build_query($queryParams);
+        $result = $this->hamsaService->makeRequest('POST', $endpoint, $requestBody);
+        
+        $jobs = [];
+        $pagination = [];
+        $error = null;
+        
+        if ($result['success']) {
+            $apiData = $result['data']['data'] ?? [];
+            $jobs = $apiData['jobs'] ?? [];
+            $total = $apiData['total'] ?? 0;
+            $filtered = count($jobs);
+
+            $pagination = [
+                'total' => $total,
+                'filtered' => $filtered,
+                'take' => $take,
+                'skip' => ($page - 1) * $take,  // For display: showing X to Y
+                'page' => $page,
+                'totalPages' => $total > 0 ? ceil($total / $take) : 1,
+            ];
+        } else {
+            $error = $result['error'] ?? 'Unknown error occurred';
+        }
+
+        $availableStatuses = ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'];
+        $availableTypes = ['TRANSCRIPTION', 'TTS', 'VOICE_AGENTS', 'AI_CONTENT'];
+        
+        return view('hamsa.jobs', [
+            'jobs' => $jobs,
+            'pagination' => $pagination,
+            'filters' => $request->all(),
+            'availableStatuses' => $availableStatuses,
+            'availableTypes' => $availableTypes,
+            'error' => $error,
         ]);
     }
 
-    /**
-     * Show conversations page
-     * 
-     * @return View
-     */
+
+
+    public function tts(): View
+    {
+         $result = $this->hamsaService->makeRequest('get', '/voice-agents');
+
+        if ($result['success'] && isset($result['data']['data']['voiceAgents'])) {
+            $agents = $result['data']['data']['voiceAgents'];
+        } else {
+            $agents = [];
+        }
+        return view('hamsa.tts',compact('agents'));
+    }
+
+       public function ttsSubmit(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'text' => 'required|string|max:5000',
+            'voice' => 'required',
+        ]);
+
+        try {
+            $payload = [
+                'voiceId' => $request->get('voice'), 
+                'text' => $request->get('text'),
+            ];
+
+            if ($request->filled('model')) {
+                $payload['model'] = $request->get('model');
+            }
+
+            if ($request->filled('speed')) {
+                $payload['speed'] = (float) $request->get('speed');
+            }
+
+            if ($request->filled('response_format')) {
+                $payload['responseFormat'] = $request->get('response_format');
+            }
+
+            $result = $this->hamsaService->makeRequest('post', '/jobs/text-to-speech', $payload);
+
+            if ($result['success']) {
+                $data = $result['data'];
+                
+                return back()
+                    ->with('success', 'Text-to-speech job created successfully!')
+                    ->with('job_id', $data['id'] ?? null)
+                    ->with('status', $data['status'] ?? null)
+                    ->with('media_url', $data['mediaUrl'] ?? null)
+                    ->with('result_data', $data);
+            }
+
+            return back()
+                ->with('error', 'TTS conversion failed: ' . ($result['error'] ?? $result['message'] ?? 'Unknown error'))
+                ->withInput();
+
+        } catch (Exception $e) {
+            return back()
+                ->with('error', 'Exception occurred: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+
+    public function translate(): View
+    {
+        return view('hamsa.translate');
+    }
+
+    public function translateSubmit(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+        'mediaUrl' => 'required',
+        'title' => 'nullable',
+        'language' => 'required',
+        'model' => 'required',
+        'processingType' => 'required|string|in:async,sync',
+        'webhookUrl' => 'nullable',
+        'returnSrtFormat' => 'nullable',
+        'srtOptions' => 'nullable',
+        'srtOptions.maxLinesPerSubtitle' => 'nullable|integer|min:1|max:10',
+        'srtOptions.singleSpeakerPerSubtitle' => 'nullable|boolean',
+        'srtOptions.maxCharsPerLine' => 'nullable|integer|min:1|max:100',
+        'srtOptions.maxMergeableGap' => 'nullable|numeric|min:0|max:10',
+        'srtOptions.minDuration' => 'nullable|numeric|min:0|max:60',
+        'srtOptions.maxDuration' => 'nullable|numeric|min:0|max:60',
+        'srtOptions.minGap' => 'nullable|numeric|min:0|max:10',
+    ]);
+
+    try {
+        // Prepare the request payload
+        $payload = [
+            'mediaUrl' => $validated['mediaUrl'],
+            'processingType' => $validated['processingType'],
+            'model' => $validated['model'],
+            'language' => $validated['language'],
+            'returnSrtFormat' => isset($validated['returnSrtFormat']) && $validated['returnSrtFormat'] == '1',
+        ];
+
+        // Add optional fields
+        if (!empty($validated['title'])) {
+            $payload['title'] = $validated['title'];
+        }
+
+        if (!empty($validated['webhookUrl'])) {
+            $payload['webhookUrl'] = $validated['webhookUrl'];
+        }
+
+        // Add SRT options if returnSrtFormat is true
+        if ($payload['returnSrtFormat'] && !empty($validated['srtOptions'])) {
+            $srtOptions = [];
+            
+            if (isset($validated['srtOptions']['maxLinesPerSubtitle'])) {
+                $srtOptions['maxLinesPerSubtitle'] = (int) $validated['srtOptions']['maxLinesPerSubtitle'];
+            }
+            
+            if (isset($validated['srtOptions']['singleSpeakerPerSubtitle'])) {
+                $srtOptions['singleSpeakerPerSubtitle'] = (bool) $validated['srtOptions']['singleSpeakerPerSubtitle'];
+            }
+            
+            if (isset($validated['srtOptions']['maxCharsPerLine'])) {
+                $srtOptions['maxCharsPerLine'] = (int) $validated['srtOptions']['maxCharsPerLine'];
+            }
+            
+            if (isset($validated['srtOptions']['maxMergeableGap'])) {
+                $srtOptions['maxMergeableGap'] = (float) $validated['srtOptions']['maxMergeableGap'];
+            }
+            
+            if (isset($validated['srtOptions']['minDuration'])) {
+                $srtOptions['minDuration'] = (float) $validated['srtOptions']['minDuration'];
+            }
+            
+            if (isset($validated['srtOptions']['maxDuration'])) {
+                $srtOptions['maxDuration'] = (float) $validated['srtOptions']['maxDuration'];
+            }
+            
+            if (isset($validated['srtOptions']['minGap'])) {
+                $srtOptions['minGap'] = (float) $validated['srtOptions']['minGap'];
+            }
+
+            if (!empty($srtOptions)) {
+                $payload['srtOptions'] = $srtOptions;
+            }
+        }
+
+        // Make the API request
+        $result = $this->hamsaService->makeRequest('post', '/jobs/transcribe', $payload);
+
+        if ($result['success']) {
+            $data = $result['data'];
+            
+            // Store the transcription result if available
+            $transcriptionText = $data['transcription'] ?? $data['text'] ?? '';
+            
+            return back()
+                ->with('success', 'Transcription job submitted successfully!')
+                ->with('transcription_text', $transcriptionText)
+                ->with('result_data', $data);
+        }
+
+        return back()
+            ->with('error', 'Transcription failed: ' . $result['error'])
+            ->withInput();
+
+    } catch (Exception $e) {
+        return back()
+            ->with('error', 'Exception occurred: ' . $e->getMessage())
+            ->withInput();
+    }
+    }
+
+    public function voiceAgents(): View
+    {
+        $result = $this->hamsaService->makeRequest('get', '/voice-agents');
+
+        if ($result['success'] && isset($result['data']['data']['voiceAgents'])) {
+            $agents = $result['data']['data']['voiceAgents'];
+        } else {
+            $agents = [];
+        }
+
+        return view('hamsa.voice-agents', [
+            'agents' => $agents,
+            'error' => !$result['success'] ? ($result['error'] ?? 'Unknown error') : null,
+        ]);
+    }
+    
+    public function createVoiceAgent(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'voice_id' => 'required|string',
+            'language' => 'required|string|max:10',
+            'prompt' => 'required|string|max:4000',
+            'greeting_message' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $apiData = [
+                'agentName' => $validated['name'],
+                'voiceId' => $validated['voice_id'],
+                'lang' => $validated['language'],
+                'preamble' => $validated['prompt'],
+                'greetingMessage' => $validated['greeting_message'] ?? 'Hello, how can I help you today?',
+                'interrupt' => $validated['allow_interruptions'] ?? true,
+                'silenceTimeout' => 800,
+                'maxDuration' => 600,
+                'webhook' => '',
+                'model' => 'gpt-4',
+                'silenceThreshold' => 800,
+                'realTime' => false,
+                'pokeMessages' => [],
+                'outcome' => null,
+                'params' => new \stdClass(),
+                'tools' => [
+                    'genderDetection' => false,
+                    'smartCallEnd' => false
+                ]
+            ];
+
+            $result = $this->hamsaService->makeRequest('post', '/voice-agents', $apiData);
+            
+            if ($result['success']) {
+                return redirect()
+                    ->route('hamsa.voice-agents')
+                    ->with('success', 'Voice agent created successfully!');
+            }
+
+            return back()
+                ->with('error', 'Failed to create voice agent: ' . ($result['error'] ?? 'Unknown error'))
+                ->withInput();
+
+        } catch (Exception $e) {
+            return back()
+                ->with('error', 'Exception occurred: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function conversations(): View
     {
         return view('hamsa.conversations');
     }
 
-    /**
-     * Show jobs list
-     * 
-     * @return View
-     */
-    public function jobs(): View
-    {
-        $result = $this->hamsaService->makeRequest('get', '/jobs', ['limit' => 50]);
-        $jobs = $result['success'] ? ($result['data']['results'] ?? $result['data']) : [];
-
-        return view('hamsa.jobs', [
-            'jobs' => $jobs,
-            'error' => !$result['success'] ? $result['error'] : null,
-        ]);
-    }
-
-    /**
-     * Show usage statistics
-     * 
-     * @return View
-     */
     public function usage(): View
     {
         $numbers = $this->hamsaService->makeRequest('get', '/usage/numbers');
@@ -163,11 +406,6 @@ class HamsaController extends Controller
         ]);
     }
 
-    /**
-     * Show project details
-     * 
-     * @return View
-     */
     public function project(): View
     {
         $result = $this->hamsaService->makeRequest('get', '/project');
@@ -179,14 +417,6 @@ class HamsaController extends Controller
         ]);
     }
 
-    // ==================== FORM SUBMISSIONS ====================
-
-    /**
-     * Submit audio file for transcription
-     * 
-     * @param Request $request
-     * @return RedirectResponse
-     */
     public function transcribeSubmit(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -248,105 +478,6 @@ class HamsaController extends Controller
         }
     }
 
-    /**
-     * Submit text for text-to-speech conversion
-     * 
-     * @param Request $request
-     * @return RedirectResponse
-     */
-    public function ttsSubmit(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'text' => 'required|string|max:5000',
-            'voice' => 'required|string|in:alloy,echo,fable,onyx,nova,shimmer',
-            'model' => 'nullable|string|in:tts-1,tts-1-hd',
-            'speed' => 'nullable|numeric|between:0.25,4.0',
-            'response_format' => 'nullable|string|in:mp3,opus,aac,flac,wav',
-        ]);
-
-        try {
-            $payload = [
-                'text' => $request->get('text'),
-                'voice' => $request->get('voice'),
-            ];
-
-            if ($request->filled('model')) {
-                $payload['model'] = $request->get('model');
-            }
-
-            if ($request->filled('speed')) {
-                $payload['speed'] = (float) $request->get('speed');
-            }
-
-            if ($request->filled('response_format')) {
-                $payload['response_format'] = $request->get('response_format');
-            }
-
-            $result = $this->hamsaService->makeRequest('post', '/tts', $payload);
-
-            if ($result['success']) {
-                $data = $result['data'];
-                return back()
-                    ->with('success', 'Text-to-speech conversion successful!')
-                    ->with('audio_url', $data['audio_url'] ?? null)
-                    ->with('job_id', $data['job_id'] ?? null)
-                    ->with('result_data', $data);
-            }
-
-            return back()
-                ->with('error', 'TTS conversion failed: ' . $result['error'])
-                ->withInput();
-
-        } catch (Exception $e) {
-            return back()
-                ->with('error', 'Exception occurred: ' . $e->getMessage())
-                ->withInput();
-        }
-    }
-
-    /**
-     * Submit text for translation
-     * 
-     * @param Request $request
-     * @return RedirectResponse
-     */
-    public function translateSubmit(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'text' => 'required|string|max:5000',
-            'target_language' => 'required|string|max:10',
-            'source_language' => 'nullable|string|max:10',
-            'model' => 'nullable|string',
-        ]);
-
-        try {
-            $result = $this->hamsaService->makeRequest('post', '/translate', $validated);
-
-            if ($result['success']) {
-                $data = $result['data'];
-                return back()
-                    ->with('success', 'Translation completed successfully!')
-                    ->with('translated_text', $data['translated_text'] ?? $data['translation'] ?? '')
-                    ->with('result_data', $data);
-            }
-
-            return back()
-                ->with('error', 'Translation failed: ' . $result['error'])
-                ->withInput();
-
-        } catch (Exception $e) {
-            return back()
-                ->with('error', 'Exception occurred: ' . $e->getMessage())
-                ->withInput();
-        }
-    }
-
-    /**
-     * Submit audio for speech-to-speech conversion
-     * 
-     * @param Request $request
-     * @return RedirectResponse
-     */
     public function stsSubmit(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -405,12 +536,6 @@ class HamsaController extends Controller
         }
     }
 
-    /**
-     * Submit prompt for AI content generation
-     * 
-     * @param Request $request
-     * @return RedirectResponse
-     */
     public function aiGenerateSubmit(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -442,50 +567,7 @@ class HamsaController extends Controller
         }
     }
 
-    /**
-     * Create a new voice agent
-     * 
-     * @param Request $request
-     * @return RedirectResponse
-     */
-    public function createVoiceAgent(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'voice' => 'required|string|in:alloy,echo,fable,onyx,nova,shimmer',
-            'language' => 'required|string|max:10',
-            'prompt' => 'required|string|max:4000',
-            'greeting_message' => 'nullable|string|max:500',
-            'model' => 'nullable|string',
-        ]);
 
-        try {
-            $result = $this->hamsaService->makeRequest('post', '/voice-agents', $validated);
-
-            if ($result['success']) {
-                return redirect()
-                    ->route('hamsa.voice-agents')
-                    ->with('success', 'Voice agent created successfully!');
-            }
-
-            return back()
-                ->with('error', 'Failed to create voice agent: ' . $result['error'])
-                ->withInput();
-
-        } catch (Exception $e) {
-            return back()
-                ->with('error', 'Exception occurred: ' . $e->getMessage())
-                ->withInput();
-        }
-    }
-
-    /**
-     * Update an existing voice agent
-     * 
-     * @param Request $request
-     * @param string $agentId
-     * @return RedirectResponse
-     */
     public function updateVoiceAgent(Request $request, string $agentId): RedirectResponse
     {
         $validated = $request->validate([
@@ -515,12 +597,6 @@ class HamsaController extends Controller
         }
     }
 
-    /**
-     * Delete a voice agent
-     * 
-     * @param string $agentId
-     * @return RedirectResponse
-     */
     public function deleteVoiceAgent(string $agentId): RedirectResponse
     {
         try {
@@ -539,12 +615,6 @@ class HamsaController extends Controller
         }
     }
 
-    /**
-     * Start a new conversation with voice agent
-     * 
-     * @param Request $request
-     * @return RedirectResponse
-     */
     public function startConversation(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -575,12 +645,6 @@ class HamsaController extends Controller
         }
     }
 
-    /**
-     * Stop an active conversation
-     * 
-     * @param string $conversationId
-     * @return RedirectResponse
-     */
     public function stopConversation(string $conversationId): RedirectResponse
     {
         try {
@@ -597,14 +661,6 @@ class HamsaController extends Controller
         }
     }
 
-    // ==================== API/AJAX ENDPOINTS ====================
-
-    /**
-     * Get transcription job details (API)
-     * 
-     * @param string $jobId
-     * @return JsonResponse
-     */
     public function getTranscriptionJob(string $jobId): JsonResponse
     {
         $result = $this->hamsaService->makeRequest('get', "/transcribe/{$jobId}");
@@ -619,12 +675,6 @@ class HamsaController extends Controller
         ], $result['status']);
     }
 
-    /**
-     * Get TTS job details (API)
-     * 
-     * @param string $jobId
-     * @return JsonResponse
-     */
     public function getTtsJob(string $jobId): JsonResponse
     {
         $result = $this->hamsaService->makeRequest('get', "/tts/{$jobId}");
@@ -639,12 +689,6 @@ class HamsaController extends Controller
         ], $result['status']);
     }
 
-    /**
-     * Get speech-to-speech job details (API)
-     * 
-     * @param string $jobId
-     * @return JsonResponse
-     */
     public function getStsJob(string $jobId): JsonResponse
     {
         $result = $this->hamsaService->makeRequest('get', "/sts/{$jobId}");
@@ -659,58 +703,33 @@ class HamsaController extends Controller
         ], $result['status']);
     }
 
-    /**
-     * Get general job details (API)
-     * 
-     * @param string $jobId
-     * @return JsonResponse
-     */
-    public function getJob(string $jobId): JsonResponse
+    public function getJob(string $jobId)
     {
-        $result = $this->hamsaService->makeRequest('get', "/jobs/{$jobId}");
+        $endpoint = "/jobs";
+        
+        // Pass jobId as query parameters for GET request
+        $queryParams = [
+            'jobId' => $jobId
+        ];
+        
+        $result = $this->hamsaService->makeRequest('GET', $endpoint, $queryParams);
         
         if ($result['success']) {
-            return response()->json($result['data']);
+            // dd($result['data']['data']['data']);
+            // Extract the actual job data from the nested response
+            $jobData = $result['data']['data']['data'] ?? $result['data']['data'] ?? [];
+            
+            return view('hamsa.job-details', [
+                'job' => $jobData
+            ]);
         }
 
-        return response()->json([
-            'error' => $result['error'],
-            'message' => 'Failed to retrieve job'
-        ], $result['status']);
-    }
-
-    /**
-     * Get all jobs (API)
-     * 
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function getJobs(Request $request): JsonResponse
-    {
-        $limit = $request->get('limit', 20);
-        $offset = $request->get('offset', 0);
-        
-        $result = $this->hamsaService->makeRequest('get', '/jobs', [
-            'limit' => $limit,
-            'offset' => $offset,
+        return view('hamsa.job-details', [
+            'error' => $result['error'] ?? 'Failed to retrieve job'
         ]);
-        
-        if ($result['success']) {
-            return response()->json($result['data']);
-        }
-
-        return response()->json([
-            'error' => $result['error'],
-            'message' => 'Failed to retrieve jobs'
-        ], $result['status']);
     }
 
-    /**
-     * Get voice agent details (API)
-     * 
-     * @param string $agentId
-     * @return JsonResponse
-     */
+    
     public function getVoiceAgent(string $agentId): JsonResponse
     {
         $result = $this->hamsaService->makeRequest('get', "/voice-agents/{$agentId}");
@@ -725,11 +744,6 @@ class HamsaController extends Controller
         ], $result['status']);
     }
 
-    /**
-     * Get all voice agents (API)
-     * 
-     * @return JsonResponse
-     */
     public function getVoiceAgents(): JsonResponse
     {
         $result = $this->hamsaService->makeRequest('get', '/voice-agents');
@@ -744,12 +758,6 @@ class HamsaController extends Controller
         ], $result['status']);
     }
 
-    /**
-     * Get conversation details (API)
-     * 
-     * @param string $conversationId
-     * @return JsonResponse
-     */
     public function getConversation(string $conversationId): JsonResponse
     {
         $result = $this->hamsaService->makeRequest('get', "/conversations/{$conversationId}");
@@ -764,11 +772,6 @@ class HamsaController extends Controller
         ], $result['status']);
     }
 
-    /**
-     * Get usage statistics (API)
-     * 
-     * @return JsonResponse
-     */
     public function getUsageNumbers(): JsonResponse
     {
         $result = $this->hamsaService->makeRequest('get', '/usage/numbers');
@@ -783,12 +786,6 @@ class HamsaController extends Controller
         ], $result['status']);
     }
 
-    /**
-     * Get usage charts (API)
-     * 
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function getUsageCharts(Request $request): JsonResponse
     {
         $period = $request->get('period', 'week');
@@ -807,11 +804,6 @@ class HamsaController extends Controller
         ], $result['status']);
     }
 
-    /**
-     * Get project details (API)
-     * 
-     * @return JsonResponse
-     */
     public function getProject(): JsonResponse
     {
         $result = $this->hamsaService->makeRequest('get', '/project');
@@ -826,11 +818,6 @@ class HamsaController extends Controller
         ], $result['status']);
     }
 
-    /**
-     * Test API connection
-     * 
-     * @return JsonResponse
-     */
     public function testConnection(): JsonResponse
     {
         try {

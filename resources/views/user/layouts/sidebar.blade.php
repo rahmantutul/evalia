@@ -70,27 +70,39 @@
                             <span class="menu-title">Dashboard</span>
                         </a>
                     </li>
-
-                    <li class="nav-item {{ Request::is('hamsa/transcribe*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ url('/hamsa/transcribe') }}">
-                            <i class="fas fa-microphone-alt menu-icon"></i>
-                            <span class="menu-title">Speech to Text</span>
+                    <li class="nav-item {{ Request::is('hamsa/jobs*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('/hamsa/jobs') }}">
+                            <i class="fas fa-tasks menu-icon"></i>
+                            <span class="menu-title">Jobs</span>
                         </a>
                     </li>
-
                     <li class="nav-item {{ Request::is('hamsa/tts*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('/hamsa/tts') }}">
                             <i class="fas fa-volume-up menu-icon"></i>
                             <span class="menu-title">Text to Speech</span>
                         </a>
                     </li>
-
                     <li class="nav-item {{ Request::is('hamsa/translate*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('/hamsa/translate') }}">
                             <i class="fas fa-language menu-icon"></i>
                             <span class="menu-title">Translation</span>
                         </a>
                     </li>
+                    <li class="nav-item {{ Request::is('hamsa/voice-agents*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('/hamsa/voice-agents') }}">
+                            <i class="fas fa-headset menu-icon"></i>
+                            <span class="menu-title">Voice Agents</span>
+                        </a>
+                    </li>
+                    {{--  <li class="nav-item {{ Request::is('hamsa/transcribe*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('/hamsa/transcribe') }}">
+                            <i class="fas fa-microphone-alt menu-icon"></i>
+                            <span class="menu-title">Speech to Text</span>
+                        </a>
+                    </li>  --}}
+                  
+
+
 
                     <li class="nav-item {{ Request::is('hamsa/sts*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('/hamsa/sts') }}">
@@ -105,14 +117,6 @@
                             <span class="menu-title">AI Content</span>
                         </a>
                     </li>
-
-                    <li class="nav-item {{ Request::is('hamsa/voice-agents*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ url('/hamsa/voice-agents') }}">
-                            <i class="fas fa-headset menu-icon"></i>
-                            <span class="menu-title">Voice Agents</span>
-                        </a>
-                    </li>
-
                     <li class="nav-item {{ Request::is('hamsa/conversations*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('/hamsa/conversations') }}">
                             <i class="fas fa-phone menu-icon"></i>
@@ -120,19 +124,12 @@
                         </a>
                     </li>
 
-                    <li class="nav-item {{ Request::is('hamsa/jobs*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ url('/hamsa/jobs') }}">
-                            <i class="fas fa-tasks menu-icon"></i>
-                            <span class="menu-title">Jobs</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-item {{ Request::is('hamsa/usage*') ? 'active' : '' }}">
+                    {{--  <li class="nav-item {{ Request::is('hamsa/usage*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('/hamsa/usage') }}">
                             <i class="fas fa-chart-bar menu-icon"></i>
                             <span class="menu-title">Usage Analytics</span>
                         </a>
-                    </li>
+                    </li>  --}}
 
                     <li class="nav-item {{ Request::is('hamsa/project*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('/hamsa/project') }}">

@@ -7,42 +7,17 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Client\Response;
 use Exception;
 
-/**
- * Hamsa API Service
- * 
- * Complete integration with Hamsa API (https://docs.tryhamsa.com)
- * Handles all API interactions including authentication, transcription,
- * text-to-speech, translation, voice agents, and more.
- * 
- * @package App\Services
- */
 class HamsaService
 {
-    /**
-     * @var string Base URL for Hamsa API
-     */
+
     protected string $baseUrl;
 
-    /**
-     * @var string API Key for authentication
-     */
     protected string $apiKey;
 
-    /**
-     * @var int Default timeout for requests (seconds)
-     */
     protected int $timeout = 60;
 
-    /**
-     * @var int Timeout for file upload requests (seconds)
-     */
     protected int $fileTimeout = 180;
 
-    /**
-     * Initialize the service with configuration
-     * 
-     * @throws Exception if API key is not configured
-     */
     public function __construct()
     {
         $this->baseUrl = config('services.hamsa.base_url');
@@ -53,38 +28,35 @@ class HamsaService
         }
     }
 
-    /**
-     * Make authenticated API request to Hamsa
-     * 
-     * @param string $method HTTP method (get, post, put, delete, patch)
-     * @param string $endpoint API endpoint (e.g., '/transcribe')
-     * @param array $data Request payload
-     * @param array $headers Additional headers
-     * @return array Response with success status, data/error, and HTTP status
-     */
     public function makeRequest(string $method, string $endpoint, array $data = [], array $headers = []): array
     {
         $url = $this->baseUrl . $endpoint;
-        
+    
         $defaultHeaders = [
             'Authorization' => 'Token ' . $this->apiKey,
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
         ];
-
+    
         $fullHeaders = array_merge($defaultHeaders, $headers);
 
         try {
-            $startTime = microtime(true);
-            
-            $response = Http::withHeaders($fullHeaders)
-                ->timeout($this->timeout)
-                ->{$method}($url, $data);
+            $httpClient = Http::withHeaders($fullHeaders)->timeout($this->timeout);
 
-            $duration = round((microtime(true) - $startTime) * 1000, 2);
+            // Handle GET requests differently - use query parameters
+            if (strtolower($method) === 'get') {
+                $response = $httpClient->get($url, $data); // This will add data as query params
+            } else {
+                // For POST/PUT/PATCH, send data as JSON body
+                $response = $httpClient->{$method}($url, $data);
+            }
 
-            // Log to custom channel if exists, otherwise use default
-            $this->logRequest($method, $endpoint, $duration, $response->status(), $data);
+            \Log::info('Hamsa API Response', [
+                'url' => $url,
+                'method' => $method,
+                'status' => $response->status(),
+                'response' => $response->json() ?? $response->body()
+            ]);
 
             if ($response->successful()) {
                 return [
@@ -104,25 +76,21 @@ class HamsaService
                 'raw_response' => $response->body(),
             ];
 
-        } catch (Exception $e) {
-            $this->logError($method, $endpoint, $e->getMessage());
+        } catch (\Exception $e) {
+            \Log::error('Hamsa API Request Failed', [
+                'url' => $url,
+                'method' => $method,
+                'error' => $e->getMessage()
+            ]);
 
             return [
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => 'API request failed: ' . $e->getMessage(),
                 'status' => 500,
             ];
         }
     }
 
-    /**
-     * Make file upload request with multipart form data
-     * 
-     * @param string $method HTTP method (typically 'post')
-     * @param string $endpoint API endpoint
-     * @param array $multipartData Array of multipart form data
-     * @return array Response with success status, data/error, and HTTP status
-     */
     public function makeFileRequest(string $method, string $endpoint, array $multipartData = []): array
     {
         $url = $this->baseUrl . $endpoint;
@@ -169,46 +137,34 @@ class HamsaService
         }
     }
 
-    /**
-     * Parse error response from API
-     * 
-     * @param Response $response
-     * @return string Formatted error message
-     */
     protected function parseErrorResponse(Response $response): string
     {
         try {
             $body = $response->json();
             
-            // Check common error formats
+            // Check common error formats and ensure string output
             if (isset($body['error'])) {
                 return is_string($body['error']) ? $body['error'] : json_encode($body['error']);
             }
             
             if (isset($body['message'])) {
-                return $body['message'];
+                return is_string($body['message']) ? $body['message'] : json_encode($body['message']);
             }
             
             if (isset($body['detail'])) {
-                return $body['detail'];
+                return is_string($body['detail']) ? $body['detail'] : json_encode($body['detail']);
             }
 
-            return $response->body() ?: 'Unknown error occurred';
+            // Handle cases where the response body might be a simple string
+            $responseBody = $response->body();
+            return !empty($responseBody) ? $responseBody : 'Unknown error occurred';
             
         } catch (Exception $e) {
-            return $response->body() ?: 'Failed to parse error response';
+            $responseBody = $response->body();
+            return !empty($responseBody) ? $responseBody : 'Failed to parse error response';
         }
     }
 
-    /**
-     * Log API request
-     * 
-     * @param string $method
-     * @param string $endpoint
-     * @param float $duration
-     * @param int $status
-     * @param array $data
-     */
     protected function logRequest(string $method, string $endpoint, float $duration, int $status, array $data = []): void
     {
         try {
@@ -230,13 +186,6 @@ class HamsaService
         }
     }
 
-    /**
-     * Log API error
-     * 
-     * @param string $method
-     * @param string $endpoint
-     * @param string $error
-     */
     protected function logError(string $method, string $endpoint, string $error): void
     {
         try {
@@ -256,57 +205,28 @@ class HamsaService
         }
     }
 
-    /**
-     * Test API connection and authentication
-     * 
-     * @return array Result with connection status
-     */
     public function testConnection(): array
     {
         return $this->makeRequest('get', '/project');
     }
 
-    // ==================== HELPER METHODS ====================
-
-    /**
-     * Set custom timeout for requests
-     * 
-     * @param int $seconds
-     * @return self
-     */
     public function setTimeout(int $seconds): self
     {
         $this->timeout = $seconds;
         return $this;
     }
 
-    /**
-     * Set custom timeout for file uploads
-     * 
-     * @param int $seconds
-     * @return self
-     */
     public function setFileTimeout(int $seconds): self
     {
         $this->fileTimeout = $seconds;
         return $this;
     }
 
-    /**
-     * Get the base URL
-     * 
-     * @return string
-     */
     public function getBaseUrl(): string
     {
         return $this->baseUrl;
     }
 
-    /**
-     * Check if API key is configured
-     * 
-     * @return bool
-     */
     public function isConfigured(): bool
     {
         return !empty($this->apiKey);

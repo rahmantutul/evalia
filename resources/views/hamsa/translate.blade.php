@@ -1,475 +1,286 @@
 @extends('user.layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-xxl-10 col-xl-11 col-lg-12">
-            <!-- Header Section -->
-            <div class="d-flex justify-content-between align-items-center mb-5">
-                <div>
-                    <h1 class="h3 mb-2 text-gray-800 fw-bold">
-                        <i class="fas fa-language text-primary me-2"></i>AI Translation
-                    </h1>
-                    <p class="text-muted">Translate text between 100+ languages with advanced AI accuracy</p>
-                </div>
-                <div class="d-flex align-items-center">
-                    <span class="badge bg-light text-dark border me-3">
-                        <i class="fas fa-globe text-info me-1"></i>100+ Languages
-                    </span>
-                </div>
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Audio/Video Transcription</h1>
+
+        {{-- Success Message --}}
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                {{ session('success') }}
             </div>
+        @endif
 
-            <!-- Success Alert -->
-            @if(session('success'))
-                <div class="alert alert-success border-0 shadow-sm mb-5">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-check-circle fa-2x text-success"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h5 class="alert-heading mb-3">Translation Complete!</h5>
-                            <div class="translation-result p-4 bg-light rounded-3 border">
-                                <div class="row g-4">
-                                    <div class="col-md-6">
-                                        <div class="source-text">
-                                            <strong class="text-muted d-block mb-2">
-                                                <i class="fas fa-arrow-right me-1"></i>Original Text
-                                            </strong>
-                                            <div class="p-3 bg-white rounded-2 border">
-                                                {{ old('text') }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="translated-text">
-                                            <strong class="text-primary d-block mb-2">
-                                                <i class="fas fa-flag me-1"></i>Translated Text
-                                            </strong>
-                                            <div class="p-3 bg-white rounded-2 border border-primary">
-                                                {{ session('translated_text') }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-3 d-flex gap-2 flex-wrap">
-                                    <button class="btn btn-outline-primary btn-sm" onclick="copyTranslation()">
-                                        <i class="fas fa-copy me-1"></i>Copy Translation
-                                    </button>
-                                    <button class="btn btn-outline-success btn-sm">
-                                        <i class="fas fa-download me-1"></i>Export Text
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="swapLanguages()">
-                                        <i class="fas fa-exchange-alt me-1"></i>Swap Languages
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            <div class="row g-4">
-                <!-- Main Translation Card -->
-                <div class="col-lg-8">
-                    <div class="card border-0 shadow-lg">
-                        <div class="card-header bg-white py-4 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h4 class="card-title mb-0 fw-bold text-dark">
-                                    <i class="fas fa-exchange-alt text-primary me-2"></i>Translate Text
-                                </h4>
-                                <span class="badge bg-success bg-opacity-10 text-success">Real-time</span>
-                            </div>
-                        </div>
-                        
-                        <div class="card-body p-5">
-                            <form method="POST" action="{{ url('/hamsa/translate') }}" id="translationForm">
-                                @csrf
-                                
-                                <!-- Text Input Section -->
-                                <div class="mb-5">
-                                    <label for="text" class="form-label fw-semibold text-dark mb-3">
-                                        <i class="fas fa-edit text-primary me-2"></i>Text to Translate
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <textarea class="form-control form-control-lg border-2" 
-                                              id="text" 
-                                              name="text" 
-                                              rows="5" 
-                                              placeholder="Enter the text you want to translate. You can paste up to 5000 characters..."
-                                              required>{{ old('text') }}</textarea>
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <small class="form-text text-muted">
-                                            <i class="fas fa-lightbulb me-1"></i>
-                                            For best results, use complete sentences with proper punctuation
-                                        </small>
-                                        <small class="text-muted" id="charCount">0/5000 characters</small>
-                                    </div>
-                                </div>
-
-                                <!-- Language Selection Section -->
-                                <div class="row g-4 mb-5">
-                                    <div class="col-md-6">
-                                        <div class="card border-0 bg-light h-100">
-                                            <div class="card-body">
-                                                <label for="source_language" class="form-label fw-semibold text-dark">
-                                                    <i class="fas fa-search text-primary me-2"></i>Source Language
-                                                </label>
-                                                <select class="form-select border-0 shadow-sm" id="source_language" name="source_language">
-                                                    <option value="auto" selected>Auto-detect Language</option>
-                                                    <optgroup label="Popular Languages">
-                                                        <option value="en">English</option>
-                                                        <option value="ar">Arabic</option>
-                                                        <option value="fr">French</option>
-                                                        <option value="es">Spanish</option>
-                                                        <option value="de">German</option>
-                                                    </optgroup>
-                                                    <optgroup label="Other Languages">
-                                                        <option value="it">Italian</option>
-                                                        <option value="pt">Portuguese</option>
-                                                        <option value="ru">Russian</option>
-                                                        <option value="zh">Chinese</option>
-                                                        <option value="ja">Japanese</option>
-                                                        <option value="ko">Korean</option>
-                                                        <option value="hi">Hindi</option>
-                                                    </optgroup>
-                                                </select>
-                                                <small class="form-text text-muted mt-2 d-block">
-                                                    Let AI detect the language automatically
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-6">
-                                        <div class="card border-0 bg-light h-100">
-                                            <div class="card-body">
-                                                <label for="target_language" class="form-label fw-semibold text-dark">
-                                                    <i class="fas fa-flag text-primary me-2"></i>Target Language
-                                                    <span class="text-danger">*</span>
-                                                </label>
-                                                <select class="form-select border-0 shadow-sm" id="target_language" name="target_language" required>
-                                                    <optgroup label="Popular Languages">
-                                                        <option value="en" selected>English</option>
-                                                        <option value="ar">Arabic</option>
-                                                        <option value="fr">French</option>
-                                                        <option value="es">Spanish</option>
-                                                        <option value="de">German</option>
-                                                    </optgroup>
-                                                    <optgroup label="Other Languages">
-                                                        <option value="it">Italian</option>
-                                                        <option value="pt">Portuguese</option>
-                                                        <option value="ru">Russian</option>
-                                                        <option value="zh">Chinese</option>
-                                                        <option value="ja">Japanese</option>
-                                                        <option value="ko">Korean</option>
-                                                        <option value="hi">Hindi</option>
-                                                    </optgroup>
-                                                </select>
-                                                <div class="mt-3">
-                                                    <button type="button" class="btn btn-outline-primary btn-sm w-100" onclick="swapLanguages()">
-                                                        <i class="fas fa-exchange-alt me-1"></i>Swap Languages
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Translation Options -->
-                                <div class="row g-4 mb-5">
-                                    <div class="col-12">
-                                        <div class="card border-0 bg-light">
-                                            <div class="card-body">
-                                                <label class="form-label fw-semibold text-dark mb-3">
-                                                    <i class="fas fa-cog text-primary me-2"></i>Translation Options
-                                                </label>
-                                                <div class="row g-3">
-                                                    <div class="col-md-6">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" id="formal_tone" name="formal_tone">
-                                                            <label class="form-check-label text-dark" for="formal_tone">
-                                                                Use formal tone
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" id="preserve_formatting" name="preserve_formatting" checked>
-                                                            <label class="form-check-label text-dark" for="preserve_formatting">
-                                                                Preserve formatting
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Action Buttons -->
-                                <div class="d-flex justify-content-between align-items-center pt-4 border-top">
-                                    <div>
-                                        <small class="text-muted">
-                                            <i class="fas fa-shield-alt me-1"></i>
-                                            Your text is processed securely and privately
-                                        </small>
-                                    </div>
-                                    <div>
-                                        <button type="submit" class="btn btn-primary px-5 py-2 fw-semibold" id="translateBtn">
-                                            <i class="fas fa-exchange-alt me-2"></i>
-                                            <span class="translate-text">Translate Text</span>
-                                            <span class="loading-text d-none">
-                                                <span class="spinner-border spinner-border-sm me-2"></span>
-                                                Translating...
-                                            </span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Sidebar Information -->
-                <div class="col-lg-4">
-                    <!-- Supported Languages Card -->
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-white py-3 border-bottom">
-                            <h5 class="card-title mb-0 fw-semibold text-dark">
-                                <i class="fas fa-globe-americas text-primary me-2"></i>Supported Languages
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="language-categories">
-                                <div class="category mb-4">
-                                    <h6 class="fw-semibold text-dark mb-3">Popular Languages</h6>
-                                    <div class="language-grid mb-3">
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border-0 mb-2 me-2 px-3 py-2">English</span>
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border-0 mb-2 me-2 px-3 py-2">Arabic</span>
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border-0 mb-2 me-2 px-3 py-2">French</span>
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border-0 mb-2 me-2 px-3 py-2">Spanish</span>
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border-0 mb-2 me-2 px-3 py-2">German</span>
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border-0 mb-2 me-2 px-3 py-2">Chinese</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="category">
-                                    <h6 class="fw-semibold text-dark mb-3">Other Languages</h6>
-                                    <div class="language-grid">
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 mb-2 me-2 px-3 py-2">Japanese</span>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 mb-2 me-2 px-3 py-2">Korean</span>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 mb-2 me-2 px-3 py-2">Hindi</span>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 mb-2 me-2 px-3 py-2">Italian</span>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 mb-2 me-2 px-3 py-2">Portuguese</span>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 mb-2 me-2 px-3 py-2">Russian</span>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 mb-2 me-2 px-3 py-2">Dutch</span>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 mb-2 me-2 px-3 py-2">Turkish</span>
-                                        <span class="badge bg-success bg-opacity-10 text-success border-0 mb-2 me-2 px-3 py-2">+90 more</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Translation Tips Card -->
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white py-3 border-bottom">
-                            <h5 class="card-title mb-0 fw-semibold text-dark">
-                                <i class="fas fa-lightbulb text-warning me-2"></i>Translation Tips
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="tips-list">
-                                <div class="tip-item d-flex align-items-start mb-3">
-                                    <i class="fas fa-check-circle text-success mt-1 me-2"></i>
-                                    <div>
-                                        <strong class="text-dark">Use complete sentences</strong>
-                                        <p class="text-muted small mb-0">Context improves translation accuracy</p>
-                                    </div>
-                                </div>
-                                <div class="tip-item d-flex align-items-start mb-3">
-                                    <i class="fas fa-check-circle text-success mt-1 me-2"></i>
-                                    <div>
-                                        <strong class="text-dark">Check punctuation</strong>
-                                        <p class="text-muted small mb-0">Proper punctuation helps AI understand structure</p>
-                                    </div>
-                                </div>
-                                <div class="tip-item d-flex align-items-start mb-3">
-                                    <i class="fas fa-check-circle text-success mt-1 me-2"></i>
-                                    <div>
-                                        <strong class="text-dark">Be specific with terms</strong>
-                                        <p class="text-muted small mb-0">Technical terms may need clarification</p>
-                                    </div>
-                                </div>
-                                <div class="tip-item d-flex align-items-start">
-                                    <i class="fas fa-check-circle text-success mt-1 me-2"></i>
-                                    <div>
-                                        <strong class="text-dark">Use auto-detect</strong>
-                                        <p class="text-muted small mb-0">Let AI identify the source language automatically</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        {{-- Error Message --}}
+        @if(session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {{ session('error') }}
             </div>
+        @endif
+
+        {{-- Transcription Form --}}
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <form action="{{ url('/hamsa/translate') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+
+                {{-- Media URL Input --}}
+                <div class="mb-4">
+                    <label for="mediaUrl" class="block text-gray-700 font-medium mb-2">
+                        Media URL <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="url" 
+                        name="mediaUrl" 
+                        id="mediaUrl" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('mediaUrl') border-red-500 @enderror"
+                        value="{{ old('mediaUrl') }}"
+                        placeholder="https://example.com/audio.mp3"
+                        required
+                    >
+                    @error('mediaUrl')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                    <p class="text-gray-500 text-sm mt-1">Enter the URL of the audio or video file to transcribe</p>
+                </div>
+
+                {{-- Title Input --}}
+                <div class="mb-4">
+                    <label for="title" class="block text-gray-700 font-medium mb-2">
+                        Title (Optional)
+                    </label>
+                    <input 
+                        type="text" 
+                        name="title" 
+                        id="title" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('title') border-red-500 @enderror"
+                        value="{{ old('title') }}"
+                        placeholder="Enter a title for this transcription"
+                    >
+                    @error('title')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Language Selection --}}
+                <div class="mb-4">
+                    <label for="language" class="block text-gray-700 font-medium mb-2">
+                        Language <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        name="language" 
+                        id="language" 
+                        class="form-control"
+                        required
+                    >
+                        <option value="">Select Language</option>
+                        <option value="ar" {{ old('language') == 'ar' ? 'selected' : '' }}>Arabic (ar)</option>
+                        <option value="en" {{ old('language', 'en') == 'en' ? 'selected' : '' }}>English (en)</option>
+                    </select>
+                    @error('language')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Model Selection --}}
+                <div class="mb-4">
+                    <label for="model" class="block text-gray-700 font-medium mb-2">
+                        Model <span class="text-red-500">*</span>
+                    </label>
+                    <select name="model"  id="model" class="form-control" required >
+                        <option value="Hamsa-General-V2.0" {{ old('model', 'Hamsa-General-V2.0') == 'Hamsa-General-V2.0' ? 'selected' : '' }}>CRTV AI V2.0</option>
+                        <option value="Hamsa-General-V2.0" {{ old('model', 'Hamsa-General-V1.0') == 'Hamsa-General-V2.0' ? 'selected' : '' }}>CRTV AI V1.0</option>
+                    </select>
+                    @error('model')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                    <input type="hidden"  name="processingType"  value="async">
+                </div>
+                {{-- SRT Format Options --}}
+                <div class="mb-4">
+                    <div class="flex items-center mb-2">
+                        <input 
+                            type="checkbox" 
+                            name="returnSrtFormat" 
+                            id="returnSrtFormat" 
+                            value="1"
+                            class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            {{ old('returnSrtFormat') ? 'checked' : '' }}
+                        >
+                        <label for="returnSrtFormat" class="ml-2 text-gray-700 font-medium">
+                            Return SRT Format
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Advanced SRT Options (collapsible) --}}
+                <div class="mb-4">
+                    <button 
+                        type="button" 
+                        class="text-blue-600 hover:text-blue-800 font-medium mb-2"
+                        onclick="document.getElementById('srtOptions').classList.toggle('hidden')"
+                    >
+                        ▼ Advanced SRT Options
+                    </button>
+                    
+                    <div id="srtOptions" class="hidden border border-gray-200 rounded-lg p-4 space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="maxLinesPerSubtitle" class="block text-gray-700 text-sm mb-1">Max Lines Per Subtitle</label>
+                                <input 
+                                    type="number" 
+                                    name="srtOptions[maxLinesPerSubtitle]" 
+                                    id="maxLinesPerSubtitle" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded"
+                                    value="{{ old('srtOptions.maxLinesPerSubtitle', 2) }}"
+                                    min="1"
+                                >
+                            </div>
+
+                            <div>
+                                <label for="maxCharsPerLine" class="block text-gray-700 text-sm mb-1">Max Chars Per Line</label>
+                                <input 
+                                    type="number" 
+                                    name="srtOptions[maxCharsPerLine]" 
+                                    id="maxCharsPerLine" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded"
+                                    value="{{ old('srtOptions.maxCharsPerLine', 42) }}"
+                                    min="1"
+                                >
+                            </div>
+
+                            <div>
+                                <label for="maxMergeableGap" class="block text-gray-700 text-sm mb-1">Max Mergeable Gap (s)</label>
+                                <input 
+                                    type="number" 
+                                    name="srtOptions[maxMergeableGap]" 
+                                    id="maxMergeableGap" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded"
+                                    value="{{ old('srtOptions.maxMergeableGap', 0.3) }}"
+                                    step="0.1"
+                                    min="0"
+                                >
+                            </div>
+
+                            <div>
+                                <label for="minDuration" class="block text-gray-700 text-sm mb-1">Min Duration (s)</label>
+                                <input 
+                                    type="number" 
+                                    name="srtOptions[minDuration]" 
+                                    id="minDuration" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded"
+                                    value="{{ old('srtOptions.minDuration', 0.7) }}"
+                                    step="0.1"
+                                    min="0"
+                                >
+                            </div>
+
+                            <div>
+                                <label for="maxDuration" class="block text-gray-700 text-sm mb-1">Max Duration (s)</label>
+                                <input 
+                                    type="number" 
+                                    name="srtOptions[maxDuration]" 
+                                    id="maxDuration" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded"
+                                    value="{{ old('srtOptions.maxDuration', 7) }}"
+                                    step="0.1"
+                                    min="0"
+                                >
+                            </div>
+
+                            <div>
+                                <label for="minGap" class="block text-gray-700 text-sm mb-1">Min Gap (s)</label>
+                                <input 
+                                    type="number" 
+                                    name="srtOptions[minGap]" 
+                                    id="minGap" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded"
+                                    value="{{ old('srtOptions.minGap', 0.04) }}"
+                                    step="0.01"
+                                    min="0"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input 
+                                type="checkbox" 
+                                name="srtOptions[singleSpeakerPerSubtitle]" 
+                                id="singleSpeakerPerSubtitle" 
+                                value="1"
+                                class="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                                {{ old('srtOptions.singleSpeakerPerSubtitle', true) ? 'checked' : '' }}
+                            >
+                            <label for="singleSpeakerPerSubtitle" class="ml-2 text-gray-700 text-sm">
+                                Single Speaker Per Subtitle
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Submit Button --}}
+                <div class="flex justify-end">
+                    <button 
+                        type="submit" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg transition duration-200"
+                    >
+                        Submit Transcription
+                    </button>
+                </div>
+            </form>
         </div>
+
+        {{-- Result Display --}}
+        @if(session('result_data'))
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">Transcription Result</h2>
+                
+                <div class="space-y-4">
+                    @if(isset(session('result_data')['jobId']))
+                        <div>
+                            <span class="font-medium">Job ID:</span>
+                            <span class="text-gray-700">{{ session('result_data')['jobId'] }}</span>
+                        </div>
+                    @endif
+
+                    @if(isset(session('result_data')['status']))
+                        <div>
+                            <span class="font-medium">Status:</span>
+                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded">
+                                {{ session('result_data')['status'] }}
+                            </span>
+                        </div>
+                    @endif
+
+                    @if(isset(session('result_data')['transcription']))
+                        <div>
+                            <span class="font-medium block mb-2">Transcription:</span>
+                            <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                                <pre class="whitespace-pre-wrap">{{ session('result_data')['transcription'] }}</pre>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if(isset(session('result_data')['srtFormat']))
+                        <div>
+                            <span class="font-medium block mb-2">SRT Format:</span>
+                            <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                                <pre class="whitespace-pre-wrap text-sm">{{ session('result_data')['srtFormat'] }}</pre>
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="mt-4">
+                        <button 
+                            onclick="navigator.clipboard.writeText(document.querySelector('pre').textContent)"
+                            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded transition duration-200"
+                        >
+                            Copy to Clipboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const textTextarea = document.getElementById('text');
-    const charCount = document.getElementById('charCount');
-    const translateBtn = document.getElementById('translateBtn');
-    const translationForm = document.getElementById('translationForm');
-    
-    // Character count update
-    textTextarea.addEventListener('input', function() {
-        const count = this.value.length;
-        charCount.textContent = `${count}/5000 characters`;
-        
-        if (count > 5000) {
-            charCount.classList.add('text-danger');
-            translateBtn.disabled = true;
-        } else {
-            charCount.classList.remove('text-danger');
-            translateBtn.disabled = false;
-        }
-    });
-    
-    // Form submission with loading state
-    translationForm.addEventListener('submit', function() {
-        if (textTextarea.value.length > 5000) {
-            alert('Text exceeds 5000 character limit. Please shorten your text.');
-            return false;
-        }
-        
-        translateBtn.disabled = true;
-        translateBtn.querySelector('.translate-text').classList.add('d-none');
-        translateBtn.querySelector('.loading-text').classList.remove('d-none');
-    });
-    
-    // Initialize character count
-    charCount.textContent = `${textTextarea.value.length}/5000 characters`;
-});
-
-// Swap source and target languages
-function swapLanguages() {
-    const sourceLang = document.getElementById('source_language');
-    const targetLang = document.getElementById('target_language');
-    
-    // Store current values
-    const sourceValue = sourceLang.value;
-    const targetValue = targetLang.value;
-    
-    // Swap values
-    sourceLang.value = targetValue;
-    targetLang.value = sourceValue;
-    
-    // If source was auto, set it to the previous target
-    if (sourceValue === 'auto') {
-        sourceLang.value = targetValue;
-    }
-    
-    // Visual feedback
-    const swapBtn = event.target;
-    swapBtn.innerHTML = '<i class="fas fa-check me-1"></i>Languages Swapped';
-    swapBtn.classList.remove('btn-outline-primary');
-    swapBtn.classList.add('btn-success');
-    
-    setTimeout(() => {
-        swapBtn.innerHTML = '<i class="fas fa-exchange-alt me-1"></i>Swap Languages';
-        swapBtn.classList.remove('btn-success');
-        swapBtn.classList.add('btn-outline-primary');
-    }, 2000);
-}
-
-// Copy translation to clipboard
-function copyTranslation() {
-    const translatedText = "{{ session('translated_text', '') }}";
-    if (translatedText) {
-        navigator.clipboard.writeText(translatedText).then(() => {
-            // Visual feedback
-            const copyBtn = event.target;
-            const originalHtml = copyBtn.innerHTML;
-            copyBtn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
-            copyBtn.classList.remove('btn-outline-primary');
-            copyBtn.classList.add('btn-success');
-            
-            setTimeout(() => {
-                copyBtn.innerHTML = originalHtml;
-                copyBtn.classList.remove('btn-success');
-                copyBtn.classList.add('btn-outline-primary');
-            }, 2000);
-        });
-    }
-}
-</script>
-@endpush
-
-<style>
-.card {
-    border-radius: 12px;
-}
-
-.form-control, .form-select {
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus, .form-select:focus {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    border-color: #3b82f6;
-}
-
-.btn {
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.alert {
-    border-radius: 12px;
-}
-
-.badge {
-    border-radius: 6px;
-    font-weight: 500;
-}
-
-.language-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.translation-result {
-    background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-}
-
-.tip-item {
-    transition: all 0.3s ease;
-}
-
-.tip-item:hover {
-    transform: translateX(5px);
-}
-
-.optgroup {
-    font-weight: 600;
-    color: #6c757d;
-}
-
-.optgroup option {
-    font-weight: normal;
-    color: #000;
-}
-
-.category h6 {
-    font-size: 0.9rem;
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 0.5rem;
-}
-</style>
 @endsection

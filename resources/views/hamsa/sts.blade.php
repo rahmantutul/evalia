@@ -32,7 +32,7 @@
                             </div>
                         </div>
                         
-                        <div class="card-body p-5">
+                        <div class="card-body p-2">
                             <!-- Success Alert -->
                             @if(session('success'))
                                 <div class="alert alert-success border-0 shadow-sm mb-5">

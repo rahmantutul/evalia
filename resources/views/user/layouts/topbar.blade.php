@@ -121,41 +121,41 @@
 
 {{-- 🔹 Simple Script: Click → Set Session → Reload --}}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const productButtons = document.querySelectorAll('.product-btn');
+    document.addEventListener('DOMContentLoaded', function() {
+        const productButtons = document.querySelectorAll('.product-btn');
 
-    productButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Prevent double clicks
-            if (this.disabled) return;
-            
-            const productId = this.dataset.product;
-            
-            // Disable all buttons
-            productButtons.forEach(b => b.disabled = true);
+        productButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Prevent double clicks
+                if (this.disabled) return;
+                
+                const productId = this.dataset.product;
+                
+                // Disable all buttons
+                productButtons.forEach(b => b.disabled = true);
 
-            // Set session via AJAX, then reload page
-            fetch("{{ route('setActiveProduct') }}", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ product_id: productId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Reload page - sidebar and dashboard will render with new session
-                    window.location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                productButtons.forEach(b => b.disabled = false);
-                alert('Error switching product. Please try again.');
+                // Set session via AJAX, then redirect to user.home
+                fetch("{{ route('setActiveProduct') }}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ product_id: productId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Redirect to user.home instead of reloading
+                        window.location.href = "{{ route('user.home') }}";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    productButtons.forEach(b => b.disabled = false);
+                    alert('Error switching product. Please try again.');
+                });
             });
         });
     });
-});
 </script>

@@ -49,7 +49,7 @@ Route::prefix('hamsa')->name('hamsa.')->group(function () {
     Route::get('/tts', [HamsaController::class, 'tts'])->name('tts');
     Route::post('/tts', [HamsaController::class, 'ttsSubmit'])->name('tts.submit');
     Route::get('/tts/{jobId}', [HamsaController::class, 'getTtsJob'])->name('tts.job');
-    
+    Route::get('/hamsa/tts/status', [HamsaController::class, 'checkTtsStatus'])->name('hamsa.tts.status');
     // Translation
     Route::get('/translate', [HamsaController::class, 'translate'])->name('translate');
     Route::post('/translate', [HamsaController::class, 'translateSubmit'])->name('translate.submit');

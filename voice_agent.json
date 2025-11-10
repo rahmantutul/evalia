@@ -1,0 +1,46 @@
+{
+  "info": {
+    "name": "Hamsa - Create Voice Agent",
+    "_postman_id": "c7890123-45de-6789-abcd-ef0123456789",
+    "description": "Create a voice agent using Hamsa API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Voice Agent",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token f03dbabc-a5f1-424c-a66e-fd9080d83f2e",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"agentName\": \"My Test Agent\",\n  \"greetingMessage\": \"Hello, how can I help you today?\",\n  \"preamble\": \"You are a helpful assistant that will answer users questions.\",\n  \"lang\": \"ar\",\n  \"pokeMessages\": [],\n  \"realTime\": null,\n  \"silenceThreshold\": 800,\n  \"interrupt\": null,\n  \"outcome\": null,\n  \"webhookUrl\": \"https://example.com/webhook\",\n  \"webhookAuth\": {\n    \"authKey\": \"Token\",\n    \"authSecret\": \"Secret\"\n  },\n  \"outcomeResponseShape\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"test\": {\n        \"type\": \"number\",\n        \"description\": \"Hello world from Hamsa AI!\"\n      }\n    },\n    \"required\": [\n      \"test\"\n    ]\n  },\n  \"voiceId\": \"1f3396aa-24e3-4523-b4ef-7dd4adb8fab9\",\n  \"tools\": {\n    \"genderDetection\": null,\n    \"smartCallEnd\": null\n  },\n  \"params\": {}\n}"
+        },
+        "url": {
+          "raw": "https://api.tryhamsa.com/v1/voice-agents",
+          "protocol": "https",
+          "host": [
+            "api",
+            "tryhamsa",
+            "com"
+          ],
+          "path": [
+            "v1",
+            "voice-agents"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

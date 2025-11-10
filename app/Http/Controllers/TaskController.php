@@ -170,12 +170,13 @@ private function applyFilters($tasks, $request)
 
     public function taskStore(Request $request)
     {
+        dd('Okay');
         $request->validate([
             'company_id' => 'required|string',
             'agent_id' => 'required|string',
-            'agent_audio' => 'required|file|mimes:mp3,wav|max:51200',
-            'customer_audio' => 'required|file|mimes:mp3,wav|max:51200',
-            'combined_audio' => 'nullable|file|mimes:mp3,wav|max:102400',
+            'agent_audio' => 'required',
+            'customer_audio' => 'required',
+            'combined_audio' => 'nullable',
         ]);
 
         $http = Http::withHeaders([

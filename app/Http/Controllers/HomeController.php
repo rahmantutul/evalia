@@ -2,12 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 class HomeController extends Controller
 {
     public function __construct()
@@ -37,9 +32,12 @@ class HomeController extends Controller
         // 🔹 Set new active product
         session(['active_product' => $productId]);
         
-        return response()->json(['success' => true]);
+        // 🔹 Return success with redirect URL if needed
+        return response()->json([
+            'success' => true,
+            'redirect_url' => route('user.home') // Optional: you can use this in JS too
+        ]);
     }
-
 
     
     // public function profile()
