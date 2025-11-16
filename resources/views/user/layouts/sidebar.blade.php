@@ -44,6 +44,24 @@
                             </a>
                         </li>
                         @endif
+                        <li class="nav-item {{ Route::is('criteria.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('criteria.index') ? 'active' : '' }}" href="{{ route('criteria.index') }}">
+                                <i class="fas fa-tags menu-icon"></i>
+                                <span>Criteria</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Route::is('sales_person.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('sales_person.index') ? 'active' : '' }}" href="{{ route('sales_person.index') }}">
+                                <i class="fas fa-user-tie menu-icon"></i>
+                                <span>Sales Person</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Route::is('client.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('client.index') ? 'active' : '' }}" href="{{ route('client.index') }}">
+                                <i class="fas fa-users menu-icon"></i>
+                                <span>Client</span>
+                            </a>
+                        </li>
                         @if($hasManageSystem)
                         <li class="nav-item {{ Route::is('user.group_data.*') ? 'active' : '' }}">
                             <a class="nav-link {{ Route::is('user.group_data.*') ? 'active' : '' }}" href="{{ route('user.group_data.list') }}">
