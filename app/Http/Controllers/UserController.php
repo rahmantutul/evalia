@@ -15,7 +15,8 @@ class UserController extends Controller
         $this->middleware('auth.api');
         $this->apiService = $apiService;
     }
-private function getToken()
+
+    private function getToken()
     {
         return session('user_access_token');
     }
@@ -34,8 +35,9 @@ private function getToken()
      */
     public function index(Request $request)
     {
+        // dd($this->getToken());
         $page = $request->get('page', 1);
-        $limit = 100;
+        $limit = 1000;
         $skip = ($page - 1) * $limit;
 
         $result = $this->apiService->listUsers($skip, $limit);
@@ -45,40 +47,40 @@ private function getToken()
         }
 
         $users = $result['users'] ?? [];
-        
-        // Fetch company details for each user
-        $usersWithCompanies = $this->getUsersWithCompanyDetails($users);
-        // dd($usersWithCompanies);
-        return view('user.users.index', compact('usersWithCompanies', 'page'));
+    
+        // Fetch company details in batches
+        // $usersWithCompanies = $this->getUsersWithCompanyDetailsBatch($users);
+        // dd(session('permissions'));
+        return view('user.users.index', compact('users', 'page'));
     }
 
-    private function getUsersWithCompanyDetails($users)
+    private function getUsersWithCompanyDetailsBatch($users)
     {
         $usersWithCompanies = [];
-        
-        foreach ($users as $user) {
-            // Check if user has a company_id
+        $companyIds = [];
+        $userCompanyMap = [];
+
+        // Collect all company IDs
+        foreach ($users as $index => $user) {
             if (isset($user['company_id']) && !empty($user['company_id'])) {
-                try {
-                    $response = Http::withHeaders($this->getAuthHeaders())
-                        ->get('http://35.153.178.201:8080/get_company_details', [
-                            'company_id' => $user['company_id']
-                        ]);
-                    
-                    if ($response->successful()) {
-                        $companyData = $response->json();
-                        $user['company_name'] = $companyData['data']['company_name'] ?? 'N/A';
-                        $user['company_details'] = $companyData;
-                    } else {
-                        $user['company_name'] = 'Company Not Found';
-                        $user['company_details'] = null;
-                    }
-                } catch (\Exception $e) {
-                    $user['company_name'] = 'Error Fetching Company';
-                    $user['company_details'] = null;
-                }
+                $companyIds[] = $user['company_id'];
+                $userCompanyMap[$user['company_id']][] = $index;
+            }
+        }
+
+        // Remove duplicates
+        $companyIds = array_unique($companyIds);
+        
+        // Fetch all companies in one batch
+        $companiesData = $this->getCompaniesBatch($companyIds);
+        
+        // Assign company data to users
+        foreach ($users as $index => $user) {
+            if (isset($user['company_id']) && !empty($user['company_id']) && isset($companiesData[$user['company_id']])) {
+                $user['company_name'] = $companiesData[$user['company_id']]['company_name'] ?? 'N/A';
+                $user['company_details'] = $companiesData[$user['company_id']];
             } else {
-                $user['company_name'] = 'No Company';
+                $user['company_name'] = isset($user['company_id']) ? 'Company Not Found' : 'No Company';
                 $user['company_details'] = null;
             }
             
@@ -86,6 +88,30 @@ private function getToken()
         }
         
         return $usersWithCompanies;
+    }
+
+    private function getCompaniesBatch($companyIds)
+    {
+        if (empty($companyIds)) {
+            return [];
+        }
+
+        try {
+            $response = Http::withHeaders($this->getAuthHeaders())
+                ->timeout(30) // Increased timeout for batch request
+                ->post('http://35.153.178.201:8080/get_companies_batch', [
+                    'company_ids' => $companyIds
+                ]);
+            
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['data'] ?? [];
+            }
+        } catch (\Exception $e) {
+            Log::error('Batch company fetch failed: ' . $e->getMessage());
+        }
+        
+        return [];
     }
 
     /**
@@ -226,48 +252,65 @@ private function getToken()
     /**
      * Update user
      */
-    public function update(Request $request, $id)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'full_name' => 'required|string',
-            'position' => 'nullable|string',
-            'phone' => 'nullable|string',
-            'role_id' => 'required|uuid',
-            'company_id' => 'nullable|string',
-            'supervisor_id' => 'nullable|uuid'
-        ]);
+        public function update(Request $request, $id)
+        {
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email',
+                'full_name' => 'required|string',
+                'position' => 'nullable|string',
+                'phone' => 'nullable|string',
+                'role_id' => 'required|uuid',
+                'company_id' => 'nullable|string',
+                'supervisor_id' => 'nullable|uuid',
+                'new_password' => 'nullable|min:6|confirmed'
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            // Handle password change if provided
+            if ($request->filled('new_password')) {
+                $passwordResult = $this->apiService->changeUserPassword($id, $request->new_password);
+                
+                if (!$passwordResult['success']) {
+                    return redirect()->back()
+                        ->with('error', 'Password update failed: ' . $passwordResult['error'])
+                        ->withInput();
+                }
+            }
+
+            // Update user profile data
+            $userData = $request->only([
+                'email', 'full_name', 'position', 'phone',
+                'role_id', 'company_id', 'supervisor_id'
+            ]);
+
+            // Add is_active status
+            $userData['is_active'] = true;
+
+            // Remove null values
+            $userData = array_filter($userData, function($value) {
+                return $value !== null && $value !== '';
+            });
+
+            $result = $this->apiService->updateUser($id, $userData);
+
+            if ($result['success']) {
+                $message = 'User updated successfully';
+                if ($request->filled('new_password')) {
+                    $message .= ' and password changed';
+                }
+                return redirect()->back()
+                    ->with('success', $message . '!');
+            }
+
             return redirect()->back()
-                ->withErrors($validator)
+                ->with('error', $result['error'])
                 ->withInput();
         }
-
-        $userData = $request->only([
-            'email', 'full_name', 'position', 'phone',
-            'role_id', 'company_id', 'supervisor_id'
-        ]);
-
-        // Add is_active status
-        $userData['is_active'] = true;
-
-        // Remove null values
-        $userData = array_filter($userData, function($value) {
-            return $value !== null && $value !== '';
-        });
-
-        $result = $this->apiService->updateUser($id, $userData);
-
-        if ($result['success']) {
-            return redirect()->route('users.show', $id)
-                ->with('success', 'User updated successfully!');
-        }
-
-        return redirect()->back()
-            ->with('error', $result['error'])
-            ->withInput();
-    }
 
     /**
      * Deactivate user

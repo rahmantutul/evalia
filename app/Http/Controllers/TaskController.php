@@ -70,12 +70,25 @@ class TaskController extends Controller
             'query' => $request->query()
         ]
     );
-    $agentsResult = $this->apiService->getAgentsList();
+
+    $page = $request->get('page', 1);
+    $limit = 1000;
+    $skip = ($page - 1) * $limit;
+
+    $result = $this->apiService->listUsers($skip, $limit);
     
-    if (!$agentsResult['success']) {
-        return back()->with('error', $agentsResult['error']);
+    if (!$result['success']) {
+        return redirect()->back()->with('error', $result['error']);
     }
-    $companyAgents = $agentsResult['agents'];
+
+    $allUsers = $result['users'] ?? [];
+    
+    $companyAgents = array_filter($allUsers, function($user) use ($companyId) {
+        return is_array($user) && 
+               ($user['is_active'] ?? false) === true && 
+               ($user['role']['name'] ?? '') === 'Agent' && 
+               ($user['company_id'] ?? '') === $companyId;
+    });
     return view('user.task.task_list', [
         'company_id' => $companyId,
         'taskList' => $paginatedTasks,
@@ -170,7 +183,6 @@ private function applyFilters($tasks, $request)
 
     public function taskStore(Request $request)
     {
-        dd('Okay');
         $request->validate([
             'company_id' => 'required|string',
             'agent_id' => 'required|string',

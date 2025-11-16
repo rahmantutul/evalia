@@ -48,6 +48,32 @@
             cursor: help;
         }
     </style>
+
+    <style>
+/* Ensure accordion content stays visible */
+.accordion-collapse {
+    transition: height 0.35s ease !important;
+}
+
+.accordion-collapse.show {
+    visibility: visible !important;
+    height: auto !important;
+}
+
+/* Prevent any hiding animations */
+.accordion-button:not(.collapsed)::after {
+    transform: rotate(-180deg) !important;
+}
+
+/* Fix for Bootstrap 5 accordion */
+.collapse:not(.show) {
+    display: none;
+}
+
+.collapse.show {
+    display: block;
+}
+</style>
 @endpush
 
 @section('content')

@@ -138,16 +138,25 @@
                                             <div class="card-body">
                                                 <div class="form-group">
                                                     <label for="agent_id" class="form-label fw-500 mb-2">Choose an agent for this analysis</label>
+                                                    @php
+                                                        // Ensure $companyAgents is always an array
+                                                        $agents = is_array($companyAgents) ? $companyAgents : [];
+                                                    @endphp
+
                                                     <select name="agent_id" id="agent_id" class="form-select form-select-lg py-3 select2" required>
                                                         <option value="">-- Select Agent --</option>
-                                                            @foreach($companyAgents as $agent)
+                                                        @if(count($agents) > 0)
+                                                            @foreach($agents as $agent)
                                                                 <option value="{{ $agent['id'] }}">
-                                                                    {{ $agent['agent_id_display'] }} - {{ $agent['name'] }} 
-                                                                    @if($agent['email'])
+                                                                    {{ $agent['full_name'] }} 
+                                                                    @if(!empty($agent['email']))
                                                                         ({{ $agent['email'] }})
                                                                     @endif
                                                                 </option>
                                                             @endforeach
+                                                        @else
+                                                            <option value="">No agent found for this company</option>
+                                                        @endif
                                                     </select>
                                                     @error('agent_id')
                                                         <div class="text-danger small mt-2">{{ $message }}</div>

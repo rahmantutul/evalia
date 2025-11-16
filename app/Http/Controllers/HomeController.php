@@ -23,9 +23,6 @@ class HomeController extends Controller
             'product_1_data',
             'product_2_data',
             'product_3_data',
-            'product_filters',
-            'product_settings',
-            'dashboard_state',
             // Add any other product-specific session keys you use
         ]);
         

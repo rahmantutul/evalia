@@ -30,63 +30,67 @@ Route::post('/register', [ApiAuthController::class, 'register']);
 Route::post('/logout', [ApiAuthController::class, 'logout'])->name('logout');
 
 Route::get('/', function () {
-    return redirect()->route(session()->has('user_access_token') ? 'user.home' : 'login');
+    return redirect()->route(session()->has('user') ? 'user.home' : 'login');
 });
 
-
-
-// Hamsa Web Interface Routes
-Route::prefix('hamsa')->name('hamsa.')->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [HamsaController::class, 'dashboard'])->name('dashboard');
-    
-    // Transcription
-    Route::get('/transcribe', [HamsaController::class, 'transcribe'])->name('transcribe');
-    Route::post('/transcribe', [HamsaController::class, 'transcribeSubmit'])->name('transcribe.submit');
-    Route::get('/transcribe/{jobId}', [HamsaController::class, 'getTranscriptionJob'])->name('transcribe.job');
-    
-    // Text-to-Speech
-    Route::get('/tts', [HamsaController::class, 'tts'])->name('tts');
-    Route::post('/tts', [HamsaController::class, 'ttsSubmit'])->name('tts.submit');
-    Route::get('/tts/{jobId}', [HamsaController::class, 'getTtsJob'])->name('tts.job');
-    Route::get('/hamsa/tts/status', [HamsaController::class, 'checkTtsStatus'])->name('hamsa.tts.status');
-    // Translation
-    Route::get('/translate', [HamsaController::class, 'translate'])->name('translate');
-    Route::post('/translate', [HamsaController::class, 'translateSubmit'])->name('translate.submit');
-    
-    // Speech-to-Speech
-    Route::get('/sts', [HamsaController::class, 'sts'])->name('sts');
-    Route::post('/sts', [HamsaController::class, 'stsSubmit'])->name('sts.submit');
-    Route::get('/sts/{jobId}', [HamsaController::class, 'getStsJob'])->name('sts.job');
-    
-    // AI Content Generation
-    Route::get('/ai/generate', [HamsaController::class, 'aiGenerate'])->name('ai.generate');
-    Route::post('/ai/generate', [HamsaController::class, 'aiGenerateSubmit'])->name('ai.generate.submit');
-    
-    // Voice Agents
-    Route::get('/voice-agents', [HamsaController::class, 'voiceAgents'])->name('voice-agents');
-    Route::post('/voice-agents', [HamsaController::class, 'createVoiceAgent'])->name('voice-agents.create');
-    Route::get('/voice-agents/{agentId}', [HamsaController::class, 'getVoiceAgent'])->name('voice-agents.show');
-    
-    // Conversations
-    Route::get('/conversations', [HamsaController::class, 'conversations'])->name('conversations');
-    Route::post('/conversations/start', [HamsaController::class, 'startConversation'])->name('conversations.start');
-    Route::get('/conversations/{conversationId}', [HamsaController::class, 'getConversation'])->name('conversations.show');
-    
-    // Jobs
-    Route::get('/jobs', [HamsaController::class, 'jobs'])->name('jobs');
-    Route::get('/jobs/{jobId}', [HamsaController::class, 'getJob'])->name('jobs.show');
-    
-    // Usage Statistics
-    Route::get('/usage', [HamsaController::class, 'usage'])->name('usage');
-    
-    // Project Settings
-    Route::get('/project', [HamsaController::class, 'project'])->name('project');
-});
 
 
 Route::post('/set-active-product', [HomeController::class, 'setActiveProduct'])->name('setActiveProduct');
+
+
+
 Route::group(['middleware' => 'auth.api'], function () {
+    Route::prefix('hamsa')->name('hamsa.')->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [HamsaController::class, 'dashboard'])->name('dashboard');
+        
+        // Transcription
+        Route::get('/transcribe', [HamsaController::class, 'transcribe'])->name('transcribe');
+        Route::post('/transcribe', [HamsaController::class, 'transcribeSubmit'])->name('transcribe.submit');
+        Route::get('/transcribe/{jobId}', [HamsaController::class, 'getTranscriptionJob'])->name('transcribe.job');
+        
+        // Text-to-Speech
+        Route::get('/tts', [HamsaController::class, 'tts'])->name('tts');
+        Route::post('/tts', [HamsaController::class, 'ttsSubmit'])->name('tts.submit');
+        Route::get('/tts/{jobId}', [HamsaController::class, 'getTtsJob'])->name('tts.job');
+        Route::get('/hamsa/tts/status', [HamsaController::class, 'checkTtsStatus'])->name('hamsa.tts.status');
+        // Translation
+        Route::get('/translate', [HamsaController::class, 'translate'])->name('translate');
+        Route::post('/translate', [HamsaController::class, 'translateSubmit'])->name('translate.submit');
+        
+        // Speech-to-Speech
+        Route::get('/sts', [HamsaController::class, 'sts'])->name('sts');
+        Route::post('/sts', [HamsaController::class, 'stsSubmit'])->name('sts.submit');
+        Route::get('/sts/{jobId}', [HamsaController::class, 'getStsJob'])->name('sts.job');
+        
+        // AI Content Generation
+        Route::get('/ai/generate', [HamsaController::class, 'aiGenerate'])->name('ai.generate');
+        Route::post('/ai/generate', [HamsaController::class, 'aiGenerateSubmit'])->name('ai.generate.submit');
+        
+        // Voice Agents
+        Route::get('/voice-agents', [HamsaController::class, 'voiceAgents'])->name('voice-agents');
+        Route::post('/voice-agents', [HamsaController::class, 'createVoiceAgent'])->name('voice-agents.create');
+        Route::get('/voice-agents/{agentId}', [HamsaController::class, 'getVoiceAgent'])->name('voice-agents.show');
+        Route::get('/clone-voice-agents', [HamsaController::class, 'cloneVoiceAgent'])->name('voice-agents.clone');
+        
+        // Conversations
+        Route::get('/conversations', [HamsaController::class, 'conversations'])->name('conversations');
+        Route::post('/conversations/start', [HamsaController::class, 'startConversation'])->name('conversations.start');
+        Route::get('/conversations/{conversationId}', [HamsaController::class, 'getConversation'])->name('conversations.show');
+        
+        // Jobs
+        Route::get('/jobs', [HamsaController::class, 'jobs'])->name('jobs');
+        Route::get('/jobs/{jobId}', [HamsaController::class, 'getJob'])->name('jobs.show');
+        
+        // Usage Statistics
+        Route::get('/usage', [HamsaController::class, 'usage'])->name('usage');
+        
+        // Project Settings
+        Route::get('/project', [HamsaController::class, 'project'])->name('project');
+    });
+
+
+
     Route::get('/user-dashboard', [HomeController::class, 'index'])->name('user.home');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');

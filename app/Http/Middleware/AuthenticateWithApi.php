@@ -26,14 +26,12 @@ class AuthenticateWithApi
             return $this->redirectToLogin('Your session has expired. Please login again.');
         }
 
-        // Verify token with API (with better error handling)
+        // Verify token with API on EVERY request (remove caching)
         if (!$this->verifyTokenWithApi()) {
-            return $this->redirectToLogin('Invalid session. Please login again.');
+            return $this->redirectToLogin('Your session has expired. Please login again.');
         }
 
-        // Add security headers
-        $response = $next($request);
-        return $this->addSecurityHeaders($response);
+        return $next($request);
     }
 
     /**
@@ -53,7 +51,7 @@ class AuthenticateWithApi
     }
 
     /**
-     * Check if token exists and is valid
+     * Check if token exists and is valid locally
      */
     private function hasValidToken(): bool
     {
@@ -64,81 +62,57 @@ class AuthenticateWithApi
             return false;
         }
 
-        // More robust token validation
-        if (strlen($token) < 20 || !preg_match('/^[a-zA-Z0-9\.\-_]+$/', $token)) {
-            Log::warning('Invalid token format');
+        // Basic token format validation
+        if (strlen($token) < 20) {
+            Log::warning('Invalid token format - too short');
             return false;
-        }
-
-        // Check token expiration
-        $tokenExpiry = session('token_expiry');
-        if ($tokenExpiry) {
-            try {
-                $expiry = Carbon::parse($tokenExpiry);
-                if (now()->greaterThan($expiry)) {
-                    Log::info('Token expired');
-                    return false;
-                }
-            } catch (\Exception $e) {
-                Log::warning('Invalid token expiry format');
-                return false;
-            }
         }
 
         return true;
     }
 
     /**
-     * Verify token with API with better security
+     * Verify token with API - ALWAYS check on every request
      */
     private function verifyTokenWithApi(): bool
     {
-        // Only verify periodically to reduce API calls
-        $lastVerified = session('token_last_verified');
-        
-        if ($lastVerified && now()->diffInMinutes($lastVerified) < 10) {
-            return true;
-        }
-
         try {
             $token = session('user_access_token');
             
-            $response = Http::timeout(8)
-                ->retry(2, 100) // Retry twice with 100ms delay
+            $response = Http::timeout(10)
+                ->retry(1, 100) // Only retry once to be faster
                 ->withHeaders([
-                    'User-Agent' => 'Laravel-App/1.0',
+                    'Authorization' => 'Bearer ' . $token,
                     'Accept' => 'application/json',
                 ])
-                ->withToken($token)
                 ->get('http://35.153.178.201:8080/auth/me');
 
             if ($response->successful()) {
-                session(['token_last_verified' => now()]);
-                Log::info('Token verified successfully');
+                Log::debug('Token verified successfully');
                 return true;
             }
 
-            // Log the specific error
-            Log::warning('Token verification failed', [
-                'status' => $response->status(),
-                'response' => $response->body()
+            // Token is invalid at API level
+            if ($response->status() === 401 || $response->status() === 403) {
+                Log::warning('Token rejected by API', [
+                    'status' => $response->status(),
+                    'token_prefix' => substr($token, 0, 10) . '...'
+                ]);
+                return false;
+            }
+
+            // For server errors, allow temporary access
+            Log::warning('API server error during token verification', [
+                'status' => $response->status()
             ]);
             
-            return false;
+            return true;
 
         } catch (\Exception $e) {
-            Log::error('Token verification exception: ' . $e->getMessage(), [
-                'exception' => get_class($e)
-            ]);
+            Log::error('Token verification failed: ' . $e->getMessage());
             
-            // If API is temporarily down, allow access but log the issue
-            // Only allow this for a short period
-            $lastSuccess = session('last_successful_verification');
-            if ($lastSuccess && now()->diffInHours($lastSuccess) < 2) {
-                return true;
-            }
-            
-            return false;
+            // If API is down, allow temporary access
+            return true;
         }
     }
 
@@ -147,63 +121,16 @@ class AuthenticateWithApi
      */
     private function redirectToLogin(string $message = null)
     {
-        $this->clearSession();
+        // Clear the invalid token from session
+        session()->forget('user_access_token');
+        session()->forget('token_expiry');
+        session()->forget('token_last_verified');
         
         if ($message) {
             return redirect()->route('login')
-                ->with('error', $message)
-                ->withHeaders([
-                    'Cache-Control' => 'no-cache, no-store, must-revalidate',
-                    'Pragma' => 'no-cache',
-                    'Expires' => '0'
-                ]);
+                ->with('error', $message);
         }
         
-        return redirect()->route('login')
-            ->withHeaders([
-                'Cache-Control' => 'no-cache, no-store, must-revalidate',
-                'Pragma' => 'no-cache',
-                'Expires' => '0'
-            ]);
-    }
-
-    /**
-     * Clear all session data securely
-     */
-    private function clearSession(): void
-    {
-        try {
-            $allSession = session()->all();
-            session()->flush();
-            
-            Log::info('Session cleared for security', [
-                'session_keys' => array_keys($allSession)
-            ]);
-            
-        } catch (\Exception $e) {
-            Log::error('Failed to clear session: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Add security headers to response
-     */
-    private function addSecurityHeaders(Response $response): Response
-    {
-        $headers = [
-            'X-Frame-Options' => 'DENY',
-            'X-Content-Type-Options' => 'nosniff',
-            'X-XSS-Protection' => '1; mode=block',
-            'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains',
-            'Referrer-Policy' => 'strict-origin-when-cross-origin',
-            'Permissions-Policy' => 'geolocation=(), microphone=(), camera=()',
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
-        ];
-
-        foreach ($headers as $key => $value) {
-            $response->headers->set($key, $value);
-        }
-
-        return $response;
+        return redirect()->route('login');
     }
 }

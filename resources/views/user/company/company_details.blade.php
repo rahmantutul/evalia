@@ -439,7 +439,49 @@
                             </div>
                         </div>
                     </div>
+                    {{-- Agent Selection Dropdown --}}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-white border-0 py-2">
+                                    <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
+                                        <span class="bg-info bg-opacity-10 text-info p-2 me-2 rounded">
+                                            <i class="fas fa-user-tie"></i>
+                                        </span>
+                                        Select Agent
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="agent_id" class="form-label fw-500 mb-2">Choose an agent for this analysis</label>
+                                        @php
+                                            // Ensure $companyAgents is always an array
+                                            $agents = is_array($companyAgents) ? $companyAgents : [];
+                                        @endphp
 
+                                        <select name="agent_id" id="agent_id" class="form-select form-select-lg py-3 select2" required>
+                                            <option value="">-- Select Agent --</option>
+                                            @if(count($agents) > 0)
+                                                @foreach($agents as $agent)
+                                                    <option value="{{ $agent['id'] }}">
+                                                        {{ $agent['full_name'] }} 
+                                                        @if(!empty($agent['email']))
+                                                            ({{ $agent['email'] }})
+                                                        @endif
+                                                    </option>
+                                                @endforeach
+                                            @else
+                                                <option value="">No agent found for this company</option>
+                                            @endif
+                                        </select>
+                                        @error('agent_id')
+                                            <div class="text-danger small mt-2">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Hidden company_id -->

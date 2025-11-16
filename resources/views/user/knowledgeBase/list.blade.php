@@ -81,15 +81,16 @@
                                         <td>
                                             <div class="d-flex justify-content-end gap-2 pe-2">
                                                
-                                                <a href="{{ route('user.knowledgeBase.edit', $entry['id']) }}" class="btn btn-sm btn-light border" data-bs-toggle="tooltip" title="Edit">
+                                                <span class="text-small">No action found</span>
+                                                {{--  <a href="{{ route('user.knowledgeBase.edit', $entry['id']) }}" class="btn btn-sm btn-light border" data-bs-toggle="tooltip" title="Edit">
                                                     <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="{{ route('user.knowledgeBase.delete', ['id' => $entry['notebook_id'], 'company_id' => $entry['company_id']]) }}" 
+                                                </a>  --}}
+                                                {{--  <a href="{{ route('user.knowledgeBase.delete', ['id' => $entry['notebook_id'], 'company_id' => $entry['company_id']]) }}" 
                                                     class="btn btn-sm btn-icon btn-outline-secondary" 
                                                     data-bs-toggle="tooltip" title="Delete"
                                                     onclick="return confirm('Are you sure you want to delete this entry?')">
                                                     <i class="fas fa-trash text-danger"></i>
-                                                </a>
+                                                </a>  --}}
                                             </div>
                                         </td>
                                     </tr>

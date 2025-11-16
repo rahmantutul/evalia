@@ -44,14 +44,32 @@ class ApiAuthController extends Controller
             $userResult = $this->apiService->getCurrentUser();
         
             if ($userResult['success']) {
-                session(['user' => $userResult['user']]);
+                $user = $userResult['user'];
+                session(['user' => $user]);
+                
+                // Fetch permissions using the role ID from user data
+                $roleId = $user['role']['id']; // This is "ecedd3ec-6b66-45e1-9c1b-6cc3ee772762"
+                $permissionsResult = $this->apiService->getRolePermissions($roleId);
+                
+                if ($permissionsResult['success']) {
+                    session(['permissions' => $permissionsResult['permissions']]);
+                } else {
+                    // If permissions fetch fails, set empty permissions
+                    session(['permissions' => []]);
+                }
+                
+                // Debug: Check what's in session
+                \Log::info('User logged in', [
+                    'user' => $user,
+                    'permissions' => session('permissions')
+                ]);
+                
                 return redirect('/user-dashboard')->with('success', 'Login successful!');
             } else {
                 return back()->withErrors(['username' => 'Failed to retrieve user information.'])->withInput();
             }
         }
 
-        // Use the detailed error message from API
         return back()->withErrors(['username' => $result['error']])->withInput();
     }
 

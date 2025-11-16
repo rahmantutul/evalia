@@ -147,8 +147,8 @@
                                     <span>{{ $user['full_name'] }}</span>
                                 </div>
                             </div>
-                            <a href="{{ route('users.show', $user['id']) }}" class="btn btn-outline-linkedin btn-sm">
-                                <i class="fas fa-arrow-left me-2"></i>Back to Details
+                            <a href="{{ route('users.index') }}" class="btn btn-outline-linkedin btn-sm">
+                                <i class="fas fa-arrow-left me-2"></i>Back to list
                             </a>
                         </div>
                     </div>
@@ -184,12 +184,12 @@
                             <div class="col-md-6">
                                 <label for="full_name" class="form-label">Full Name <span class="required-mark">*</span></label>
                                 <input type="text" 
-                                       class="form-control input-focus @error('full_name') is-invalid @enderror" 
-                                       id="full_name" 
-                                       name="full_name" 
-                                       value="{{ old('full_name', $user['full_name']) }}" 
-                                       placeholder="Enter full name"
-                                       required>
+                                    class="form-control input-focus @error('full_name') is-invalid @enderror" 
+                                    id="full_name" 
+                                    name="full_name" 
+                                    value="{{ old('full_name', $user['full_name']) }}" 
+                                    placeholder="Enter full name"
+                                    required>
                                 @error('full_name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -198,12 +198,12 @@
                             <div class="col-md-6">
                                 <label for="email" class="form-label">Email Address <span class="required-mark">*</span></label>
                                 <input type="email" 
-                                       class="form-control input-focus @error('email') is-invalid @enderror" 
-                                       id="email" 
-                                       name="email" 
-                                       value="{{ old('email', $user['email']) }}" 
-                                       placeholder="user@example.com"
-                                       required>
+                                    class="form-control input-focus @error('email') is-invalid @enderror" 
+                                    id="email" 
+                                    name="email" 
+                                    value="{{ old('email', $user['email']) }}" 
+                                    placeholder="user@example.com"
+                                    required>
                                 @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -215,6 +215,7 @@
                             <span><i class="fas fa-briefcase me-2"></i>Role & Organization</span>
                         </div>
 
+                        <!-- Rest of your existing form fields -->
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label for="role_id" class="form-label">Role <span class="required-mark">*</span></label>
@@ -256,11 +257,11 @@
                             <div class="col-md-6">
                                 <label for="position" class="form-label">Position</label>
                                 <input type="text" 
-                                       class="form-control input-focus @error('position') is-invalid @enderror" 
-                                       id="position" 
-                                       name="position" 
-                                       value="{{ old('position', $user['position'] ?? '') }}"
-                                       placeholder="e.g. Sales Manager">
+                                    class="form-control input-focus @error('position') is-invalid @enderror" 
+                                    id="position" 
+                                    name="position" 
+                                    value="{{ old('position', $user['position'] ?? '') }}"
+                                    placeholder="e.g. Sales Manager">
                                 @error('position')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -269,11 +270,11 @@
                             <div class="col-md-6">
                                 <label for="phone" class="form-label">Phone Number</label>
                                 <input type="tel" 
-                                       class="form-control input-focus @error('phone') is-invalid @enderror" 
-                                       id="phone" 
-                                       name="phone" 
-                                       value="{{ old('phone', $user['phone'] ?? '') }}"
-                                       placeholder="+1 (555) 000-0000">
+                                    class="form-control input-focus @error('phone') is-invalid @enderror" 
+                                    id="phone" 
+                                    name="phone" 
+                                    value="{{ old('phone', $user['phone'] ?? '') }}"
+                                    placeholder="+1 (555) 000-0000">
                                 @error('phone')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -296,6 +297,37 @@
                                 @error('supervisor_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+                        </div>
+
+                        
+                        <!-- Password Change Section -->
+                        <div class="section-divider">
+                            <span><i class="fas fa-lock me-2"></i>Password Change (Optional)</span>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="new_password" class="form-label">New Password</label>
+                                <input type="password" 
+                                    class="form-control input-focus @error('new_password') is-invalid @enderror" 
+                                    id="new_password" 
+                                    name="new_password" 
+                                    placeholder="Enter new password (min 6 characters)"
+                                    minlength="6">
+                                <div class="form-text">Leave blank to keep current password</div>
+                                @error('new_password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="new_password_confirmation" class="form-label">Confirm New Password</label>
+                                <input type="password" 
+                                    class="form-control input-focus" 
+                                    id="new_password_confirmation" 
+                                    name="new_password_confirmation" 
+                                    placeholder="Confirm new password">
                             </div>
                         </div>
 

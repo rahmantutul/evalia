@@ -148,12 +148,20 @@ public function knowledgeBaseStore(Request $request)
 
     public function knowledgeBaseList(Request $request)
     {
-        $response = Http::get('http://35.153.178.201:8080/get_all');
-
-        $knowledgeBase = [];
-        if ($response->successful()) {
-            $knowledgeBase = $response->json()['data'] ?? [];
+        $client = new \GuzzleHttp\Client();
+        $response = $client->get('http://35.153.178.201:8080/get_all', [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->getToken(),
+            ],
+            'timeout' => 120,
+        ]);
+        
+        $knowledgeBase = [];    
+        if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
+            $knowledgeBase = json_decode($response->getBody(), true)['data'] ?? [];
         }
+        
         $collection = collect($knowledgeBase);
 
         $perPage = 10;

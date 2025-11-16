@@ -117,11 +117,31 @@ class CompanyController extends Controller
                 'query' => $request->query()
             ]
         );
+
+        $page = $request->get('page', 1);
+        $limit = 1000;
+        $skip = ($page - 1) * $limit;
+
+        $result = $this->apiService->listUsers($skip, $limit);
         
+        if (!$result['success']) {
+            return redirect()->back()->with('error', $result['error']);
+        }
+
+        $allUsers = $result['users'] ?? [];
+        
+        $companyId = $company['company_id'];
+        $companyAgents = array_filter($allUsers, function($user) use ($companyId) {
+            return is_array($user) && 
+                ($user['is_active'] ?? false) === true && 
+                ($user['role']['name'] ?? '') === 'Agent' && 
+                ($user['company_id'] ?? '') === $companyId;
+        });
         return view('user.company.company_details', [
             'company' => $company,
             'taskList' => $paginatedTasks,
             'company_id' => $id,
+            'companyAgents' => $companyAgents,
         ]);
     }
 

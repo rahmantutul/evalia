@@ -73,7 +73,7 @@ class AgentController extends Controller
     /**
      * Display only agent list (if needed separately)
      */
-   public function index()
+    public function index()
     {
         // Get dashboard summary for statistics
         $summaryResult = $this->apiService->getAgentDashboardSummary();
@@ -82,15 +82,43 @@ class AgentController extends Controller
             return back()->with('error', $summaryResult['error']);
         }
 
-        $agentsResult = $this->apiService->getAgentsList();
+        // Get all users and filter for agents
+        $page = 1;
+        $limit = 1000;
+        $skip = ($page - 1) * $limit;
+
+        $result = $this->apiService->listUsers($skip, $limit);
         
-        if (!$agentsResult['success']) {
-            return back()->with('error', $agentsResult['error']);
+        if (!$result['success']) {
+            return back()->with('error', $result['error']);
+        }
+
+        $allUsers = $result['users'] ?? [];
+        
+        // Filter only active agents (without company filter)
+        $agents = array_filter($allUsers, function($user) {
+            return is_array($user) && 
+                ($user['is_active'] ?? false) === true && 
+                ($user['role']['name'] ?? '') === 'Agent';
+        });
+
+        // Reset array keys
+        $agents = array_values($agents);
+
+        // Get performance history for each agent
+        $agentsWithPerformance = [];
+        foreach ($agents as $agent) {
+            $performanceResult = $this->apiService->getAgentPerformanceHistory($agent['id']);
+            
+            $agentsWithPerformance[] = [
+                'agent' => $agent,
+                'performance' => $performanceResult['success'] ? $performanceResult['data'] : null,
+                'performance_error' => $performanceResult['success'] ? null : $performanceResult['error']
+            ];
         }
 
         $summary = $summaryResult['data'];
-        $agents = $agentsResult['agents'];
-        return view('user.agents.index', compact('summary', 'agents'));
+        return view('user.agents.index', compact('summary', 'agentsWithPerformance'));
     }
     public function getPerformanceData($agentId)
     {

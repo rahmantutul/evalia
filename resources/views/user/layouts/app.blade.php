@@ -107,7 +107,45 @@
         });
     });
     </script>
+    <script>
+        // Global error handler for authentication failures
+        document.addEventListener('DOMContentLoaded', function() {
+            // Override fetch to handle auth errors
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                return originalFetch.apply(this, args)
+                    .then(response => {
+                        if (response.status === 401 || response.status === 403) {
+                            // Redirect to login immediately
+                            window.location.href = '{{ route("login") }}?session_expired=1';
+                            return Promise.reject(new Error('Authentication failed'));
+                        }
+                        return response;
+                    })
+                    .catch(error => {
+                        // If it's a network error but we have a session, check if we should redirect
+                        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                            // Only redirect if we believe we should be authenticated
+                            setTimeout(() => {
+                                window.location.href = '{{ route("login") }}?connection_error=1';
+                            }, 1000);
+                        }
+                        throw error;
+                    });
+            };
+        });
 
+        // Handle any uncaught errors that might be auth-related
+        window.addEventListener('unhandledrejection', function(event) {
+            if (event.reason && 
+                (event.reason.status === 401 || 
+                event.reason.status === 403 ||
+                event.reason.message.includes('Failed to fetch'))) {
+                event.preventDefault();
+                window.location.href = '{{ route("login") }}?session_expired=1';
+            }
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

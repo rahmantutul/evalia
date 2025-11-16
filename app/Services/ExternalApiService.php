@@ -12,6 +12,7 @@ class ExternalApiService
 
     public function __construct()
     {
+    
         $this->baseUrl = 'http://35.153.178.201:8080';
         $this->timeout =  30;
     }
@@ -130,7 +131,51 @@ public function login($email, $password)
             ];
         }
     }
+    public function getRolePermissions($roleId)
+    {
+        $token = $this->getToken();
+        if (!$token) {
+            return ['success' => false, 'error' => 'Not authenticated'];
+        }
 
+        try {
+            $response = Http::timeout($this->timeout)
+                ->withToken($token)
+                ->get($this->baseUrl . "/roles/{$roleId}");
+
+            if ($response->successful()) {
+                $roleData = $response->json();
+                
+                // Debug the API response
+                \Log::info('Role API Response', [
+                    'role_id' => $roleId,
+                    'response' => $roleData
+                ]);
+                
+                return [
+                    'success' => true,
+                    'permissions' => $roleData['permissions'] ?? $roleData['data']['permissions'] ?? []
+                ];
+            }
+
+            \Log::error('Failed to fetch role permissions', [
+                'status' => $response->status(),
+                'response' => $response->body()
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'Failed to fetch role permissions'
+            ];
+
+        } catch (\Exception $e) {
+            \Log::error('Role permissions API exception: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => 'Service unavailable'
+            ];
+        }
+    }
     /**
      * Register new user
      */
@@ -168,6 +213,7 @@ public function login($email, $password)
     public function listUsers($skip = 0, $limit = 100)
     {
         $token = $this->getToken();
+        // dd($token);
         if (!$token) {
             return ['success' => false, 'error' => 'Not authenticated'];
         }
@@ -179,7 +225,7 @@ public function login($email, $password)
                     'skip' => $skip,
                     'limit' => $limit
                 ]);
-
+            
             if ($response->successful()) {
                 return [
                     'success' => true,
@@ -327,23 +373,59 @@ public function login($email, $password)
                 ->delete($this->baseUrl . "/users/{$userId}");
 
             if ($response->status() === 204) {
-                return ['success' => true];
+                return ['success' => true, 'message' => 'User deactivated successfully'];
             }
+
+            // Get the actual error message from API response
+            $errorData = $response->json();
+            $errorMessage = $errorData['detail'] ?? $errorData['message'] ?? 'Failed to deactivate user';
 
             return [
                 'success' => false,
-                'error' => 'Failed to deactivate user'
+                'error' => $errorMessage
             ];
 
         } catch (\Exception $e) {
-            Log::error('Deactivate user failed: ' . $e->getMessage());
             return [
                 'success' => false,
                 'error' => 'Service unavailable'
             ];
         }
     }
+        public function changeUserPassword($userId, $newPassword)
+    {
+        $token = $this->getToken();
+        if (!$token) {
+            return ['success' => false, 'error' => 'Not authenticated'];
+        }
 
+        try {
+            $response = Http::timeout($this->timeout)
+                ->withToken($token)
+                ->post($this->baseUrl . "/users/{$userId}/change-password", [
+                    'new_password' => $newPassword
+                ]);
+
+            if ($response->successful()) {
+                return ['success' => true];
+            }
+
+            // Get the actual error message from API response
+            $errorData = $response->json();
+            $errorMessage = $errorData['detail'] ?? $errorData['message'] ?? 'Failed to change password';
+
+            return [
+                'success' => false,
+                'error' => $errorMessage
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'error' => 'Service unavailable'
+            ];
+        }
+    }
     /**
      * Change user password
      */

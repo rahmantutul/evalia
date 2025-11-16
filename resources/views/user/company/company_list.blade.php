@@ -293,9 +293,9 @@
                                                 <a href="{{ route('user.company.view',$company['id']) }}" class="btn btn-icon" title="View">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-icon" data-bs-toggle="modal" data-bs-target="#audioUploadModal{{ $company['id'] }}" style="height: 38px;" title="Add a new task">
+                                                {{--  <button type="button" class="btn btn-icon" data-bs-toggle="modal" data-bs-target="#audioUploadModal{{ $company['id'] }}" style="height: 38px;" title="Add a new task">
                                                     <i class="fas fa-plus"></i>
-                                                </button>
+                                                </button>  --}}
                                                 <a href="{{ route('user.task.list',$company['id']) }}" class="btn btn-icon" title="Task List">
                                                     <i class="fas fa-list"></i>
                                                 </a>
@@ -309,7 +309,7 @@
                                         </td>
                                     </tr>
 
-                                    <!-- Modal -->
+                                    {{--  <!-- Modal -->
                                     <div class="modal fade" id="audioUploadModal{{ $company['id'] }}" tabindex="-1" aria-labelledby="audioUploadModalLabel" aria-hidden="true">
                                         <div class="modal-dialog modal-xl modal-dialog-centered">
                                             <div class="modal-content border-0 shadow-lg rounded-4">
@@ -320,134 +320,130 @@
                                                     </h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
-<div class="modal-body">
-    <form action="{{ route('user.task.store') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        <div class="row g-4 mb-4">
+                                                    <div class="modal-body">
+                                                        <form action="{{ route('user.task.store') }}" method="POST" enctype="multipart/form-data">
+                                                            @csrf
+                                                            <div class="row g-4 mb-4">
 
-            {{-- Customer Audio --}}
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white border-0 py-2">
-                        <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
-                            <span class="bg-dark bg-opacity-10 text-primary p-2 me-2 rounded">
-                                <i class="fas fa-microphone"></i>
-                            </span>
-                            Customer Audio
-                        </h5>
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <p class="text-muted small mb-4">Upload customer audio file in WAV or MP3 format</p>
-                        <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
-                            <i class="bi bi-cloud-upload text-primary fs-1 mb-2"></i>
-                            <span class="text-center mb-1 fw-500">Drag & drop files here</span>
-                            <span class="text-muted small mb-3">or click to browse</span>
-                            <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
-                            <input type="file" name="customer_audio" class="d-none" accept="audio/*" required>
-                        </label>
-                    </div>
-                </div>
-            </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="card border-0 shadow-sm h-100">
+                                                                        <div class="card-header bg-white border-0 py-2">
+                                                                            <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
+                                                                                <span class="bg-dark bg-opacity-10 text-primary p-2 me-2 rounded">
+                                                                                    <i class="fas fa-microphone"></i>
+                                                                                </span>
+                                                                                Customer Audio
+                                                                            </h5>
+                                                                        </div>
+                                                                        <div class="card-body d-flex flex-column">
+                                                                            <p class="text-muted small mb-4">Upload customer audio file in WAV or MP3 format</p>
+                                                                            <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
+                                                                                <i class="bi bi-cloud-upload text-primary fs-1 mb-2"></i>
+                                                                                <span class="text-center mb-1 fw-500">Drag & drop files here</span>
+                                                                                <span class="text-muted small mb-3">or click to browse</span>
+                                                                                <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
+                                                                                <input type="file" name="customer_audio" class="d-none" accept="audio/*" required>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
-            {{-- Agent Audio --}}
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white border-0 py-2">
-                        <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
-                            <span class="bg-danger bg-opacity-10 text-danger p-2 me-2 rounded">
-                                <i class="fas fa-headset fs-5"></i>
-                            </span>
-                            Agent Audio
-                        </h5>
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <p class="text-muted small mb-4">Upload agent audio file in WAV or MP3 format</p>
-                        <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
-                            <i class="bi bi-cloud-upload text-danger fs-1 mb-2"></i>
-                            <span class="text-center mb-1 fw-500">Drag & drop files here</span>
-                            <span class="text-muted small mb-3">or click to browse</span>
-                            <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
-                            <input type="file" name="agent_audio" class="d-none" accept="audio/*" required>
-                        </label>
-                    </div>
-                </div>
-            </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="card border-0 shadow-sm h-100">
+                                                                        <div class="card-header bg-white border-0 py-2">
+                                                                            <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
+                                                                                <span class="bg-danger bg-opacity-10 text-danger p-2 me-2 rounded">
+                                                                                    <i class="fas fa-headset fs-5"></i>
+                                                                                </span>
+                                                                                Agent Audio
+                                                                            </h5>
+                                                                        </div>
+                                                                        <div class="card-body d-flex flex-column">
+                                                                            <p class="text-muted small mb-4">Upload agent audio file in WAV or MP3 format</p>
+                                                                            <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
+                                                                                <i class="bi bi-cloud-upload text-danger fs-1 mb-2"></i>
+                                                                                <span class="text-center mb-1 fw-500">Drag & drop files here</span>
+                                                                                <span class="text-muted small mb-3">or click to browse</span>
+                                                                                <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
+                                                                                <input type="file" name="agent_audio" class="d-none" accept="audio/*" required>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
-            {{-- Combined Audio --}}
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white border-0 py-2">
-                        <h5 class="card-title mb-0 fw-600 d-flex align-items-center">
-                            <span class="bg-success bg-opacity-10 text-success p-2 me-2 rounded">
-                                <i class="fas fa-microphone fs-5"></i>
-                            </span>
-                            Combined Audio
-                        </h5>
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <p class="text-muted small mb-4">Upload pre-mixed audio file (optional)</p>
-                        <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
-                            <i class="bi bi-cloud-upload text-success fs-1 mb-2"></i>
-                            <span class="text-center mb-1 fw-500">Drag & drop files here</span>
-                            <span class="text-muted small mb-3">or click to browse</span>
-                            <span class="badge bg-light text-dark px-3 py-2">Max 100MB</span>
-                            <input type="file" name="combined_audio" class="d-none" accept="audio/*">
-                        </label>
-                    </div>
-                </div>
-            </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="card border-0 shadow-sm h-100">
+                                                                        <div class="card-header bg-white border-0 py-2">
+                                                                            <h5 class="card-title mb-0 fw-600 d-flex align-items-center">
+                                                                                <span class="bg-success bg-opacity-10 text-success p-2 me-2 rounded">
+                                                                                    <i class="fas fa-microphone fs-5"></i>
+                                                                                </span>
+                                                                                Combined Audio
+                                                                            </h5>
+                                                                        </div>
+                                                                        <div class="card-body d-flex flex-column">
+                                                                            <p class="text-muted small mb-4">Upload pre-mixed audio file (optional)</p>
+                                                                            <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
+                                                                                <i class="bi bi-cloud-upload text-success fs-1 mb-2"></i>
+                                                                                <span class="text-center mb-1 fw-500">Drag & drop files here</span>
+                                                                                <span class="text-muted small mb-3">or click to browse</span>
+                                                                                <span class="badge bg-light text-dark px-3 py-2">Max 100MB</span>
+                                                                                <input type="file" name="combined_audio" class="d-none" accept="audio/*">
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
-        </div>
+                                                            </div>
 
-        {{-- Agent Selection Dropdown --}}
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-0 py-2">
-                        <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
-                            <span class="bg-info bg-opacity-10 text-info p-2 me-2 rounded">
-                                <i class="fas fa-user-tie"></i>
-                            </span>
-                            Select Agent
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label for="agent_id" class="form-label fw-500 mb-2">Choose an agent for this analysis</label>
-                            <select name="agent_id" id="agent_id" class="form-select form-select-lg py-3 select2" required>
-                                <option value="">-- Select Agent --</option>
-                                    @foreach($companyAgents as $agent)
-                                        <option value="{{ $agent['id'] }}">
-                                            {{ $agent['agent_id_display'] }} - {{ $agent['name'] }} 
-                                            @if($agent['email'])
-                                                ({{ $agent['email'] }})
-                                            @endif
-                                        </option>
-                                    @endforeach
-                            </select>
-                            @error('agent_id')
-                                <div class="text-danger small mt-2">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                                                            <div class="row mb-4">
+                                                                <div class="col-12">
+                                                                    <div class="card border-0 shadow-sm">
+                                                                        <div class="card-header bg-white border-0 py-2">
+                                                                            <h5 class="card-title mb-0 fw-500 d-flex align-items-center">
+                                                                                <span class="bg-info bg-opacity-10 text-info p-2 me-2 rounded">
+                                                                                    <i class="fas fa-user-tie"></i>
+                                                                                </span>
+                                                                                Select Agent
+                                                                            </h5>
+                                                                        </div>
+                                                                        <div class="card-body">
+                                                                            <div class="form-group">
+                                                                                <label for="agent_id" class="form-label fw-500 mb-2">Choose an agent for this analysis</label>
+                                                                                <select name="agent_id" id="agent_id" class="form-select form-select-lg py-3 select2" required>
+                                                                                    <option value="">-- Select Agent --</option>
+                                                                                        @foreach($companyAgents as $agent)
+                                                                                            <option value="{{ $agent['id'] }}">
+                                                                                                {{ $agent['agent_id_display'] }} - {{ $agent['name'] }} 
+                                                                                                @if($agent['email'])
+                                                                                                    ({{ $agent['email'] }})
+                                                                                                @endif
+                                                                                            </option>
+                                                                                        @endforeach
+                                                                                </select>
+                                                                                @error('agent_id')
+                                                                                    <div class="text-danger small mt-2">{{ $message }}</div>
+                                                                                @enderror
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
 
-        <!-- Hidden company_id -->
-        <input type="hidden" name="company_id" value="{{ $company['id'] }}">
+                                                            <!-- Hidden company_id -->
+                                                            <input type="hidden" name="company_id" value="{{ $company['id'] }}">
 
-        <!-- Action Buttons -->
-        <div class="d-flex justify-content-center mb-2">
-            <button type="submit" class="btn btn-primary px-5 py-2 me-3 rounded-pill fw-600 shadow-sm">
-                <i class="fas fa-chart-line me-2"></i> Analyze Audio
-            </button>
-        </div>
-    </form>
-</div>
+                                                            <!-- Action Buttons -->
+                                                            <div class="d-flex justify-content-center mb-2">
+                                                                <button type="submit" class="btn btn-primary px-5 py-2 me-3 rounded-pill fw-600 shadow-sm">
+                                                                    <i class="fas fa-chart-line me-2"></i> Analyze Audio
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div>  --}}
                                 @endforeach         
                             </tbody>
                         </table>                                             
