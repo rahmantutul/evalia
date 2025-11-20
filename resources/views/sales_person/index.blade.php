@@ -118,14 +118,14 @@
                                                 </div>
                                                 <small class="text-muted">{{ $personClientCount }} total assigned</small>
                                             </div>
-                                            @if(count($person['clients'] ?? []) > 0)
+                                            {{--  @if(count($person['clients'] ?? []) > 0)
                                             <a href="{{ route('sales_person.show', $person['id']) }}" 
                                                class="btn btn-sm btn-outline-primary"
                                                data-toggle="tooltip"
                                                title="View Clients">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            @endif
+                                            @endif  --}}
                                         </div>
                                     </td>
                                     <td class="text-center">

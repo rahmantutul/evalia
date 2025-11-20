@@ -32,37 +32,37 @@ Route::post('/logout', [ApiAuthController::class, 'logout'])->name('logout');
 
 
 // Criteria Routes
-Route::prefix('criteria')->name('criteria.')->group(function () {
-    Route::get('/', [SalesManagerController::class, 'criteriaIndex'])->name('index');
-    Route::get('/create', [SalesManagerController::class, 'criteriaCreate'])->name('create');
-    Route::post('/', [SalesManagerController::class, 'criteriaStore'])->name('store');
-    Route::get('/{id}/edit', [SalesManagerController::class, 'criteriaEdit'])->name('edit');
-    Route::put('/{id}', [SalesManagerController::class, 'criteriaUpdate'])->name('update');
-    Route::delete('/{id}', [SalesManagerController::class, 'criteriaDestroy'])->name('destroy');
-});
+// Route::prefix('criteria')->name('criteria.')->group(function () {
+//     Route::get('/', [SalesManagerController::class, 'criteriaIndex'])->name('index');
+//     Route::get('/create', [SalesManagerController::class, 'criteriaCreate'])->name('create');
+//     Route::post('/', [SalesManagerController::class, 'criteriaStore'])->name('store');
+//     Route::get('/{id}/edit', [SalesManagerController::class, 'criteriaEdit'])->name('edit');
+//     Route::put('/{id}', [SalesManagerController::class, 'criteriaUpdate'])->name('update');
+//     Route::delete('/{id}', [SalesManagerController::class, 'criteriaDestroy'])->name('destroy');
+// });
 
-// Sales Person Routes
-Route::prefix('sales-person')->name('sales_person.')->group(function () {
-    Route::get('/', [SalesManagerController::class, 'salesPersonIndex'])->name('index');
-    Route::get('/create', [SalesManagerController::class, 'salesPersonCreate'])->name('create');
-    Route::post('/', [SalesManagerController::class, 'salesPersonStore'])->name('store');
-    Route::get('/{id}', [SalesManagerController::class, 'salesPersonShow'])->name('show');
-    Route::get('/{id}/edit', [SalesManagerController::class, 'salesPersonEdit'])->name('edit');
-    Route::put('/{id}', [SalesManagerController::class, 'salesPersonUpdate'])->name('update');
-    Route::delete('/{id}', [SalesManagerController::class, 'salesPersonDestroy'])->name('destroy');
-    Route::get('/{id}/clients', [SalesManagerController::class, 'salesPersonClients'])->name('clients');
-});
+// // Sales Person Routes
+// Route::prefix('sales-person')->name('sales_person.')->group(function () {
+//     Route::get('/', [SalesManagerController::class, 'salesPersonIndex'])->name('index');
+//     Route::get('/create', [SalesManagerController::class, 'salesPersonCreate'])->name('create');
+//     Route::post('/', [SalesManagerController::class, 'salesPersonStore'])->name('store');
+//     Route::get('/{id}', [SalesManagerController::class, 'salesPersonShow'])->name('show');
+//     Route::get('/{id}/edit', [SalesManagerController::class, 'salesPersonEdit'])->name('edit');
+//     Route::put('/{id}', [SalesManagerController::class, 'salesPersonUpdate'])->name('update');
+//     Route::delete('/{id}', [SalesManagerController::class, 'salesPersonDestroy'])->name('destroy');
+//     Route::get('/{id}/clients', [SalesManagerController::class, 'salesPersonClients'])->name('clients');
+// });
 
-// Client Routes
-Route::prefix('client')->name('client.')->group(function () {
-    Route::get('/', [SalesManagerController::class, 'clientIndex'])->name('index');
-    Route::get('/create', [SalesManagerController::class, 'clientCreate'])->name('create');
-    Route::post('/', [SalesManagerController::class, 'clientStore'])->name('store');
-    Route::get('/{id}', [SalesManagerController::class, 'clientShow'])->name('show');
-    Route::get('/{id}/edit', [SalesManagerController::class, 'clientEdit'])->name('edit');
-    Route::put('/{id}', [SalesManagerController::class, 'clientUpdate'])->name('update');
-    Route::delete('/{id}', [SalesManagerController::class, 'clientDestroy'])->name('destroy');
-});
+// // Client Routes
+// Route::prefix('client')->name('client.')->group(function () {
+//     Route::get('/', [SalesManagerController::class, 'clientIndex'])->name('index');
+//     Route::get('/create', [SalesManagerController::class, 'clientCreate'])->name('create');
+//     Route::post('/', [SalesManagerController::class, 'clientStore'])->name('store');
+//     Route::get('/{id}', [SalesManagerController::class, 'clientShow'])->name('show');
+//     Route::get('/{id}/edit', [SalesManagerController::class, 'clientEdit'])->name('edit');
+//     Route::put('/{id}', [SalesManagerController::class, 'clientUpdate'])->name('update');
+//     Route::delete('/{id}', [SalesManagerController::class, 'clientDestroy'])->name('destroy');
+// });
 
 
 

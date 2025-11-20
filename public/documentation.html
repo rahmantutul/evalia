@@ -1,0 +1,3646 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evalia Documentation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2563eb;
+        --primary-light: #3b82f6;
+        --primary-lighter: #60a5fa;
+        --accent: #0ea5e9;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --gray-50: #fafafa;
+        --gray-100: #f5f5f5;
+        --gray-200: #e5e5e5;
+        --gray-300: #d4d4d4;
+        --gray-400: #a3a3a3;
+        --gray-500: #737373;
+        --gray-600: #525252;
+        --gray-700: #404040;
+        --gray-800: #262626;
+        --gray-900: #171717;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.6;
+        color: var(--gray-700);
+        background: #ffffff;
+      }
+
+      /* Header */
+      .header {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        color: var(--gray-800);
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        border-bottom: 1px solid var(--gray-200);
+      }
+
+      .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .base-url {
+        background: var(--gray-100);
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-family: "Monaco", monospace;
+        font-size: 0.85rem;
+        color: var(--gray-700);
+        border: 1px solid var(--gray-200);
+      }
+
+      /* Layout */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        height: fit-content;
+        position: sticky;
+        top: 120px;
+        border: 1px solid var(--gray-200);
+      }
+
+      .nav-section {
+        margin-bottom: 1.5rem;
+      }
+
+      .nav-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--gray-600);
+        margin-bottom: 0.75rem;
+      }
+
+      .nav-item {
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: var(--gray-700);
+        border-radius: 6px;
+        transition: all 0.2s;
+        margin-bottom: 0.25rem;
+        border: 1px solid transparent;
+      }
+
+      .nav-item:hover {
+        background: var(--gray-100);
+        color: var(--primary);
+        border-color: var(--gray-300);
+      }
+
+      .nav-item.active {
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--accent) 100%
+        );
+        color: white;
+        font-weight: 600;
+        border-color: var(--primary);
+      }
+
+      /* Main Content */
+      .main-content {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: var(--shadow);
+        min-height: 80vh;
+        border: 1px solid var(--gray-200);
+      }
+
+      .section {
+        display: none;
+        animation: fadeIn 0.3s;
+      }
+
+      .section.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--gray-200);
+      }
+
+      .section-subtitle {
+        color: var(--gray-600);
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+      }
+
+      /* Cards */
+      .card {
+        background: var(--gray-50);
+        border: 1px solid var(--gray-200);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .badge-post {
+        background: #3b82f6;
+        color: white;
+      }
+      .badge-get {
+        background: var(--success);
+        color: white;
+      }
+      .badge-put {
+        background: var(--warning);
+        color: white;
+      }
+      .badge-delete {
+        background: var(--danger);
+        color: white;
+      }
+
+      .endpoint-path {
+        font-family: "Monaco", monospace;
+        font-size: 1rem;
+        color: var(--gray-800);
+        font-weight: 600;
+      }
+
+      .code-block {
+        background: var(--gray-900);
+        color: #e5e7eb;
+        padding: 1.25rem;
+        border-radius: 8px;
+        font-family: "Monaco", monospace;
+        font-size: 0.85rem;
+        overflow-x: auto;
+        line-height: 1.6;
+        margin: 1rem 0;
+        box-shadow: var(--shadow);
+      }
+
+      .code-block .key {
+        color: #8b5cf6;
+      }
+      .code-block .string {
+        color: #10b981;
+      }
+      .code-block .number {
+        color: #f59e0b;
+      }
+      .code-block .comment {
+        color: #9ca3af;
+      }
+
+      .param-grid {
+        display: grid;
+        gap: 0.75rem;
+        margin: 1rem 0;
+      }
+
+      .param {
+        background: white;
+        padding: 1rem;
+        border-radius: 6px;
+        border-left: 3px solid var(--primary);
+      }
+
+      .param-name {
+        font-weight: 700;
+        color: var(--gray-900);
+        font-family: "Monaco", monospace;
+        font-size: 0.9rem;
+      }
+
+      .param-required {
+        color: var(--danger);
+        font-size: 0.75rem;
+        margin-left: 0.5rem;
+      }
+
+      .param-desc {
+        color: var(--gray-600);
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+      }
+
+      .feature-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 2px solid var(--gray-200);
+        transition: all 0.3s;
+      }
+
+      .feature-card:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .feature-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--accent) 100%
+        );
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .feature-title {
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+      }
+
+      .feature-desc {
+        color: var(--gray-600);
+        font-size: 0.9rem;
+      }
+
+      .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+      }
+
+      .status-code {
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        color: white;
+        font-weight: 700;
+      }
+
+      .status-200 {
+        background: var(--success);
+      }
+      .status-400 {
+        background: var(--warning);
+      }
+      .status-401 {
+        background: #f59e0b;
+      }
+      .status-404 {
+        background: var(--danger);
+      }
+      .status-500 {
+        background: #991b1b;
+      }
+
+      .info-box {
+        background: #dbeafe;
+        border-left: 4px solid #3b82f6;
+        padding: 1rem;
+        border-radius: 6px;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+        color: var(--gray-700);
+      }
+
+      .warning-box {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        border-radius: 6px;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+        color: var(--gray-700);
+      }
+
+      h3 {
+        color: var(--gray-900);
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 1.5rem 0 0.75rem 0;
+      }
+
+      .api-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+      }
+
+      .api-table th,
+      .api-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--gray-200);
+      }
+
+      .api-table th {
+        background: var(--gray-100);
+        font-weight: 700;
+        color: var(--gray-800);
+      }
+
+      .api-table tr:hover {
+        background: var(--gray-50);
+      }
+
+      /* Mobile */
+      @media (max-width: 968px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          position: relative;
+          top: 0;
+        }
+
+        .header-content {
+          flex-direction: column;
+          gap: 1rem;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+     <!-- Header -->
+                <div class="header">
+                <div class="header-content">
+                    <h1>🎙️ Audio analysis Documentation</h1>
+                    <div class="base-url">http://35.153.178.201:8080</div>
+                </div>
+                </div>
+
+                <div class="container">
+                <!-- Sidebar Navigation -->
+                <aside class="sidebar">
+                    <nav class="nav-section">
+                    <div class="nav-title">Getting Started</div>
+                    <div class="nav-item active" data-section="overview">Overview</div>
+                    <div class="nav-item" data-section="features">Features</div>
+                    </nav>
+
+                    <nav class="nav-section">
+                    <div class="nav-title">Endpoints</div>
+                    <div class="nav-item" data-section="authentication">Authentication</div>
+                    <div class="nav-item" data-section="user-management">User management</div>
+                    <div class="nav-item" data-section="rbac">Roles & Permissions</div>
+                    <div class="nav-item" data-section="agents-performance">Agents & Performance</div>
+                    <div class="nav-item" data-section="group-management">Group management</div>
+                    <div class="nav-item" data-section="company-management">Company management</div>
+                    <div class="nav-item" data-section="task-management">Task Management</div>
+                    <div class="nav-item" data-section="background-processing">Upload Audio</div>
+                    <div class="nav-item" data-section="errors">Errors</div>
+
+                    </nav>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="main-content">
+                    <!-- Overview Section -->
+                    <section class="section active" id="overview">
+                    <h1 class="section-title">API Overview</h1>
+                    <p class="section-subtitle">
+                        Enterprise-grade audio processing and speech recognition API
+                    </p>
+
+                    <div class="card">
+                        <h3>Base URL</h3>
+                        <div class="code-block">http://35.153.178.201:8080</div>
+                        <div class="info-box">
+                        All API requests should be made to this base URL. Authentication
+                        may be required for certain endpoints.
+                        </div>
+                    </div>
+
+                    <h3>API Architecture</h3>
+                    <p>
+                        The AI Audio API provides a comprehensive solution for audio
+                        processing, transcription, and analysis. Built with a microservices
+                        architecture, it supports:
+                    </p>
+
+                    <ul style="margin: 1rem 0 1rem 2rem">
+                        <li>Audio transcription</li>
+                        <li>Multi-language support</li>
+                        <li>Sentiment and emotion analysis</li>
+                        <li>User and company management</li>
+                        <li>Role-based access control</li>
+                    </ul>
+
+                    <div class="warning-box">
+                        <strong>Note:</strong> This is a beta version of the API. Some
+                        features may change in future releases.
+                    </div>
+                    </section>
+                    <!-- Authentication Section -->
+                    <section class="section" id="authentication">
+                    <h1 class="section-title">Authentication</h1>
+                    <p class="section-subtitle">Secure access to API endpoints</p>
+
+                    <div class="card">
+                        <h3>🔐 Login & Token Generation</h3>
+                        <p>
+                        To access protected endpoints, you first need to obtain an access
+                        token.
+                        </p>
+
+                        <div class="card-header">
+                        <span class="badge badge-post">POST</span>
+                        <span class="endpoint-path">/auth/token</span>
+                        </div>
+
+                        <h3>Request Body</h3>
+                        <div class="code-block">
+                        { <span class="key">"username"</span>:
+                        <span class="string">"superadmin"</span>,
+                        <span class="key">"password"</span>:
+                        <span class="string">"superadminpassword"</span> }
+                        </div>
+
+                        <h3>Response</h3>
+                        <div class="code-block">
+                        { <span class="key">"access_token"</span>:
+                        <span class="string"
+                            >"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."</span
+                        >, <span class="key">"token_type"</span>:
+                        <span class="string">"bearer"</span> }
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Usage:</strong> Include this token in the Authorization
+                        header for all subsequent requests:
+                        <code>Authorization: Bearer YOUR_ACCESS_TOKEN</code>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>👤 Get User Profile</h3>
+                        <p>Retrieve current user information using your access token.</p>
+
+                        <div class="card-header">
+                        <span class="badge badge-get">GET</span>
+                        <span class="endpoint-path">/auth/me</span>
+                        </div>
+
+                        <h3>Headers</h3>
+                        <div class="code-block">
+                        Authorization: Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h3>Response</h3>
+                        <div class="code-block">
+                        { <span class="key">"username"</span>:
+                        <span class="string">"john_doe"</span>,
+                        <span class="key">"email"</span>:
+                        <span class="string">"user@example.com"</span>,
+                        <span class="key">"full_name"</span>:
+                        <span class="string">"John Doe"</span>,
+                        <span class="key">"position"</span>:
+                        <span class="string">"Sales Agent"</span>,
+                        <span class="key">"phone"</span>:
+                        <span class="string">"+1234567890"</span>,
+                        <span class="key">"id"</span>:
+                        <span class="string">"user_123"</span>,
+                        <span class="key">"is_active"</span>:
+                        <span class="number">true</span>, <span class="key">"role"</span>:
+                        { <span class="key">"id"</span>:
+                        <span class="string">"role_456"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"agent"</span>
+                        },
+                        <span class="key">"company_id"</span>:
+                        <span class="string">"company_789"</span>,
+                        <span class="key">"company_name"</span>:
+                        <span class="string">"ABC Corp"</span>,
+                        <span class="key">"supervisor_id"</span>:
+                        <span class="string">"user_456"</span> }
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>📋 Quick Start Guide</h3>
+
+                        <h4>Step 1: Get Access Token</h4>
+                        <div class="code-block">
+                        curl -X POST "http://35.153.178.201:8080/auth/token" \ -H
+                        "Content-Type: application/json" \ -d '{"username": "superadmin",
+                        "password": "superadminpassword"}'
+                        </div>
+
+                        <h4>Step 2: Use Token in API Calls</h4>
+                        <div class="code-block">
+                        curl -X GET "http://35.153.178.201:8080/auth/me" \ -H
+                        "Authorization: Bearer YOUR_ACCESS_TOKEN"
+                        </div>
+
+                        <div class="warning-box">
+                        <strong>Security Note:</strong> Never expose your access token in
+                        client-side code. Always store tokens securely and use HTTPS in
+                        production.
+                        </div>
+                    </div>
+                    </section>
+
+                    <!-- Features Section -->
+                    <section class="section" id="features">
+                    <h1 class="section-title">Features</h1>
+                    <p class="section-subtitle">
+                        Comprehensive audio processing capabilities
+                    </p>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                        <div class="feature-icon">👤</div>
+                        <div class="feature-title">User Management</div>
+                        <div class="feature-desc">
+                            Store, retrieve, and deactivate user accounts with full profile
+                            management
+                        </div>
+                        </div>
+
+                        <div class="feature-card">
+                        <div class="feature-icon">🔐</div>
+                        <div class="feature-title">RBAC System</div>
+                        <div class="feature-desc">
+                            Role-based access control with granular permissions
+                        </div>
+                        </div>
+
+                        <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-title">Agent Performance</div>
+                        <div class="feature-desc">
+                            Track and analyze agent metrics and performance history
+                        </div>
+                        </div>
+
+                        <div class="feature-card">
+                        <div class="feature-icon">🏢</div>
+                        <div class="feature-title">Company Management</div>
+                        <div class="feature-desc">
+                            Create, edit, and manage company profiles and data
+                        </div>
+                        </div>
+
+                        <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-title">Task Management</div>
+                        <div class="feature-desc">
+                            Agent & company-specific audio upload and analysis
+                        </div>
+                        </div>
+
+                        <div class="feature-card">
+                        <div class="feature-icon">📚</div>
+                        <div class="feature-title">Knowledge Base</div>
+                        <div class="feature-desc">
+                            Custom knowledge base for AI training and optimization
+                        </div>
+                        </div>
+
+                        <div class="feature-card">
+                        <div class="feature-icon">👥</div>
+                        <div class="feature-title">Group Management</div>
+                        <div class="feature-desc">
+                            Organize and manage multiple companies in groups
+                        </div>
+                        </div>
+
+                        <div class="feature-card">
+                        <div class="feature-icon">🎙️</div>
+                        <div class="feature-title">Audio Processing</div>
+                        <div class="feature-desc">
+                            High-quality transcription, analysis, and processing
+                        </div>
+                        </div>
+                    </div>
+                    </section>
+
+                    <!-- User Management Section -->
+                    <section class="section" id="user-management">
+                    <h1 class="section-title">User Management</h1>
+                    <p class="section-subtitle">
+                        Create, manage, and organize users in the system
+                    </p>
+
+                    <!-- Create User -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-post">POST</span>
+                        <span class="endpoint-path">/users</span>
+                        </div>
+
+                        <h3>Create New User</h3>
+                        <p>
+                        Create a new user account in the system. No authentication
+                        required.
+                        </p>
+
+                        <h4>Required Fields</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            username <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">Minimum 3 characters</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">
+                            email <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">Valid email format</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">
+                            password <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">Minimum 6 characters</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">
+                            role_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">Valid UUID of existing role</div>
+                        </div>
+                        </div>
+
+                        <h4>Optional Fields</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">full_name</div>
+                            <div class="param-desc">User's full name</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">position</div>
+                            <div class="param-desc">Job title/position</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">phone</div>
+                            <div class="param-desc">Contact number</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">company_id</div>
+                            <div class="param-desc">
+                            UUID of company (required for non-SuperAdmin roles)
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">supervisor_id</div>
+                            <div class="param-desc">UUID of supervisor user</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">is_active</div>
+                            <div class="param-desc">Default: true</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        { <span class="key">"username"</span>:
+                        <span class="string">"jane.doe"</span>,
+                        <span class="key">"email"</span>:
+                        <span class="string">"jane.doe@example.com"</span>,
+                        <span class="key">"password"</span>:
+                        <span class="string">"a_very_secure_password"</span>,
+                        <span class="key">"role_id"</span>:
+                        <span class="string">"c03c4820-9d03-4a56-9b17-997f641dc3bc"</span
+                        >, <span class="key">"full_name"</span>:
+                        <span class="string">"Jane Doe"</span>,
+                        <span class="key">"company_id"</span>:
+                        <span class="string">"hassan"</span>,
+                        <span class="key">"supervisor_id"</span>:
+                        <span class="string">"f81d4fae-7dec-11d0-a765-00a0c91e6bf6"</span
+                        >, <span class="key">"is_active"</span>:
+                        <span class="number">true</span> }
+                        </div>
+
+                        <h4>Response (201 Created)</h4>
+                        <div class="code-block">
+                        { <span class="key">"id"</span>:
+                        <span class="string">"user_123"</span>,
+                        <span class="key">"username"</span>:
+                        <span class="string">"jane.doe"</span>,
+                        <span class="key">"email"</span>:
+                        <span class="string">"jane.doe@example.com"</span>,
+                        <span class="key">"full_name"</span>:
+                        <span class="string">"Jane Doe"</span>,
+                        <span class="key">"position"</span>:
+                        <span class="string">"Sales Agent"</span>,
+                        <span class="key">"phone"</span>:
+                        <span class="string">null</span>,
+                        <span class="key">"is_active"</span>:
+                        <span class="number">true</span>, <span class="key">"role"</span>:
+                        { <span class="key">"id"</span>:
+                        <span class="string">"role_456"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"agent"</span>
+                        },
+                        <span class="key">"company_id"</span>:
+                        <span class="string">"company_789"</span>,
+                        <span class="key">"company_name"</span>:
+                        <span class="string">"ABC Corp"</span>,
+                        <span class="key">"supervisor_id"</span>:
+                        <span class="string">"user_456"</span> }
+                        </div>
+                    </div>
+
+                    <!-- List Users -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-get">GET</span>
+                        <span class="endpoint-path">/users</span>
+                        </div>
+
+                        <h3>List Users</h3>
+                        <p>
+                        Get a list of users based on current user's role and permissions.
+                        Includes company_name and company_id in response.
+                        </p>
+
+                        <h4>Query Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">skip</div>
+                            <div class="param-desc">
+                            Number of records to skip for pagination (default: 0, min: 0)
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">limit</div>
+                            <div class="param-desc">
+                            Maximum records to return (default: 100, min: 1, max: 1000)
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Access Control</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">SuperAdmin</div>
+                            <div class="param-desc">
+                            Can view all users across all companies
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Admin</div>
+                            <div class="param-desc">
+                            Can view users within their company only
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Supervisor</div>
+                            <div class="param-desc">
+                            Can view agents under their supervision only
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Agent</div>
+                            <div class="param-desc">Cannot access this endpoint</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        GET /users?skip=0&limit=50 Authorization: Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        [ { <span class="key">"id"</span>:
+                        <span class="string">"user_123"</span>,
+                        <span class="key">"username"</span>:
+                        <span class="string">"john.doe"</span>,
+                        <span class="key">"email"</span>:
+                        <span class="string">"john@example.com"</span>,
+                        <span class="key">"full_name"</span>:
+                        <span class="string">"John Doe"</span>,
+                        <span class="key">"position"</span>:
+                        <span class="string">"Team Lead"</span>,
+                        <span class="key">"phone"</span>:
+                        <span class="string">"+1234567890"</span>,
+                        <span class="key">"is_active"</span>:
+                        <span class="number">true</span>, <span class="key">"role"</span>:
+                        { <span class="key">"id"</span>:
+                        <span class="string">"role_456"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"supervisor"</span>
+                        },
+                        <span class="key">"company_id"</span>:
+                        <span class="string">"company_789"</span>,
+                        <span class="key">"company_name"</span>:
+                        <span class="string">"ABC Corp"</span>,
+                        <span class="key">"supervisor_id"</span>:
+                        <span class="string">null</span> } ]
+                        </div>
+                    </div>
+
+                    <!-- Get User by ID -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-get">GET</span>
+                        <span class="endpoint-path">/users/{user_id}</span>
+                        </div>
+
+                        <h3>Get User by ID</h3>
+                        <p>Retrieve detailed information about a specific user.</p>
+
+                        <h4>Path Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            user_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">UUID of the user</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        GET /users/c03c4820-9d03-4a56-9b17-997f641dc3bc Authorization:
+                        Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        { <span class="key">"id"</span>:
+                        <span class="string">"c03c4820-9d03-4a56-9b17-997f641dc3bc"</span
+                        >, <span class="key">"username"</span>:
+                        <span class="string">"john.doe"</span>,
+                        <span class="key">"email"</span>:
+                        <span class="string">"john@example.com"</span>,
+                        <span class="key">"full_name"</span>:
+                        <span class="string">"John Doe"</span>,
+                        <span class="key">"position"</span>:
+                        <span class="string">"Team Lead"</span>,
+                        <span class="key">"phone"</span>:
+                        <span class="string">"+1234567890"</span>,
+                        <span class="key">"is_active"</span>:
+                        <span class="number">true</span>, <span class="key">"role"</span>:
+                        { <span class="key">"id"</span>:
+                        <span class="string">"role_456"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"supervisor"</span>
+                        },
+                        <span class="key">"company_id"</span>:
+                        <span class="string">"company_789"</span>,
+                        <span class="key">"company_name"</span>:
+                        <span class="string">"ABC Corp"</span>,
+                        <span class="key">"supervisor_id"</span>:
+                        <span class="string">null</span> }
+                        </div>
+                    </div>
+
+                    <!-- Update User -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-put">PUT</span>
+                        <span class="endpoint-path">/users/{user_id}</span>
+                        </div>
+
+                        <h3>Update User</h3>
+                        <p>
+                        Update an existing user's information. Only provided fields will
+                        be updated.
+                        </p>
+
+                        <h4>Path Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            user_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">UUID of the user to update</div>
+                        </div>
+                        </div>
+
+                        <h4>Optional Fields</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">email</div>
+                            <div class="param-desc">Valid email format</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">full_name</div>
+                            <div class="param-desc">User's full name</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">position</div>
+                            <div class="param-desc">Job title/position</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">phone</div>
+                            <div class="param-desc">Contact number</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">role_id</div>
+                            <div class="param-desc">UUID of role</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">company_id</div>
+                            <div class="param-desc">UUID of company</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">supervisor_id</div>
+                            <div class="param-desc">UUID of supervisor</div>
+                        </div>
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Note:</strong> Cannot update password through this
+                        endpoint. Use the change password endpoint instead.
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        PUT /users/c03c4820-9d03-4a56-9b17-997f641dc3bc Authorization:
+                        Bearer YOUR_ACCESS_TOKEN { <span class="key">"email"</span>:
+                        <span class="string">"john.new@example.com"</span>,
+                        <span class="key">"position"</span>:
+                        <span class="string">"Senior Team Lead"</span>,
+                        <span class="key">"phone"</span>:
+                        <span class="string">"+1987654321"</span> }
+                        </div>
+                    </div>
+
+                    <!-- Deactivate User -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-delete">DELETE</span>
+                        <span class="endpoint-path">/users/{user_id}</span>
+                        </div>
+
+                        <h3>Deactivate User</h3>
+                        <p>
+                        Deactivate a user account (soft delete - sets is_active to false).
+                        </p>
+
+                        <h4>Path Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            user_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">UUID of the user to deactivate</div>
+                        </div>
+                        </div>
+
+                        <div class="warning-box">
+                        <strong>Important Notes:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem">
+                            <li>SuperAdmin accounts cannot be deactivated</li>
+                            <li>This is a soft delete - user data is preserved</li>
+                            <li>Requires <code>manage_users</code> permission</li>
+                        </ul>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        DELETE /users/c03c4820-9d03-4a56-9b17-997f641dc3bc Authorization:
+                        Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (204 No Content)</h4>
+                        <p>Successfully deactivated - no response body</p>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-post">POST</span>
+                        <span class="endpoint-path"
+                            >/users/{user_id}/change-password</span
+                        >
+                        </div>
+
+                        <h3>Change User Password</h3>
+                        <p>
+                        Change a user's password. Users can change their own password, or
+                        users with manage_users permission can change any user's password.
+                        </p>
+
+                        <h4>Path Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            user_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">UUID of the user</div>
+                        </div>
+                        </div>
+
+                        <h4>Request Body</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            new_password <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">Minimum 6 characters</div>
+                        </div>
+                        </div>
+
+                        <h4>Permissions</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">Self-Service</div>
+                            <div class="param-desc">
+                            Users can change their own password
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Admin Access</div>
+                            <div class="param-desc">
+                            Users with <code>manage_users</code> permission can change any
+                            password
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        POST /users/c03c4820-9d03-4a56-9b17-997f641dc3bc/change-password
+                        Authorization: Bearer YOUR_ACCESS_TOKEN {
+                        <span class="key">"new_password"</span>:
+                        <span class="string">"new_secure_password_123"</span> }
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        <span class="string">"Password updated successfully"</span>
+                        </div>
+                    </div>
+                    </section>
+
+                    <!-- RBAC & Permissions Section -->
+                    <section class="section" id="rbac">
+                    <h1 class="section-title">Role-Based Access Control</h1>
+                    <p class="section-subtitle">
+                        Manage roles, permissions, and access control in the system
+                    </p>
+
+                    <!-- List Permissions -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-get">GET</span>
+                        <span class="endpoint-path">/permissions</span>
+                        </div>
+
+                        <h3>List All Permissions</h3>
+                        <p>Get a list of all available permissions in the system.</p>
+
+                        <h4>Response Includes</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">Permission ID</div>
+                            <div class="param-desc">
+                            Unique identifier for the permission
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Permission Name</div>
+                            <div class="param-desc">System name of the permission</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Description</div>
+                            <div class="param-desc">
+                            Detailed description of what the permission allows
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        GET /permissions Authorization: Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        [ { <span class="key">"id"</span>:
+                        <span class="string">"perm_001"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"manage_users"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Create, update, and deactivate user accounts"</span
+                        >
+                        }, {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_002"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"manage_roles"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Create and manage roles and permissions"</span
+                        >
+                        }, {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_003"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"manage_companies"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string">"Create and manage company data"</span>
+                        }, {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_004"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"view_audio"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Access audio processing and transcription features"</span
+                        >
+                        }, {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_005"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"analyze_audio"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Perform audio analysis and sentiment detection"</span
+                        >
+                        } ]
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Permission Required:</strong> <code>manage_roles</code>
+                        </div>
+                    </div>
+
+                    <!-- List Roles -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-get">GET</span>
+                        <span class="endpoint-path">/roles</span>
+                        </div>
+
+                        <h3>List All Roles</h3>
+                        <p>
+                        Get a list of all roles in the system with their assigned
+                        permissions.
+                        </p>
+
+                        <h4>Response Includes</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">Role ID</div>
+                            <div class="param-desc">Unique identifier for the role</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Role Name</div>
+                            <div class="param-desc">Name of the role</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Description</div>
+                            <div class="param-desc">Role description</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Permissions</div>
+                            <div class="param-desc">
+                            List of assigned permission objects
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        GET /roles Authorization: Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        [ { <span class="key">"id"</span>:
+                        <span class="string">"role_001"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"SuperAdmin"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Full system access across all companies and features"</span
+                        >, <span class="key">"permissions"</span>: [ {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_001"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"manage_users"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Create, update, and deactivate user accounts"</span
+                        >
+                        }, {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_002"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"manage_roles"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Create and manage roles and permissions"</span
+                        >
+                        } ] }, {
+                        <span class="key">"id"</span>:
+                        <span class="string">"role_002"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"Agent"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string">"Standard user with basic audio access"</span
+                        >, <span class="key">"permissions"</span>: [ {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_004"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"view_audio"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Access audio processing and transcription features"</span
+                        >
+                        } ] } ]
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Permission Required:</strong> <code>manage_roles</code>
+                        </div>
+                    </div>
+
+                    <!-- Create Role -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-post">POST</span>
+                        <span class="endpoint-path">/roles</span>
+                        </div>
+
+                        <h3>Create New Role</h3>
+                        <p>Create a new role in the system.</p>
+
+                        <h4>Required Fields</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            name <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">Unique role name</div>
+                        </div>
+                        </div>
+
+                        <h4>Optional Fields</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">description</div>
+                            <div class="param-desc">Role description</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        POST /roles Authorization: Bearer YOUR_ACCESS_TOKEN {
+                        <span class="key">"name"</span>:
+                        <span class="string">"Content Moderator"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Can review and moderate audio content"</span
+                        >
+                        }
+                        </div>
+
+                        <h4>Response (201 Created)</h4>
+                        <div class="code-block">
+                        { <span class="key">"id"</span>:
+                        <span class="string">"c03c4820-9d03-4a56-9b17-997f641dc3bc"</span
+                        >, <span class="key">"name"</span>:
+                        <span class="string">"Content Moderator"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string">"Can review and moderate audio content"</span
+                        >, <span class="key">"permissions"</span>: [] }
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Note:</strong> After creation, assign permissions using
+                        the <code>PUT /roles/{role_id}</code> endpoint
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Permission Required:</strong> <code>manage_roles</code>
+                        </div>
+                    </div>
+
+                    <!-- Get Role by ID -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-get">GET</span>
+                        <span class="endpoint-path">/roles/{role_id}</span>
+                        </div>
+
+                        <h3>Get Role by ID</h3>
+                        <p>Get detailed information about a specific role.</p>
+
+                        <h4>Path Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            role_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">UUID of the role</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        GET /roles/c03c4820-9d03-4a56-9b17-997f641dc3bc Authorization:
+                        Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        { <span class="key">"id"</span>:
+                        <span class="string">"c03c4820-9d03-4a56-9b17-997f641dc3bc"</span
+                        >, <span class="key">"name"</span>:
+                        <span class="string">"Content Moderator"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string">"Can review and moderate audio content"</span
+                        >, <span class="key">"permissions"</span>: [ {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_004"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"view_audio"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Access audio processing and transcription features"</span
+                        >
+                        }, {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_006"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"moderate_content"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string">"Review and moderate audio content"</span> }
+                        ] }
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Permission Required:</strong> <code>manage_roles</code>
+                        </div>
+                    </div>
+
+                    <!-- Update Role Details -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-put">PATCH</span>
+                        <span class="endpoint-path">/roles/{role_id}/details</span>
+                        </div>
+
+                        <h3>Update Role Name and Description</h3>
+                        <p>Update the name and/or description of an existing role.</p>
+
+                        <h4>Path Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            role_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">UUID of the role</div>
+                        </div>
+                        </div>
+
+                        <h4>Request Body</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">name</div>
+                            <div class="param-desc">New role name</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">description</div>
+                            <div class="param-desc">New role description</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        PATCH /roles/c03c4820-9d03-4a56-9b17-997f641dc3bc/details
+                        Authorization: Bearer YOUR_ACCESS_TOKEN {
+                        <span class="key">"name"</span>:
+                        <span class="string">"Senior Content Moderator"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Can review, moderate, and approve audio content"</span
+                        >
+                        }
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        { <span class="key">"id"</span>:
+                        <span class="string">"c03c4820-9d03-4a56-9b17-997f641dc3bc"</span
+                        >, <span class="key">"name"</span>:
+                        <span class="string">"Senior Content Moderator"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Can review, moderate, and approve audio content"</span
+                        >, <span class="key">"permissions"</span>: [ {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_004"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"view_audio"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Access audio processing and transcription features"</span
+                        >
+                        }, {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_006"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"moderate_content"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string">"Review and moderate audio content"</span> }
+                        ] }
+                        </div>
+
+                        <div class="warning-box">
+                        <strong>Restrictions:</strong> Cannot modify SuperAdmin, Admin,
+                        Supervisor, or Agent system roles
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Permission Required:</strong> <code>manage_roles</code>
+                        </div>
+                    </div>
+
+                    <!-- Update Role Permissions -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-put">PUT</span>
+                        <span class="endpoint-path">/roles/{role_id}</span>
+                        </div>
+
+                        <h3>Update Role Permissions</h3>
+                        <p>Update the permissions assigned to a role.</p>
+
+                        <h4>Path Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            role_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">UUID of the role</div>
+                        </div>
+                        </div>
+
+                        <h4>Request Body</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            permission_ids <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">List of permission UUIDs to assign</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        PUT /roles/c03c4820-9d03-4a56-9b17-997f641dc3bc Authorization:
+                        Bearer YOUR_ACCESS_TOKEN {
+                        <span class="key">"permission_ids"</span>: [
+                        <span class="string">"perm_004"</span>,
+                        <span class="string">"perm_006"</span>,
+                        <span class="string">"perm_007"</span>
+                        ] }
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        { <span class="key">"id"</span>:
+                        <span class="string">"c03c4820-9d03-4a56-9b17-997f641dc3bc"</span
+                        >, <span class="key">"name"</span>:
+                        <span class="string">"Senior Content Moderator"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Can review, moderate, and approve audio content"</span
+                        >, <span class="key">"permissions"</span>: [ {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_004"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"view_audio"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string"
+                            >"Access audio processing and transcription features"</span
+                        >
+                        }, {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_006"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"moderate_content"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string">"Review and moderate audio content"</span>
+                        }, {
+                        <span class="key">"id"</span>:
+                        <span class="string">"perm_007"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"approve_content"</span>,
+                        <span class="key">"description"</span>:
+                        <span class="string">"Approve moderated content"</span> } ] }
+                        </div>
+
+                        <div class="warning-box">
+                        <strong>Important:</strong> This replaces all existing permissions
+                        with the provided list
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Permission Required:</strong> <code>manage_roles</code>
+                        </div>
+                    </div>
+
+                    <!-- Delete Role -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-delete">DELETE</span>
+                        <span class="endpoint-path">/roles/{role_id}</span>
+                        </div>
+
+                        <h3>Delete a Role</h3>
+                        <p>Delete a role from the system.</p>
+
+                        <h4>Path Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            role_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">UUID of the role</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        DELETE /roles/c03c4820-9d03-4a56-9b17-997f641dc3bc Authorization:
+                        Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (204 No Content)</h4>
+                        <p>Successfully deleted - no response body</p>
+
+                        <div class="warning-box">
+                        <strong>Deletion Restrictions:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem">
+                            <li>
+                            Cannot delete SuperAdmin, Admin, Supervisor, or Agent roles
+                            (system roles)
+                            </li>
+                            <li>Cannot delete roles that are assigned to users</li>
+                        </ul>
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Permission Required:</strong> <code>manage_roles</code>
+                        </div>
+                    </div>
+
+                    <!-- Quick Reference -->
+                    <div class="card">
+                        <h3>📋 RBAC Quick Reference</h3>
+
+                        <h4>System Roles (Cannot be modified/deleted)</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">SuperAdmin</div>
+                            <div class="param-desc">
+                            Full system access across all companies
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Admin</div>
+                            <div class="param-desc">
+                            Full access within assigned company
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Supervisor</div>
+                            <div class="param-desc">
+                            Can manage agents under supervision
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Agent</div>
+                            <div class="param-desc">
+                            Standard user with basic permissions
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Common Permission Types</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">User Management</div>
+                            <div class="param-desc">
+                            manage_users, view_users, deactivate_users
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Role Management</div>
+                            <div class="param-desc">
+                            manage_roles, view_roles, assign_roles
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Company Management</div>
+                            <div class="param-desc">manage_companies, view_companies</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Audio Processing</div>
+                            <div class="param-desc">
+                            upload_audio, transcribe_audio, analyze_audio
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Content Management</div>
+                            <div class="param-desc">
+                            view_content, moderate_content, approve_content
+                            </div>
+                        </div>
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Workflow Tip:</strong>
+                        <ol style="margin: 0.5rem 0 0 1rem">
+                            <li>
+                            View available permissions with <code>GET /permissions</code>
+                            </li>
+                            <li>Create role with <code>POST /roles</code></li>
+                            <li>
+                            Assign permissions with <code>PUT /roles/{role_id}</code>
+                            </li>
+                            <li>Assign role to users during user creation or update</li>
+                        </ol>
+                        </div>
+
+                        <div class="warning-box">
+                        <strong>Security Best Practices:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem">
+                            <li>
+                            Follow principle of least privilege - assign only necessary
+                            permissions
+                            </li>
+                            <li>Regularly audit role assignments and permissions</li>
+                            <li>Use custom roles for specific business functions</li>
+                            <li>
+                            Test permission changes in a non-production environment first
+                            </li>
+                        </ul>
+                        </div>
+                    </div>
+                    </section>
+
+                    <!-- Agents & Performance Section -->
+                    <section class="section" id="agents-performance">
+                    <h1 class="section-title">Agents & Performance</h1>
+                    <p class="section-subtitle">
+                        Monitor and analyze agent performance metrics
+                    </p>
+
+                    <!-- Dashboard Summary -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-get">GET</span>
+                        <span class="endpoint-path">/agents/dashboard-summary</span>
+                        </div>
+
+                        <h3>Agent Performance Dashboard Summary</h3>
+                        <p>
+                        Retrieve aggregate statistics for the agent performance dashboard.
+                        </p>
+
+                        <h4>Response Metrics</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">total_agents</div>
+                            <div class="param-desc">
+                            Total number of agents in the system
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">active_agents</div>
+                            <div class="param-desc">Number of currently active agents</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">avg_rating</div>
+                            <div class="param-desc">
+                            Average overall performance rating (0-100 scale)
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">total_calls</div>
+                            <div class="param-desc">Total number of calls processed</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">success_rate</div>
+                            <div class="param-desc">Overall success rate percentage</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">avg_response_time</div>
+                            <div class="param-desc">Average response time score</div>
+                        </div>
+                        </div>
+
+                        <h4>Access Control</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">SuperAdmin</div>
+                            <div class="param-desc">
+                            Views statistics for all agents across all companies
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Admin</div>
+                            <div class="param-desc">
+                            Views statistics for agents in their company only
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Supervisor</div>
+                            <div class="param-desc">
+                            Views statistics for agents under their supervision only
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        GET /agents/dashboard-summary Authorization: Bearer
+                        YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        { <span class="key">"total_agents"</span>:
+                        <span class="number">5</span>,
+                        <span class="key">"active_agents"</span>:
+                        <span class="number">3</span>,
+                        <span class="key">"avg_rating"</span>:
+                        <span class="number">83</span>,
+                        <span class="key">"total_calls"</span>:
+                        <span class="number">23</span>,
+                        <span class="key">"success_rate"</span>:
+                        <span class="number">91</span>,
+                        <span class="key">"avg_response_time"</span>:
+                        <span class="number">80</span> }
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Permission Required:</strong> Authenticated user
+                        </div>
+                    </div>
+
+                    <!-- List Agents -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-get">GET</span>
+                        <span class="endpoint-path">/agents/list</span>
+                        </div>
+
+                        <h3>List All Agents</h3>
+                        <p>Get a list of all agents with their basic details.</p>
+
+                        <h4>Response Includes</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">Agent ID</div>
+                            <div class="param-desc">Unique identifier for the agent</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Display ID</div>
+                            <div class="param-desc">
+                            Human-readable agent identifier (e.g., AG-1876)
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Name</div>
+                            <div class="param-desc">Agent's full name</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Email</div>
+                            <div class="param-desc">Contact email address</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Phone</div>
+                            <div class="param-desc">Contact phone number</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Company</div>
+                            <div class="param-desc">Company name the agent belongs to</div>
+                        </div>
+                        </div>
+
+                        <h4>Access Control</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">SuperAdmin</div>
+                            <div class="param-desc">
+                            Can view all agents across all companies
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Admin</div>
+                            <div class="param-desc">
+                            Can view agents in their company only
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Supervisor</div>
+                            <div class="param-desc">
+                            Can view agents under their supervision only
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Agent</div>
+                            <div class="param-desc">Cannot access this endpoint</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        GET /agents/list Authorization: Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        [ { <span class="key">"id"</span>:
+                        <span class="string">"550e8400-e29b-41d4-a716-446655440000"</span
+                        >, <span class="key">"agent_id_display"</span>:
+                        <span class="string">"AG-1876"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"Xavier Fadel"</span>,
+                        <span class="key">"email"</span>:
+                        <span class="string">"xavier@example.com"</span>,
+                        <span class="key">"phone"</span>:
+                        <span class="string">"426-449-3749"</span>,
+                        <span class="key">"company"</span>:
+                        <span class="string">"hassan"</span>
+                        }, {
+                        <span class="key">"id"</span>:
+                        <span class="string">"550e8400-e29b-41d4-a716-446655440001"</span
+                        >, <span class="key">"agent_id_display"</span>:
+                        <span class="string">"AG-1877"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"Sarah Johnson"</span>,
+                        <span class="key">"email"</span>:
+                        <span class="string">"sarah@example.com"</span>,
+                        <span class="key">"phone"</span>:
+                        <span class="string">"555-123-4567"</span>,
+                        <span class="key">"company"</span>:
+                        <span class="string">"techcorp"</span> } ]
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Permission Required:</strong> Authenticated user
+                        (non-Agent role)
+                        </div>
+                    </div>
+
+                    <!-- Performance History -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-get">GET</span>
+                        <span class="endpoint-path"
+                            >/agents/{agent_id}/performance-history</span
+                        >
+                        </div>
+
+                        <h3>Get Agent Performance History</h3>
+                        <p>Retrieve detailed performance history for a specific agent.</p>
+
+                        <h4>Path Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            agent_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">UUID of the agent</div>
+                        </div>
+                        </div>
+
+                        <h4>Query Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">trend_granularity</div>
+                            <div class="param-desc">
+                            Time window for trend calculation:<br />
+                            • <strong>auto</strong> (default): Compares most recent
+                            records to previous records<br />
+                            • <strong>hour</strong>: Hourly comparison<br />
+                            • <strong>day</strong>: Daily comparison<br />
+                            • <strong>week</strong>: Weekly comparison<br />
+                            • <strong>month</strong>: Monthly comparison<br />
+                            • <strong>year</strong>: Yearly comparison
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Response Structure</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">Agent Details</div>
+                            <div class="param-desc">
+                            Basic agent information and company details
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Current Scores</div>
+                            <div class="param-desc">
+                            Latest performance metrics with trend indicators
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Performance History</div>
+                            <div class="param-desc">
+                            Historical data for the last 4 months
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Performance Weights</div>
+                            <div class="param-desc">
+                            Scoring weights for different metrics
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Supervisor Info</div>
+                            <div class="param-desc">Supervisor contact and details</div>
+                        </div>
+                        </div>
+
+                        <h4>Access Control</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">SuperAdmin</div>
+                            <div class="param-desc">Can view any agent's performance</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Admin</div>
+                            <div class="param-desc">
+                            Can view agents in their company only
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Supervisor</div>
+                            <div class="param-desc">
+                            Can view agents under their supervision only
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Agent</div>
+                            <div class="param-desc">
+                            Can view their own performance only
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        GET
+                        /agents/550e8400-e29b-41d4-a716-446655440000/performance-history?trend_granularity=month
+                        Authorization: Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        { <span class="key">"agent_details"</span>: {
+                        <span class="key">"id"</span>:
+                        <span class="string">"550e8400-e29b-41d4-a716-446655440000"</span
+                        >, <span class="key">"display_id"</span>:
+                        <span class="string">"AG-1876"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"Abdullah Al Hasib"</span>,
+                        <span class="key">"email"</span>:
+                        <span class="string">"abdullah@example.com"</span>,
+                        <span class="key">"phone"</span>:
+                        <span class="string">"+1-555-1234"</span>,
+                        <span class="key">"position"</span>:
+                        <span class="string">"Senior Customer Support Agent"</span>,
+                        <span class="key">"company_id"</span>:
+                        <span class="string">"hassan"</span>,
+                        <span class="key">"company_name"</span>:
+                        <span class="string">"Company A"</span>,
+                        <span class="key">"joined_date"</span>:
+                        <span class="string">"2022-01-15T00:00:00Z"</span>
+                        },
+                        <span class="key">"current_scores"</span>: {
+                        <span class="key">"overall_score"</span>:
+                        <span class="number">83</span>,
+                        <span class="key">"overall_score_trend"</span>:
+                        <span class="number">2.5</span>,
+                        <span class="key">"answer_accuracy"</span>:
+                        <span class="number">90</span>,
+                        <span class="key">"answer_accuracy_trend"</span>:
+                        <span class="number">3.2</span>,
+                        <span class="key">"response_speed"</span>:
+                        <span class="number">80</span>,
+                        <span class="key">"response_speed_trend"</span>:
+                        <span class="number">5</span>,
+                        <span class="key">"customer_satisfaction"</span>:
+                        <span class="number">70</span>,
+                        <span class="key">"customer_satisfaction_trend"</span>:
+                        <span class="number">-2.1</span>,
+                        <span class="key">"professionalism"</span>:
+                        <span class="number">85</span>,
+                        <span class="key">"resolution_time"</span>:
+                        <span class="number">75</span>
+                        },
+                        <span class="key">"performance_history"</span>: [ {
+                        <span class="key">"period"</span>:
+                        <span class="string">"2023-07"</span>,
+                        <span class="key">"period_display"</span>:
+                        <span class="string">"July 2023"</span>,
+                        <span class="key">"timestamp"</span>:
+                        <span class="string">"2023-07-31T23:59:59Z"</span>,
+                        <span class="key">"overall_score"</span>:
+                        <span class="number">83</span>,
+                        <span class="key">"answer_accuracy"</span>:
+                        <span class="number">90</span>,
+                        <span class="key">"response_speed"</span>:
+                        <span class="number">80</span>,
+                        <span class="key">"customer_satisfaction"</span>:
+                        <span class="number">70</span>,
+                        <span class="key">"professionalism"</span>:
+                        <span class="number">85</span>,
+                        <span class="key">"resolution_time"</span>:
+                        <span class="number">75</span>,
+                        <span class="key">"total_calls"</span>:
+                        <span class="number">25</span>
+                        }, {
+                        <span class="key">"period"</span>:
+                        <span class="string">"2023-06"</span>,
+                        <span class="key">"period_display"</span>:
+                        <span class="string">"June 2023"</span>,
+                        <span class="key">"timestamp"</span>:
+                        <span class="string">"2023-06-30T23:59:59Z"</span>,
+                        <span class="key">"overall_score"</span>:
+                        <span class="number">81</span>,
+                        <span class="key">"answer_accuracy"</span>:
+                        <span class="number">88</span>,
+                        <span class="key">"response_speed"</span>:
+                        <span class="number">78</span>,
+                        <span class="key">"customer_satisfaction"</span>:
+                        <span class="number">72</span>,
+                        <span class="key">"professionalism"</span>:
+                        <span class="number">84</span>,
+                        <span class="key">"resolution_time"</span>:
+                        <span class="number">73</span>,
+                        <span class="key">"total_calls"</span>:
+                        <span class="number">28</span>
+                        } ],
+                        <span class="key">"performance_weights"</span>: {
+                        <span class="key">"answer_accuracy"</span>:
+                        <span class="number">0.5</span>,
+                        <span class="key">"customer_satisfaction"</span>:
+                        <span class="number">0.2</span>,
+                        <span class="key">"response_speed"</span>:
+                        <span class="number">0.3</span>
+                        },
+                        <span class="key">"supervisor"</span>: {
+                        <span class="key">"id"</span>:
+                        <span class="string">"abc-123"</span>,
+                        <span class="key">"name"</span>:
+                        <span class="string">"Sarah Johnson"</span>,
+                        <span class="key">"email"</span>:
+                        <span class="string">"sarah.johnson@company.com"</span>,
+                        <span class="key">"phone"</span>:
+                        <span class="string">"+1-555-123-4567"</span>
+                        },
+                        <span class="key">"total_tasks"</span>:
+                        <span class="number">147</span>,
+                        <span class="key">"avg_call_duration"</span>:
+                        <span class="number">285.5</span>,
+                        <span class="key">"last_updated"</span>:
+                        <span class="string">"2023-07-31T23:59:59Z"</span> }
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Permission Required:</strong> Authenticated user
+                        </div>
+                    </div>
+
+                    <!-- Quick Reference -->
+                    <div class="card">
+                        <h3>📋 Performance Metrics Guide</h3>
+
+                        <h4>Performance Score Categories</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">Overall Score (0-100)</div>
+                            <div class="param-desc">
+                            Weighted average of all performance metrics
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Answer Accuracy (0-100)</div>
+                            <div class="param-desc">
+                            Accuracy and correctness of responses
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Response Speed (0-100)</div>
+                            <div class="param-desc">
+                            Speed of responding to customer inquiries
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Customer Satisfaction (0-100)</div>
+                            <div class="param-desc">
+                            Customer feedback and satisfaction ratings
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Professionalism (0-100)</div>
+                            <div class="param-desc">
+                            Communication quality and professional conduct
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Resolution Time (0-100)</div>
+                            <div class="param-desc">
+                            Efficiency in resolving customer issues
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Trend Granularity Usage</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">auto (Recommended)</div>
+                            <div class="param-desc">
+                            Best for sparse or irregular data patterns
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">hour/day</div>
+                            <div class="param-desc">
+                            For real-time monitoring and daily performance
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">week/month</div>
+                            <div class="param-desc">
+                            For weekly reviews and monthly reporting
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">year</div>
+                            <div class="param-desc">For annual performance reviews</div>
+                        </div>
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Performance Interpretation:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem">
+                            <li><strong>90-100:</strong> Excellent performance</li>
+                            <li><strong>80-89:</strong> Good performance</li>
+                            <li><strong>70-79:</strong> Satisfactory performance</li>
+                            <li><strong>60-69:</strong> Needs improvement</li>
+                            <li><strong>Below 60:</strong> Requires immediate attention</li>
+                        </ul>
+                        </div>
+
+                        <div class="warning-box">
+                        <strong>Data Privacy:</strong> Agent performance data is subject
+                        to company privacy policies. Ensure proper access controls are
+                        maintained when sharing performance reports.
+                        </div>
+                    </div>
+                    </section>
+                    <!-- Group Management Section -->
+                    <section class="section" id="group-management">
+                        <h1 class="section-title">Group Management</h1>
+                        <p class="section-subtitle">Organize companies into groups with shared configurations</p>
+                        
+                        <!-- Register Group -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="badge badge-post">POST</span>
+                                <span class="endpoint-path">/register_group</span>
+                            </div>
+                            
+                            <h3>Register New Group</h3>
+                            <p>Create a new group with comprehensive configuration settings that can be inherited by companies.</p>
+                            
+                            <h4>Required Fields</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">group_id <span class="param-required">required</span></div>
+                                    <div class="param-desc">Unique identifier for the group</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">group_name <span class="param-required">required</span></div>
+                                    <div class="param-desc">Display name of the group</div>
+                                </div>
+                            </div>
+
+                            <h4>Basic Information</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">description</div>
+                                    <div class="param-desc">Detailed description of the group's purpose</div>
+                                </div>
+                            </div>
+
+                            <h4>Analysis Configuration</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">filler_words</div>
+                                    <div class="param-desc">List of filler words for conversation analysis</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">main_topics</div>
+                                    <div class="param-desc">Primary topics for call classification</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">call_types</div>
+                                    <div class="param-desc">Supported call types (inbound, outbound, etc.)</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">call_outcomes</div>
+                                    <div class="param-desc">Possible call resolution outcomes</div>
+                                </div>
+                            </div>
+
+                            <h4>Performance Thresholds</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">delay_accept_limit</div>
+                                    <div class="param-desc">Maximum acceptable response delay (default: 0)</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">pause_accept_limit</div>
+                                    <div class="param-desc">Maximum acceptable pause duration (default: 0)</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">loudness_threshold</div>
+                                    <div class="param-desc">Audio loudness threshold (default: 0.2)</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">interactive_threshold</div>
+                                    <div class="param-desc">Interaction level threshold (default: 20.2)</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">common_words_threshold</div>
+                                    <div class="param-desc">Common words frequency threshold (default: 3)</div>
+                                </div>
+                            </div>
+
+                            <h4>API Limits & Pricing</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">llm_api_limit</div>
+                                    <div class="param-desc">Maximum LLM API calls (default: 100)</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">transcription_api_limit</div>
+                                    <div class="param-desc">Maximum transcription API calls (default: 100)</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">transcription_api_rate</div>
+                                    <div class="param-desc">Cost per transcription call (default: 0.025)</div>
+                                </div>
+                            </div>
+
+                            <h4>Example Request</h4>
+                            <div class="code-block">POST /register_group
+                                Authorization: Bearer YOUR_ACCESS_TOKEN
+
+                                {
+                                <span class="key">"group_id"</span>: <span class="string">"enterprise_clients"</span>,
+                                <span class="key">"group_name"</span>: <span class="string">"Enterprise Clients Group"</span>,
+                                <span class="key">"description"</span>: <span class="string">"Large enterprise customers with premium support"</span>,
+                                <span class="key">"filler_words"</span>: [<span class="string">"um"</span>, <span class="string">"ah"</span>, <span class="string">"like"</span>],
+                                <span class="key">"main_topics"</span>: [<span class="string">"enterprise_support"</span>, <span class="string">"account_management"</span>],
+                                <span class="key">"llm_api_limit"</span>: <span class="number">5000</span>,
+                                <span class="key">"transcription_api_limit"</span>: <span class="number">10000</span>
+                                }
+                            </div>
+
+                            <h4>Response (200 Success)</h4>
+                            <div class="code-block"><span class="string">"Group registered successfully: enterprise_clients"</span></div>
+                        </div>
+
+                        <!-- Update Group -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="badge badge-put">PUT</span>
+                                <span class="endpoint-path">/update_group</span>
+                            </div>
+                            
+                            <h3>Update Group</h3>
+                            <p>Update existing group configuration. All fields are optional - only provided fields will be updated.</p>
+
+                            <h4>Required Field</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">group_id <span class="param-required">required</span></div>
+                                    <div class="param-desc">ID of the group to update</div>
+                                </div>
+                            </div>
+
+                            <h4>Example Request</h4>
+                            <div class="code-block">PUT /update_group
+                                Authorization: Bearer YOUR_ACCESS_TOKEN
+
+                                {
+                                <span class="key">"group_id"</span>: <span class="string">"enterprise_clients"</span>,
+                                <span class="key">"group_name"</span>: <span class="string">"Enterprise & Corporate Clients"</span>,
+                                <span class="key">"llm_api_limit"</span>: <span class="number">7500</span>,
+                                <span class="key">"call_outcomes"</span>: [
+                                    <span class="string">"resolved"</span>,
+                                    <span class="string">"escalated"</span>,
+                                    <span class="string">"follow_up_scheduled"</span>,
+                                    <span class="string">"premium_support_engaged"</span>
+                                ]
+                                }
+                            </div>
+
+                            <h4>Response (200 Success)</h4>
+                            <div class="code-block"><span class="string">"Group updated successfully: enterprise_clients"</span></div>
+                        </div>
+
+                        <!-- List Groups -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="badge badge-get">GET</span>
+                                <span class="endpoint-path">/list_groups</span>
+                            </div>
+                            
+                            <h3>List Groups</h3>
+                            <p>Get a list of all registered groups in the system.</p>
+
+                            <h4>Example Request</h4>
+                            <div class="code-block">GET /list_groups
+                            Authorization: Bearer YOUR_ACCESS_TOKEN</div>
+
+                            <h4>Response (200 Success)</h4>
+                            <div class="code-block">[
+                                {
+                                    <span class="key">"group_id"</span>: <span class="string">"enterprise_clients"</span>,
+                                    <span class="key">"group_name"</span>: <span class="string">"Enterprise & Corporate Clients"</span>,
+                                    <span class="key">"description"</span>: <span class="string">"Large enterprise customers with premium support"</span>,
+                                    <span class="key">"company_count"</span>: <span class="number">12</span>,
+                                    <span class="key">"llm_api_limit"</span>: <span class="number">7500</span>,
+                                    <span class="key">"created_at"</span>: <span class="string">"2023-10-15T00:00:00Z"</span>
+                                },
+                                {
+                                    <span class="key">"group_id"</span>: <span class="string">"small_business"</span>,
+                                    <span class="key">"group_name"</span>: <span class="string">"Small Business Group"</span>,
+                                    <span class="key">"description"</span>: <span class="string">"Small to medium business customers"</span>,
+                                    <span class="key">"company_count"</span>: <span class="number">45</span>,
+                                    <span class="key">"llm_api_limit"</span>: <span class="number">1000</span>,
+                                    <span class="key">"created_at"</span>: <span class="string">"2023-09-01T00:00:00Z"</span>
+                                }
+                                ]
+                            </div>
+                        </div>
+
+                        <!-- Get Group Details -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="badge badge-get">GET</span>
+                                <span class="endpoint-path">/get_group_details</span>
+                            </div>
+                            
+                            <h3>Get Group Details</h3>
+                            <p>Retrieve detailed configuration for a specific group.</p>
+
+                            <h4>Query Parameters</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">group_id <span class="param-required">required</span></div>
+                                    <div class="param-desc">ID of the group to retrieve</div>
+                                </div>
+                            </div>
+
+                            <h4>Example Request</h4>
+                            <div class="code-block">GET /get_group_details?group_id=enterprise_clients
+                            Authorization: Bearer YOUR_ACCESS_TOKEN</div>
+
+                            <h4>Response (200 Success)</h4>
+                            <div class="code-block">{
+                                <span class="key">"group_id"</span>: <span class="string">"enterprise_clients"</span>,
+                                <span class="key">"group_name"</span>: <span class="string">"Enterprise & Corporate Clients"</span>,
+                                <span class="key">"description"</span>: <span class="string">"Large enterprise customers with premium support"</span>,
+                                <span class="key">"filler_words"</span>: [<span class="string">"um"</span>, <span class="string">"ah"</span>, <span class="string">"like"</span>],
+                                <span class="key">"main_topics"</span>: [<span class="string">"enterprise_support"</span>, <span class="string">"account_management"</span>],
+                                <span class="key">"call_types"</span>: [<span class="string">"premium_support"</span>, <span class="string">"account_review"</span>],
+                                <span class="key">"delay_accept_limit"</span>: <span class="number">5.0</span>,
+                                <span class="key">"pause_accept_limit"</span>: <span class="number">3.0</span>,
+                                <span class="key">"llm_api_limit"</span>: <span class="number">7500</span>,
+                                <span class="key">"transcription_api_limit"</span>: <span class="number">10000</span>,
+                                <span class="key">"call_outcomes"</span>: [
+                                    <span class="string">"resolved"</span>,
+                                    <span class="string">"escalated"</span>,
+                                    <span class="string">"follow_up_scheduled"</span>,
+                                    <span class="string">"premium_support_engaged"</span>
+                                ],
+                                <span class="key">"agent_assessments_configs"</span>: [
+                                    <span class="string">"cooperation"</span>,
+                                    <span class="string">"communication"</span>,
+                                    <span class="string">"problem_solving"</span>,
+                                    <span class="string">"technical_knowledge"</span>,
+                                    <span class="string">"efficiency"</span>
+                                ],
+                                <span class="key">"companies"</span>: [
+                                    {
+                                    <span class="key">"company_id"</span>: <span class="string">"techcorp_2024"</span>,
+                                    <span class="key">"company_name"</span>: <span class="string">"Tech Corporation Global"</span>
+                                    },
+                                    {
+                                    <span class="key">"company_id"</span>: <span class="string">"finance_inc"</span>,
+                                    <span class="key">"company_name"</span>: <span class="string">"Finance Solutions Inc."</span>
+                                    }
+                                ],
+                                <span class="key">"created_at"</span>: <span class="string">"2023-10-15T00:00:00Z"</span>,
+                                <span class="key">"updated_at"</span>: <span class="string">"2023-10-20T14:30:00Z"</span>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Delete Group -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="badge badge-delete">DELETE</span>
+                                <span class="endpoint-path">/delete_group</span>
+                            </div>
+                            
+                            <h3>Delete Group</h3>
+                            <p>Remove a group from the system.</p>
+
+                            <h4>Query Parameters</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">group_id <span class="param-required">required</span></div>
+                                    <div class="param-desc">ID of the group to delete</div>
+                                </div>
+                            </div>
+
+                            <h4>Example Request</h4>
+                            <div class="code-block">DELETE /delete_group?group_id=enterprise_clients
+                    Authorization: Bearer YOUR_ACCESS_TOKEN</div>
+
+                            <h4>Response (200 Success)</h4>
+                            <div class="code-block"><span class="string">"Group deleted successfully: enterprise_clients"</span></div>
+
+                            <div class="warning-box">
+                                <strong>Warning:</strong> This action is irreversible. Companies assigned to this group will have their group_id set to null.
+                            </div>
+                        </div>
+
+                        <!-- Quick Reference -->
+                        <div class="card">
+                            <h3>📋 Group Management Guide</h3>
+                            
+                            <h4>Group Benefits</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">Shared Configuration</div>
+                                    <div class="param-desc">Companies in same group inherit common settings</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Centralized Management</div>
+                                    <div class="param-desc">Update settings for multiple companies at once</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Resource Pooling</div>
+                                    <div class="param-desc">Shared API limits across group companies</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Standardization</div>
+                                    <div class="param-desc">Consistent analysis criteria across similar companies</div>
+                                </div>
+                            </div>
+
+                            <h4>Default Values</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">LLM API Limit</div>
+                                    <div class="param-desc">100 calls</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Transcription API Limit</div>
+                                    <div class="param-desc">100 calls</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Transcription Rate</div>
+                                    <div class="param-desc">$0.025 per call</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Loudness Threshold</div>
+                                    <div class="param-desc">0.2</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Interactive Threshold</div>
+                                    <div class="param-desc">20.2</div>
+                                </div>
+                            </div>
+
+                            <h4>Best Practices</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">Logical Grouping</div>
+                                    <div class="param-desc">Group companies by business type, size, or service level</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Resource Planning</div>
+                                    <div class="param-desc">Set API limits based on total expected group usage</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Configuration Review</div>
+                                    <div class="param-desc">Regularly review and update group settings</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Company Assignment</div>
+                                    <div class="param-desc">Assign companies to groups during registration</div>
+                                </div>
+                            </div>
+
+                            <div class="info-box">
+                                <strong>Inheritance Behavior:</strong>
+                                <ul style="margin: 0.5rem 0 0 1rem;">
+                                    <li>Companies inherit group configurations by default</li>
+                                    <li>Company-specific settings override group settings</li>
+                                    <li>API limits are shared across the group</li>
+                                    <li>Changes to group settings affect all member companies</li>
+                                    <li>Companies can be moved between groups without data loss</li>
+                                </ul>
+                            </div>
+
+                            <div class="warning-box">
+                                <strong>Deletion Impact:</strong>
+                                <ul style="margin: 0.5rem 0 0 1rem;">
+                                    <li>Companies will lose group configuration inheritance</li>
+                                    <li>API limits will revert to individual company settings</li>
+                                    <li>Historical data and analyses are preserved</li>
+                                    <li>Companies must be reassigned to new groups if needed</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Company Management Section -->
+                    <section class="section" id="company-management">
+                    <h1 class="section-title">Company Management</h1>
+                    <p class="section-subtitle">
+                        Register and manage company configurations
+                    </p>
+
+                    <!-- Register Company -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-post">POST</span>
+                        <span class="endpoint-path">/register_company</span>
+                        </div>
+
+                        <h3>Register New Company</h3>
+                        <p>
+                        Create a new company with comprehensive configuration settings.
+                        </p>
+
+                        <h4>Required Fields</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            company_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">Unique identifier for the company</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">
+                            company_name <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">Display name of the company</div>
+                        </div>
+                        </div>
+
+                        <h4>Key Configuration Fields</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">group_id</div>
+                            <div class="param-desc">
+                            Group identifier for company grouping
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">filler_words</div>
+                            <div class="param-desc">
+                            List of filler words to detect in conversations
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">main_topics</div>
+                            <div class="param-desc">
+                            Primary topics for conversation classification
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">call_types</div>
+                            <div class="param-desc">
+                            Types of calls supported (inbound, outbound, etc.)
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">call_outcomes</div>
+                            <div class="param-desc">
+                            Possible call outcomes (resolved, unresolved, etc.)
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Performance Thresholds</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">delay_accept_limit</div>
+                            <div class="param-desc">Maximum acceptable delay time</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">pause_accept_limit</div>
+                            <div class="param-desc">Maximum acceptable pause duration</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">loudness_threshold</div>
+                            <div class="param-desc">Audio loudness threshold</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">interactive_threshold</div>
+                            <div class="param-desc">Interaction level threshold</div>
+                        </div>
+                        </div>
+
+                        <h4>API Limits & Usage</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">llm_api_limit</div>
+                            <div class="param-desc">
+                            Maximum LLM API calls allowed (default: 100)
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">transcription_api_limit</div>
+                            <div class="param-desc">
+                            Maximum transcription API calls allowed (default: 100)
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">transcription_api_rate</div>
+                            <div class="param-desc">
+                            Cost per transcription API call (default: 0.025)
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Agent Assessment Configs</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">agent_assessments_configs</div>
+                            <div class="param-desc">
+                            Assessment categories (cooperation, communication, etc.)
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">agent_cooperation_configs</div>
+                            <div class="param-desc">
+                            Cooperation metrics (proactive assistance, responsiveness)
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">agent_performance_configs</div>
+                            <div class="param-desc">
+                            Performance metrics (satisfaction, professionalism, etc.)
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        POST /register_company Authorization: Bearer YOUR_ACCESS_TOKEN {
+                        <span class="key">"company_id"</span>:
+                        <span class="string">"techcorp_2024"</span>,
+                        <span class="key">"company_name"</span>:
+                        <span class="string">"Tech Corporation Inc."</span>,
+                        <span class="key">"group_id"</span>:
+                        <span class="string">"enterprise_group"</span>,
+                        <span class="key">"filler_words"</span>: [<span class="string"
+                            >"um"</span
+                        >, <span class="string">"ah"</span>,
+                        <span class="string">"like"</span>],
+                        <span class="key">"main_topics"</span>: [<span class="string"
+                            >"billing"</span
+                        >, <span class="string">"technical_support"</span>,
+                        <span class="string">"sales"</span>],
+                        <span class="key">"call_types"</span>: [<span class="string"
+                            >"inbound"</span
+                        >, <span class="string">"outbound"</span>],
+                        <span class="key">"delay_accept_limit"</span>:
+                        <span class="number">5.0</span>,
+                        <span class="key">"pause_accept_limit"</span>:
+                        <span class="number">3.0</span>,
+                        <span class="key">"llm_api_limit"</span>:
+                        <span class="number">1000</span>,
+                        <span class="key">"transcription_api_limit"</span>:
+                        <span class="number">5000</span> }
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        <span class="string"
+                            >"Company registered successfully: techcorp_2024"</span
+                        >
+                        </div>
+                    </div>
+
+                    <!-- Update Company -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-put">PUT</span>
+                        <span class="endpoint-path">/update_company</span>
+                        </div>
+
+                        <h3>Update Company</h3>
+                        <p>
+                        Update existing company configuration. All fields are optional -
+                        only provided fields will be updated.
+                        </p>
+
+                        <h4>Required Field</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            company_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">ID of the company to update</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        PUT /update_company Authorization: Bearer YOUR_ACCESS_TOKEN {
+                        <span class="key">"company_id"</span>:
+                        <span class="string">"techcorp_2024"</span>,
+                        <span class="key">"company_name"</span>:
+                        <span class="string">"Tech Corporation Global"</span>,
+                        <span class="key">"llm_api_limit"</span>:
+                        <span class="number">2000</span>,
+                        <span class="key">"call_outcomes"</span>: [
+                        <span class="string">"resolved"</span>,
+                        <span class="string">"unresolved"</span>,
+                        <span class="string">"escalated"</span>,
+                        <span class="string">"sale_successful"</span>
+                        ] }
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        <span class="string"
+                            >"Company updated successfully: techcorp_2024"</span
+                        >
+                        </div>
+                    </div>
+
+                    <!-- List Companies -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-get">GET</span>
+                        <span class="endpoint-path">/list_of_companies</span>
+                        </div>
+
+                        <h3>List Companies</h3>
+                        <p>Get a list of all registered companies in the system.</p>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        GET /list_of_companies Authorization: Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        [ { <span class="key">"company_id"</span>:
+                        <span class="string">"techcorp_2024"</span>,
+                        <span class="key">"company_name"</span>:
+                        <span class="string">"Tech Corporation Global"</span>,
+                        <span class="key">"group_id"</span>:
+                        <span class="string">"enterprise_group"</span>,
+                        <span class="key">"llm_api_limit"</span>:
+                        <span class="number">2000</span>,
+                        <span class="key">"transcription_api_limit"</span>:
+                        <span class="number">5000</span>
+                        }, {
+                        <span class="key">"company_id"</span>:
+                        <span class="string">"startup_xyz"</span>,
+                        <span class="key">"company_name"</span>:
+                        <span class="string">"Startup XYZ"</span>,
+                        <span class="key">"group_id"</span>:
+                        <span class="string">"small_business"</span>,
+                        <span class="key">"llm_api_limit"</span>:
+                        <span class="number">100</span>,
+                        <span class="key">"transcription_api_limit"</span>:
+                        <span class="number">100</span> } ]
+                        </div>
+                    </div>
+
+                    <!-- Get Company Details -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-get">GET</span>
+                        <span class="endpoint-path">/get_company_details</span>
+                        </div>
+
+                        <h3>Get Company Details</h3>
+                        <p>Retrieve detailed configuration for a specific company.</p>
+
+                        <h4>Query Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            company_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">ID of the company to retrieve</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        GET /get_company_details?company_id=techcorp_2024 Authorization:
+                        Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        { <span class="key">"company_id"</span>:
+                        <span class="string">"techcorp_2024"</span>,
+                        <span class="key">"company_name"</span>:
+                        <span class="string">"Tech Corporation Global"</span>,
+                        <span class="key">"group_id"</span>:
+                        <span class="string">"enterprise_group"</span>,
+                        <span class="key">"filler_words"</span>: [<span class="string"
+                            >"um"</span
+                        >, <span class="string">"ah"</span>,
+                        <span class="string">"like"</span>],
+                        <span class="key">"main_topics"</span>: [<span class="string"
+                            >"billing"</span
+                        >, <span class="string">"technical_support"</span>,
+                        <span class="string">"sales"</span>],
+                        <span class="key">"call_types"</span>: [<span class="string"
+                            >"inbound"</span
+                        >, <span class="string">"outbound"</span>],
+                        <span class="key">"delay_accept_limit"</span>:
+                        <span class="number">5.0</span>,
+                        <span class="key">"pause_accept_limit"</span>:
+                        <span class="number">3.0</span>,
+                        <span class="key">"llm_api_limit"</span>:
+                        <span class="number">2000</span>,
+                        <span class="key">"transcription_api_limit"</span>:
+                        <span class="number">5000</span>,
+                        <span class="key">"call_outcomes"</span>: [
+                        <span class="string">"resolved"</span>,
+                        <span class="string">"unresolved"</span>,
+                        <span class="string">"escalated"</span>,
+                        <span class="string">"sale_successful"</span>
+                        ],
+                        <span class="key">"agent_assessments_configs"</span>: [
+                        <span class="string">"cooperation"</span>,
+                        <span class="string">"communication"</span>,
+                        <span class="string">"problem_solving"</span>
+                        ] }
+                        </div>
+                    </div>
+
+                    <!-- Delete Company -->
+                    <div class="card">
+                        <div class="card-header">
+                        <span class="badge badge-delete">DELETE</span>
+                        <span class="endpoint-path">/delete_company</span>
+                        </div>
+
+                        <h3>Delete Company</h3>
+                        <p>Remove a company from the system.</p>
+
+                        <h4>Query Parameters</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">
+                            company_id <span class="param-required">required</span>
+                            </div>
+                            <div class="param-desc">ID of the company to delete</div>
+                        </div>
+                        </div>
+
+                        <h4>Example Request</h4>
+                        <div class="code-block">
+                        DELETE /delete_company?company_id=techcorp_2024 Authorization:
+                        Bearer YOUR_ACCESS_TOKEN
+                        </div>
+
+                        <h4>Response (200 Success)</h4>
+                        <div class="code-block">
+                        <span class="string"
+                            >"Company deleted successfully: techcorp_2024"</span
+                        >
+                        </div>
+
+                        <div class="warning-box">
+                        <strong>Warning:</strong> This action is irreversible and will
+                        remove all company configuration data.
+                        </div>
+                    </div>
+
+                    <!-- Quick Reference -->
+                    <div class="card">
+                        <h3>📋 Company Configuration Guide</h3>
+
+                        <h4>Configuration Categories</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">Basic Info</div>
+                            <div class="param-desc">company_id, company_name, group_id</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Conversation Analysis</div>
+                            <div class="param-desc">
+                            filler_words, main_topics, call_types, call_outcomes
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Performance Thresholds</div>
+                            <div class="param-desc">
+                            delay_accept_limit, pause_accept_limit, loudness_threshold
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">API Management</div>
+                            <div class="param-desc">
+                            llm_api_limit, transcription_api_limit, usage tracking
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Agent Assessment</div>
+                            <div class="param-desc">
+                            assessment configs, cooperation metrics, performance metrics
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">AI Prompts</div>
+                            <div class="param-desc">
+                            qna_pair_prompt, spelling_correction_prompt, evaluation
+                            prompts
+                            </div>
+                        </div>
+                        </div>
+
+                        <h4>Default Values</h4>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">LLM API Limit</div>
+                            <div class="param-desc">100 calls</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Transcription API Limit</div>
+                            <div class="param-desc">100 calls</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">Transcription Rate</div>
+                            <div class="param-desc">$0.025 per call</div>
+                        </div>
+                        </div>
+
+                        <div class="info-box">
+                        <strong>Best Practices:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem">
+                            <li>
+                            Use descriptive company_id that follows your naming convention
+                            </li>
+                            <li>Set realistic API limits based on expected usage</li>
+                            <li>
+                            Configure call_types and outcomes that match your business
+                            processes
+                            </li>
+                            <li>
+                            Regularly review and update filler_words and main_topics
+                            </li>
+                            <li>Monitor API usage to optimize costs and performance</li>
+                        </ul>
+                        </div>
+                    </div>
+                    </section>
+
+                    <!-- Task Management Section -->
+                    <section class="section" id="task-management">
+                        <h1 class="section-title">Task Management</h1>
+                        <p class="section-subtitle">Manage analysis tasks and retrieve results</p>
+                        
+                        <!-- Get Analysis Result -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="badge badge-get">GET</span>
+                                <span class="endpoint-path">/analysis_result/{work_id}</span>
+                            </div>
+                            
+                            <h3>Get Analysis Result</h3>
+                            <p>Retrieve the analysis results for a specific task by work ID.</p>
+                            
+                            <h4>Path Parameters</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">work_id <span class="param-required">required</span></div>
+                                    <div class="param-desc">Unique identifier of the analysis task</div>
+                                </div>
+                            </div>
+                            
+                            <h4>Example Request</h4>
+                            <div class="code-block">GET /analysis_result/123e4567-e89b-12d3-a456-426614174000
+                            Authorization: Bearer YOUR_ACCESS_TOKEN</div>
+                            
+                            <h4>Response (200 Success)</h4>
+                            <div class="code-block">{
+                                <span class="key">"work_id"</span>: <span class="string">"123e4567-e89b-12d3-a456-426614174000"</span>,
+                                <span class="key">"status"</span>: <span class="string">"completed"</span>,
+                                <span class="key">"analysis_type"</span>: <span class="string">"sentiment_analysis"</span>,
+                                <span class="key">"results"</span>: {
+                                <span class="key">"sentiment"</span>: <span class="string">"positive"</span>,
+                                <span class="key">"confidence"</span>: <span class="number">0.87</span>,
+                                <span class="key">"key_topics"</span>: [<span class="string">"customer_support"</span>, <span class="string">"billing"</span>],
+                                <span class="key">"agent_performance"</span>: {
+                                <span class="key">"professionalism"</span>: <span class="number">85</span>,
+                                <span class="key">"response_time"</span>: <span class="number">78</span>
+                                }
+                            },
+                            <span class="key">"created_at"</span>: <span class="string">"2023-10-15T14:30:00Z"</span>,
+                            <span class="key">"completed_at"</span>: <span class="string">"2023-10-15T14:35:22Z"</span>
+                            }</div>
+                        </div>
+                        
+                        <!-- Get Task List -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="badge badge-get">GET</span>
+                                <span class="endpoint-path">/task_list</span>
+                            </div>
+                            
+                            <h3>Get Task List</h3>
+                            <p>Retrieve the list of analysis tasks for a specific company.</p>
+                            
+                            <h4>Query Parameters</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">company_id <span class="param-required">required</span></div>
+                                    <div class="param-desc">ID of the company to fetch tasks for</div>
+                                </div>
+                            </div>
+                            
+                            <h4>Example Request</h4>
+                            <div class="code-block">GET /task_list?company_id=techcorp_2024
+                            Authorization: Bearer YOUR_ACCESS_TOKEN</div>
+                                    
+                                    <h4>Response (200 Success)</h4>
+                                    <div class="code-block">[
+                            {
+                                <span class="key">"work_id"</span>: <span class="string">"123e4567-e89b-12d3-a456-426614174000"</span>,
+                                <span class="key">"task_name"</span>: <span class="string">"Customer Call Analysis - Oct 15"</span>,
+                                <span class="key">"analysis_type"</span>: <span class="string">"sentiment_analysis"</span>,
+                                <span class="key">"status"</span>: <span class="string">"completed"</span>,
+                                <span class="key">"agent_id"</span>: <span class="string">"agent_123"</span>,
+                                <span class="key">"agent_name"</span>: <span class="string">"John Doe"</span>,
+                                <span class="key">"created_at"</span>: <span class="string">"2023-10-15T14:30:00Z"</span>,
+                                <span class="key">"completed_at"</span>: <span class="string">"2023-10-15T14:35:22Z"</span>,
+                                <span class="key">"file_name"</span>: <span class="string">"customer_call_oct15.wav"</span>
+                            },
+                            {
+                                <span class="key">"work_id"</span>: <span class="string">"123e4567-e89b-12d3-a456-426614174001"</span>,
+                                <span class="key">"task_name"</span>: <span class="string">"Sales Call Evaluation - Oct 14"</span>,
+                                <span class="key">"analysis_type"</span>: <span class="string">"performance_analysis"</span>,
+                                <span class="key">"status"</span>: <span class="string">"processing"</span>,
+                                <span class="key">"agent_id"</span>: <span class="string">"agent_456"</span>,
+                                <span class="key">"agent_name"</span>: <span class="string">"Jane Smith"</span>,
+                                <span class="key">"created_at"</span>: <span class="string">"2023-10-14T10:15:00Z"</span>,
+                                <span class="key">"completed_at"</span>: <span class="string">null</span>,
+                                <span class="key">"file_name"</span>: <span class="string">"sales_call_oct14.mp3"</span>
+                            }
+                            ]
+                        </div>
+                        </div>
+                        
+                        <!-- Delete Task -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="badge badge-delete">DELETE</span>
+                                <span class="endpoint-path">/delete_task</span>
+                            </div>
+                            
+                            <h3>Delete Task</h3>
+                            <p>Remove a specific analysis task from the system.</p>
+                            
+                            <h4>Query Parameters</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">work_id <span class="param-required">required</span></div>
+                                    <div class="param-desc">Unique identifier of the task to delete</div>
+                                </div>
+                            </div>
+                            
+                            <h4>Example Request</h4>
+                            <div class="code-block">DELETE /delete_task?work_id=123e4567-e89b-12d3-a456-426614174000
+                            Authorization: Bearer YOUR_ACCESS_TOKEN</div>
+                            
+                            <h4>Response (200 Success)</h4>
+                            <div class="code-block"><span class="string">"Task deleted successfully: 123e4567-e89b-12d3-a456-426614174000"</span></div>
+                            
+                            <div class="warning-box">
+                                <strong>Warning:</strong> This action is irreversible and will permanently remove the task and its analysis results.
+                            </div>
+                        </div>
+                        
+                        <!-- Re-evaluation Endpoint -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="badge badge-post">POST</span>
+                                <span class="endpoint-path">/re-evaluation/{task_uuid}</span>
+                            </div>
+                            
+                            <h3>Re-evaluation Endpoint</h3>
+                            <p>Trigger re-evaluation of an existing analysis task with updated parameters or models.</p>
+                            
+                            <h4>Path Parameters</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">task_uuid <span class="param-required">required</span></div>
+                                    <div class="param-desc">UUID of the task to re-evaluate</div>
+                                </div>
+                            </div>
+                            
+                            <h4>Example Request</h4>
+                            <div class="code-block">POST /re-evaluation/123e4567-e89b-12d3-a456-426614174000
+                                Authorization: Bearer YOUR_ACCESS_TOKEN</div>
+                            
+                            <h4>Response (200 Success)</h4>
+                            <div class="code-block"><span class="string">"Re-evaluation started for task: 123e4567-e89b-12d3-a456-426614174000"</span></div>
+                            
+                            <div class="info-box">
+                                <strong>Note:</strong> Re-evaluation creates a new task with the same source data but may use updated analysis models or configurations.
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Reference -->
+                        <div class="card">
+                            <h3>📋 Task Management Guide</h3>
+                            
+                            <h4>Task Status Types</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">pending</div>
+                                    <div class="param-desc">Task is queued for processing</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">processing</div>
+                                    <div class="param-desc">Analysis is currently running</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">completed</div>
+                                    <div class="param-desc">Analysis finished successfully</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">failed</div>
+                                    <div class="param-desc">Analysis encountered an error</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">cancelled</div>
+                                    <div class="param-desc">Task was manually cancelled</div>
+                                </div>
+                            </div>
+                            
+                            <h4>Common Analysis Types</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">sentiment_analysis</div>
+                                    <div class="param-desc">Analyze emotional tone and sentiment</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">performance_analysis</div>
+                                    <div class="param-desc">Evaluate agent performance metrics</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">compliance_check</div>
+                                    <div class="param-desc">Verify regulatory compliance</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">quality_assurance</div>
+                                    <div class="param-desc">Overall call quality assessment</div>
+                                </div>
+                            </div>
+                            
+                            <h4>Workflow Examples</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">Monitor Progress</div>
+                                    <div class="param-desc">
+                                        <code>GET /task_list?company_id=your_company</code><br>
+                                        Check task status and completion
+                                    </div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Retrieve Results</div>
+                                    <div class="param-desc">
+                                        <code>GET /analysis_result/{work_id}</code><br>
+                                        Get detailed analysis when status is "completed"
+                                    </div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Improve Analysis</div>
+                                    <div class="param-desc">
+                                        <code>POST /re-evaluation/{task_uuid}</code><br>
+                                        Re-run analysis with updated models
+                                    </div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Clean Up</div>
+                                    <div class="param-desc">
+                                        <code>DELETE /delete_task?work_id={work_id}</code><br>
+                                        Remove completed or obsolete tasks
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-box">
+                                <strong>Best Practices:</strong>
+                                <ul style="margin: 0.5rem 0 0 1rem;">
+                                    <li>Regularly monitor task status to ensure timely processing</li>
+                                    <li>Use re-evaluation when analysis models are updated</li>
+                                    <li>Archive important results before deleting tasks</li>
+                                    <li>Filter task lists by date ranges for better performance</li>
+                                    <li>Set up notifications for failed or completed tasks</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="warning-box">
+                                <strong>Data Retention:</strong> Deleted tasks cannot be recovered. Ensure you have downloaded or exported important analysis results before deletion.
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Background Processing Section -->
+                    <section class="section" id="background-processing">
+                        <h1 class="section-title">Background Processing</h1>
+                        <p class="section-subtitle">Process combined audio files for transcription and analysis</p>
+                        
+                        <!-- Background Processing V2 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="badge badge-post">POST</span>
+                                <span class="endpoint-path">/background_processing_v2</span>
+                            </div>
+                            
+                            <h3>Background Processing V2</h3>
+                            <p>Process audio file for transcription and analysis using speaker diarization.</p>
+                            
+                            <div class="warning-box">
+                                <strong>IMPORTANT:</strong> This system now works with COMBINED AUDIO ONLY. Upload a single audio file containing both agent and customer audio. The system uses speaker diarization to automatically separate speakers.
+                            </div>
+                            
+                            <h4>Supported Formats</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">Audio Formats</div>
+                                    <div class="param-desc">.wav, .mp3</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Transcription Engines</div>
+                                    <div class="param-desc">Hamsa, Whisper (AWS not supported for combined audio)</div>
+                                </div>
+                            </div>
+                            
+                            <h4>Request Parameters (multipart/form-data)</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">audio_file <span class="param-required">required</span></div>
+                                    <div class="param-desc">Combined audio file containing both agent and customer audio</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">company_id <span class="param-required">required</span></div>
+                                    <div class="param-desc">Company ID for organization and billing</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">agent_id <span class="param-required">required</span></div>
+                                    <div class="param-desc">Agent ID for KPI tracking and performance analysis</div>
+                                </div>
+                            </div>
+                            
+                            <h4>Example Request</h4>
+                            <div class="code-block">POST /background_processing_v2
+                                    Authorization: Bearer YOUR_ACCESS_TOKEN
+                                    Content-Type: multipart/form-data
+
+                                    --boundary
+                                    Content-Disposition: form-data; name="audio_file"; filename="combined_call.wav"
+                                    Content-Type: audio/wav
+
+                                    (binary audio data)
+                                    --boundary
+                                    Content-Disposition: form-data; name="company_id"
+
+                                    techcorp_2024
+                                    --boundary
+                                    Content-Disposition: form-data; name="agent_id"
+
+                                    agent_123
+                                    --boundary--
+                                </div>
+                            
+                            <h4>Response (200 Success)</h4>
+                            <div class="code-block">{
+                                <span class="key">"status"</span>: <span class="string">"processing_started"</span>,
+                                <span class="key">"work_id"</span>: <span class="string">"123e4567-e89b-12d3-a456-426614174000"</span>,
+                                <span class="key">"message"</span>: <span class="string">"Audio processing initiated successfully"</span>,
+                                <span class="key">"estimated_completion"</span>: <span class="string">"2023-10-15T15:30:00Z"</span>
+                                }
+                            </div>
+                            
+                            <h4>Processing Workflow</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">Step 1: Speaker Diarization</div>
+                                    <div class="param-desc">System automatically separates agent and customer voices</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Step 2: Transcription</div>
+                                    <div class="param-desc">Each speaker's audio is transcribed using selected engine</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Step 3: Analysis</div>
+                                    <div class="param-desc">Performance metrics, sentiment, and compliance checks</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Step 4: Results Storage</div>
+                                    <div class="param-desc">Analysis results stored and linked to agent KPI</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Reference -->
+                        <div class="card">
+                            <h3>📋 Background Processing Guide</h3>
+                            
+                            <h4>Audio Requirements</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">File Size</div>
+                                    <div class="param-desc">Maximum 100MB per file</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Duration</div>
+                                    <div class="param-desc">Up to 4 hours per file</div>
+                                </div>
+                            </div>
+                            
+                            <h4>Processing Features</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">Speaker Diarization</div>
+                                    <div class="param-desc">Automatic identification and separation of speakers</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Agent Performance</div>
+                                    <div class="param-desc">Response time, professionalism, compliance metrics</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Sentiment Analysis</div>
+                                    <div class="param-desc">Customer and agent emotional tone analysis</div>
+                                </div>
+                            </div>
+                            
+                            <h4>Integration Workflow</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">1. Upload Audio</div>
+                                    <div class="param-desc">
+                                        <code>POST /background_processing_v2</code><br>
+                                        Submit combined audio file with company and agent IDs
+                                    </div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">2. Track Progress</div>
+                                    <div class="param-desc">
+                                        <code>GET /task_list?company_id=your_company</code><br>
+                                        Monitor processing status using returned work_id
+                                    </div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">3. Retrieve Results</div>
+                                    <div class="param-desc">
+                                        <code>GET /analysis_result/{work_id}</code><br>
+                                        Get complete analysis when processing completes
+                                    </div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">4. View Performance</div>
+                                    <div class="param-desc">
+                                        <code>GET /agents/{agent_id}/performance-history</code><br>
+                                        See updated agent KPIs and performance metrics
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h4>Best Practices</h4>
+                            <div class="param-grid">
+                                <div class="param">
+                                    <div class="param-name">Audio Quality</div>
+                                    <div class="param-desc">Ensure clear audio with minimal background noise for better diarization</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Speaker Separation</div>
+                                    <div class="param-desc">Avoid overlapping speech for accurate speaker identification</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">File Naming</div>
+                                    <div class="param-desc">Use descriptive names with timestamps for easy tracking</div>
+                                </div>
+                                <div class="param">
+                                    <div class="param-name">Batch Processing</div>
+                                    <div class="param-desc">Process files in batches during off-peak hours</div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-box">
+                                <strong>Processing Time Estimates:</strong>
+                                <ul style="margin: 0.5rem 0 0 1rem;">
+                                    <li><strong>1-10 minutes:</strong> Short calls (under 15 minutes)</li>
+                                    <li><strong>10-30 minutes:</strong> Medium calls (15-60 minutes)</li>
+                                    <li><strong>30-60 minutes:</strong> Long calls (1-4 hours)</li>
+                                    <li>Times may vary based on system load and audio complexity</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="warning-box">
+                                <strong>Important Notes:</strong>
+                                <ul style="margin: 0.5rem 0 0 1rem;">
+                                    <li>Only combined audio files are supported - do not upload pre-separated audio</li>
+                                    <li>AWS transcription is not available for combined audio processing</li>
+                                    <li>Ensure agent_id matches your system's agent records for proper KPI tracking</li>
+                                    <li>Processing costs count against your company's API limits</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Error Codes Section -->
+                    <section class="section" id="errors">
+                    <h1 class="section-title">Error Codes</h1>
+                    <p class="section-subtitle">HTTP status codes and their meanings</p>
+
+                    <div class="status-grid">
+                        <div class="status-code status-200">200<br />Success</div>
+                        <div class="status-code status-400">400<br />Bad Request</div>
+                        <div class="status-code status-401">401<br />Unauthorized</div>
+                        <div class="status-code status-404">404<br />Not Found</div>
+                        <div class="status-code status-500">500<br />Server Error</div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Common Error Scenarios</h3>
+                        <div class="param-grid">
+                        <div class="param">
+                            <div class="param-name">400 Bad Request</div>
+                            <div class="param-desc">
+                            Invalid file format, missing required parameters, or file size
+                            exceeds limits
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">401 Unauthorized</div>
+                            <div class="param-desc">
+                            Authentication failed or missing API credentials
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">403 Forbidden</div>
+                            <div class="param-desc">
+                            Insufficient permissions for the requested operation
+                            </div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">404 Not Found</div>
+                            <div class="param-desc">Requested resource does not exist</div>
+                        </div>
+                        <div class="param">
+                            <div class="param-name">500 Server Error</div>
+                            <div class="param-desc">
+                            Internal processing error, retry the request
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    <h3>Error Response Format</h3>
+                    <div class="code-block">
+                        { <span class="key">"status"</span>:
+                        <span class="string">"error"</span>,
+                        <span class="key">"code"</span>: <span class="number">401</span>,
+                        <span class="key">"message"</span>:
+                        <span class="string">"Authentication failed"</span>,
+                        <span class="key">"details"</span>:
+                        <span class="string">"Invalid API key"</span> }
+                    </div>
+                    </section>
+
+                </main>
+                </div>
+
+    <script>
+      // Navigation handling
+      document.querySelectorAll(".nav-item").forEach((item) => {
+        item.addEventListener("click", function () {
+          // Remove active class from all items and sections
+          document
+            .querySelectorAll(".nav-item")
+            .forEach((i) => i.classList.remove("active"));
+          document
+            .querySelectorAll(".section")
+            .forEach((s) => s.classList.remove("active"));
+
+          // Add active class to clicked item
+          this.classList.add("active");
+
+          // Show corresponding section
+          const sectionId = this.getAttribute("data-section");
+          document.getElementById(sectionId).classList.add("active");
+
+          // Smooth scroll to top
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+    </script>
+  </body>
+</html>

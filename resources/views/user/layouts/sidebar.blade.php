@@ -44,7 +44,7 @@
                             </a>
                         </li>
                         @endif
-                        <li class="nav-item {{ Route::is('criteria.*') ? 'active' : '' }}">
+                        {{--  <li class="nav-item {{ Route::is('criteria.*') ? 'active' : '' }}">
                             <a class="nav-link {{ Route::is('criteria.index') ? 'active' : '' }}" href="{{ route('criteria.index') }}">
                                 <i class="fas fa-tags menu-icon"></i>
                                 <span>Criteria</span>
@@ -61,7 +61,7 @@
                                 <i class="fas fa-users menu-icon"></i>
                                 <span>Client</span>
                             </a>
-                        </li>
+                        </li>  --}}
                         @if($hasManageSystem)
                         <li class="nav-item {{ Route::is('user.group_data.*') ? 'active' : '' }}">
                             <a class="nav-link {{ Route::is('user.group_data.*') ? 'active' : '' }}" href="{{ route('user.group_data.list') }}">
@@ -88,6 +88,12 @@
                             <a class="nav-link {{ Route::is('user.agents.index.*') ? 'active' : '' }}" href="{{ route('user.agents.index') }}">
                                 <i class="fas fa-headset menu-icon"></i>
                                 <span>Agents</span>
+                            </a>
+                        </li>
+                       <li class="nav-item">
+                            <a class="nav-link" href="{{ asset('documentation.html') }}" target="_blank">
+                                <i class="fas fa-book menu-icon"></i>
+                                <span>Documentation</span>
                             </a>
                         </li>
                     <!-- Kayan Navigation -->

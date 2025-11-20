@@ -2,96 +2,103 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Client Details</h4>
                 <div>
-                    <a href="{{ route('client.edit', $client['id']) }}" class="btn btn-warning">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
-                    <a href="{{ route('client.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to List
-                    </a>
+                    <h4 class="mb-1 text-dark">Client Information</h4>
+                    <p class="text-muted mb-0">Client details and assigned sales person</p>
                 </div>
+                <a href="#" class="btn btn-light">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Clients
+                </a>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <h6 class="mb-0">Client Information</h6>
+        <!-- Client Information -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">Client Details</h6>
                 </div>
                 <div class="card-body">
-                    <h5 class="text-primary">{{ $client['name'] }}</h5>
-                    <p class="text-muted">{{ $client['description'] }}</p>
+                    <div class="text-center mb-4">
+                        <div class="client-avatar bg-danger text-white rounded-circle mx-auto mb-3">
+                            A
+                        </div>
+                        <h5 class="text-dark mb-1">Al Futtaim Group</h5>
+                        <p class="text-muted">Large conglomerate</p>
+                    </div>
                     
-                    <div class="mt-4">
-                        <h6>Assigned Sales Person</h6>
-                        <div class="d-flex align-items-center mt-2">
-                            <div class="avatar bg-primary rounded-circle mr-3 d-flex align-items-center justify-content-center text-white"
-                                 style="width: 50px; height: 50px;">
-                                <span class="font-weight-bold">{{ substr($salesPerson['name'], 0, 1) }}</span>
-                            </div>
-                            <div>
-                                <div class="font-weight-bold">{{ $salesPerson['name'] }}</div>
-                                <small class="text-muted">{{ $salesPerson['email'] }}</small>
-                                <br>
-                                <small class="text-muted">{{ $salesPerson['phone'] }}</small>
-                            </div>
+                    <div class="client-info">
+                        <div class="info-item mb-3">
+                            <label class="text-muted small mb-1">Description</label>
+                            <p class="mb-0">Large conglomerate looking for commercial space in Dubai. High budget investment for office buildings.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h6 class="mb-0">Sales Person Matching Results</h6>
+        <!-- Assigned Sales Person -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">Assigned Representative</h6>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Sales Person</th>
-                                    <th>Matching Score</th>
-                                    <th>Percentage</th>
-                                    <th>Matching Criteria</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($allMatches as $match)
-                                <tr class="{{ $match['salesperson']['id'] == $client['assigned_salesperson_id'] ? 'table-success' : '' }}">
-                                    <td>
-                                        <div class="font-weight-bold">{{ $match['salesperson']['name'] }}</div>
-                                        <small class="text-muted">{{ $match['salesperson']['email'] }}</small>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-primary badge-pill" style="font-size: 1.1em;">
-                                            {{ $match['score'] }}/{{ count($criteria) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar {{ $match['percentage'] > 70 ? 'bg-success' : ($match['percentage'] > 40 ? 'bg-warning' : 'bg-danger') }}"
-                                                 style="width: {{ $match['percentage'] }}%">
-                                                {{ number_format($match['percentage'], 1) }}%
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        @foreach($match['matching_criteria'] as $criteria)
-                                        <span class="badge badge-info mb-1">{{ $criteria['title'] }}</span>
-                                        @endforeach
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div class="text-center mb-4">
+                        <div class="sales-avatar bg-success text-white rounded-circle mx-auto mb-3">
+                            M
+                        </div>
+                        <h6 class="text-dark mb-1">Mohammed Hassan</h6>
+                        <p class="text-muted small mb-2">Commercial Properties Expert</p>
+                        <span class="badge badge-success">Auto-matched</span>
+                    </div>
+                    
+                    <div class="contact-info">
+                        <div class="info-item mb-2">
+                            <i class="fas fa-envelope text-muted mr-2"></i>
+                            <span class="text-dark">m.hassan@example.com</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-phone text-muted mr-2"></i>
+                            <span class="text-dark">+971 50 345 6789</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Criteria -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">Client Requirements</h6>
+                </div>
+                <div class="card-body">
+                    <div class="criteria-grid">
+                        <div class="criteria-item">
+                            <span class="badge bg-dark">Budget 5M-10M</span>
+                            <small class="text-muted d-block mt-1">Budget Range</small>
+                        </div>
+                        <div class="criteria-item">
+                            <span class="badge bg-dark">Location: Dubai</span>
+                            <small class="text-muted d-block mt-1">Location</small>
+                        </div>
+                        <div class="criteria-item">
+                            <span class="badge bg-dark">Property: Commercial</span>
+                            <small class="text-muted d-block mt-1">Property Type</small>
+                        </div>
+                        <div class="criteria-item">
+                            <span class="badge bg-dark">Client: Investor</span>
+                            <small class="text-muted d-block mt-1">Client Type</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -102,16 +109,42 @@
 
 @push('styles')
 <style>
-.avatar {
-    font-size: 1.2rem;
+.client-avatar {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 2rem;
 }
-.progress {
-    border-radius: 10px;
+.sales-avatar {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 2rem;
 }
-.progress-bar {
-    border-radius: 10px;
-    font-size: 0.8rem;
-    line-height: 20px;
+.criteria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+.criteria-item {
+    text-align: center;
+    padding: 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+.info-item label {
+    font-weight: 500;
+}
+.card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
 }
 </style>
 @endpush

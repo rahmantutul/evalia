@@ -184,10 +184,12 @@ private function applyFilters($tasks, $request)
     public function taskStore(Request $request)
     {
         $request->validate([
-            'company_id' => 'required|string',
+            'company_id' => 'required|string
+            
+            ',
             'agent_id' => 'required|string',
-            'agent_audio' => 'required',
-            'customer_audio' => 'required',
+            'agent_audio' => 'nullable',
+            'customer_audio' => 'nullable',
             'combined_audio' => 'nullable',
         ]);
 

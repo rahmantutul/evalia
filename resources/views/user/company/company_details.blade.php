@@ -386,7 +386,7 @@
                                     <span class="text-center mb-1 fw-500">Drag & drop files here</span>
                                     <span class="text-muted small mb-3">or click to browse</span>
                                     <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
-                                    <input type="file" name="customer_audio" class="d-none" accept="audio/*" required>
+                                    <input type="file" name="customer_audio" class="d-none" accept="audio/*">
                                 </label>
                             </div>
                         </div>
@@ -410,7 +410,7 @@
                                     <span class="text-center mb-1 fw-500">Drag & drop files here</span>
                                     <span class="text-muted small mb-3">or click to browse</span>
                                     <span class="badge bg-light text-dark px-3 py-2">Max 50MB</span>
-                                    <input type="file" name="agent_audio" class="d-none" accept="audio/*" required>
+                                    <input type="file" name="agent_audio" class="d-none" accept="audio/*">
                                 </label>
                             </div>
                         </div>
@@ -428,7 +428,7 @@
                                 </h5>
                             </div>
                             <div class="card-body d-flex flex-column">
-                                <p class="text-muted small mb-4">Upload pre-mixed audio file (optional)</p>
+                                <p class="text-muted small mb-4">Upload pre-mixed audio file</p>
                                 <label class="upload-container flex-grow-1 d-flex flex-column justify-content-center align-items-center border-2 border-dashed rounded p-4 bg-light bg-opacity-25">
                                     <i class="bi bi-cloud-upload text-success fs-1 mb-2"></i>
                                     <span class="text-center mb-1 fw-500">Drag & drop files here</span>
