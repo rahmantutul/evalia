@@ -104,12 +104,12 @@
                         </div>
                     </div>
 
-                    {{--  <!-- Action Buttons -->
+                    <!-- Action Buttons -->
                     <div class="d-grid gap-2 mt-3">
-                        <button class="btn btn-outline-primary btn-sm" onclick="viewAgentDetails('{{ $agent['id'] }}')">
+                        <a class="btn btn-outline-primary btn-sm" href="{{ route('user.agents.show', $agent['id']) }}">
                             <i class="fas fa-chart-bar me-1"></i>View Details
-                        </button>
-                    </div>  --}}
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

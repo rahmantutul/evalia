@@ -12,7 +12,22 @@ class TelephonyAccountController extends Controller
     // List all telephony accounts
     public function index()
     {
-        $telephonyAccounts = TelephonyAccount::all();
+        $telephonyAccounts = [
+            (object)[
+                'id' => 1,
+                'provider' => 'twilio',
+                'username' => 'AC1234567890',
+                'base_url' => 'https://api.twilio.com',
+                'company_id' => 'hassan'
+            ],
+            (object)[
+                'id' => 2,
+                'provider' => 'avaya',
+                'username' => 'avaya_user_1',
+                'base_url' => 'https://avaya.example.com',
+                'company_id' => 'hassan'
+            ]
+        ];
         return view('user.telephony-accounts.index', compact('telephonyAccounts'));
     }
 

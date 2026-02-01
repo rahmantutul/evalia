@@ -72,7 +72,7 @@
                                     : asset('assets/images/default-avatar.png');
                             @endphp
 
-                            <img src="{{ $avatar }}" 
+                            <img src="{{ session('user.avatar') ?: asset('assets/images/default-avatar.png') }}" 
                                 class="profile-pic" 
                                 id="profile-pic-preview"
                                 loading="lazy"
@@ -94,7 +94,7 @@
                                     <div class="mb-3">
                                         <label class="form-label">Full Name <small style="color: red"> (required)</small></label>
                                         <input type="text" class="form-control" name="name" 
-                                               value="{{ old('name', auth()->user()->name) }}" required>
+                                               value="{{ old('name', session('user.full_name')) }}" required>
                                     </div>
                                 </div>
                                 
@@ -102,7 +102,7 @@
                                     <div class="mb-3">
                                         <label class="form-label">Email Address <small style="color: red"> (required)</small></label>
                                         <input type="email" name="email" class="form-control" 
-                                               value="{{ auth()->user()->email }}" readonly>
+                                               value="{{ session('user.email') }}" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -112,7 +112,7 @@
                                     <div class="mb-3">
                                         <label class="form-label">Phone Number <small style="color: red"> (required)</small></label>
                                         <input type="tel" class="form-control" id="phone" 
-                                               name="phone" value="{{ old('phone', auth()->user()->phone) }}">
+                                               name="phone" value="{{ old('phone', session('user.phone')) }}">
                                         <input type="hidden" name="country_code" id="country-code">
                                     </div>
                                 </div>
@@ -121,7 +121,7 @@
                                      <div class="mb-3">
                                         <label class="form-label">Company Name <small style="color: red"> (required)</small></label>
                                         <input type="text" class="form-control" name="company" 
-                                            value="{{ old('company', auth()->user()->company) }}">
+                                            value="{{ old('company', session('user.company_name')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -164,33 +164,11 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: '{{ session('success') }}',
-                timer: 3000,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
-        @endif
-
-        @if(session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: '{{ session('error') }}',
-                showConfirmButton: true,
-                position: 'center'
-            });
-        @endif
-
         @if($errors->any())
             Swal.fire({
                 icon: 'error',
                 title: 'Validation Error',
-                html: `@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach`,
+                html: @json(implode('', array_map(fn($e) => "<p>$e</p>", $errors->all()))),
                 showConfirmButton: true,
                 position: 'center'
             });

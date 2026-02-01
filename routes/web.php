@@ -156,6 +156,7 @@ Route::group(['middleware' => 'auth.api'], function () {
     Route::get('/user-profile', [HomeController::class, 'profile'])->name('user.profile');
     Route::put('/user-profile/update', [HomeController::class, 'updateProfile'])->name('user.profile.update');
     Route::get('/user/subscription', [HomeController::class, 'subscription'])->name('user.subscription');
+    Route::get('/performance-badges', [HomeController::class, 'performanceBadges'])->name('user.performance_badges');
 
     // Group Routs start
     Route::get('/user/group_data/list', [GroupDataController::class, 'groupList'])->name('user.group_data.list');

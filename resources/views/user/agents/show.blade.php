@@ -12,9 +12,6 @@
                             <a href="{{ route('user.agents.performance', $agent['agent_details']['id'] ?? '') }}" class="btn btn-sm btn-success">
                                 <i class="fas fa-chart-line me-1"></i>Performance
                             </a>
-                            <a href="{{ route('user.agents.dashboard') }}" class="btn btn-sm btn-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
-                            </a>
                         </div>
                     </div>
                 </div>

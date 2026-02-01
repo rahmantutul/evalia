@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ExternalApiService
 {
@@ -12,9 +12,8 @@ class ExternalApiService
 
     public function __construct()
     {
-    
-        $this->baseUrl = 'http://35.153.178.201:8080';
-        $this->timeout =  30;
+        $this->baseUrl = '';
+        $this->timeout = 30;
     }
 
     /**
@@ -22,189 +21,76 @@ class ExternalApiService
      */
     private function getToken()
     {
-        return session('user_access_token');
+        return session('user_access_token', 'dummy-token');
     }
 
     /**
      * Login user
      */
-public function login($email, $password)
-{
-    try {
-        $response = Http::timeout($this->timeout)
-            ->post($this->baseUrl . '/auth/token', [
-                'username' => $email,
-                'password' => $password
-            ]);
-
-        if ($response->successful()) {
-            $token = $response->json('access_token');
-            
-            session(['user_access_token' => $token]);
-            
-            return [
-                'success' => true,
-                'access_token' => $token,
-                'token_type' => $response->json('token_type')
-            ];
-        }
-
-        // Handle 401 error specifically
-        if ($response->status() === 401) {
-            $errorData = $response->json();
-            return [
-                'success' => false,
-                'error' => $errorData['detail'] ?? 'Invalid username or password'
-            ];
-        }
-
-        // Handle other client errors (4xx)
-        if ($response->clientError()) {
-            $errorData = $response->json();
-            return [
-                'success' => false,
-                'error' => $errorData['detail'] ?? $errorData['message'] ?? 'Request failed'
-            ];
-        }
-
-        // Handle server errors (5xx)
-        if ($response->serverError()) {
-            return [
-                'success' => false,
-                'error' => 'Server error, please try again later'
-            ];
-        }
-
-        // Handle other errors
+    public function login($email, $password)
+    {
+        // For static dummy site, any login succeeds
+        session(['user_access_token' => 'dummy-token-' . uniqid()]);
+        
         return [
-            'success' => false,
-            'error' => 'Login failed'
-        ];
-
-    } catch (\Exception $e) {
-        return [
-            'success' => false,
-            'error' => 'Service unavailable: ' . $e->getMessage()
+            'success' => true,
+            'access_token' => 'dummy-token',
+            'token_type' => 'bearer'
         ];
     }
-}
 
     /**
      * Get current user profile
      */
     public function getCurrentUser()
     {
-        $token = $this->getToken();
-        
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->get($this->baseUrl . '/auth/me');
-
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'user' => $response->json()
-                ];
-            }
-
-            // If token is invalid, clear session
-            if ($response->status() === 401) {
-                session()->forget('user_access_token');
-                session()->forget('user');
-            }
-
-            return [
-                'success' => false,
-                'error' => 'Failed to get user profile'
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Get user profile failed: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
-            ];
-        }
+        return [
+            'success' => true,
+            'user' => [
+                'id' => '1',
+                'full_name' => 'أحمد حسان',
+                'email' => 'ahmed.hassan@ssc.gov.jo',
+                'position' => 'Senior Quality Analyst',
+                'phone' => '+962 79 123 4567',
+                'role' => [
+                    'id' => 'ecedd3ec-6b66-45e1-9c1b-6cc3ee772762',
+                    'name' => 'Admin'
+                ],
+                'company' => [
+                    'id' => 'ssc-jordan',
+                    'name' => 'الضمان الاجتماعي - الأردن'
+                ]
+            ]
+        ];
     }
+
     public function getRolePermissions($roleId)
     {
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->get($this->baseUrl . "/roles/{$roleId}");
-
-            if ($response->successful()) {
-                $roleData = $response->json();
-                
-                // Debug the API response
-                \Log::info('Role API Response', [
-                    'role_id' => $roleId,
-                    'response' => $roleData
-                ]);
-                
-                return [
-                    'success' => true,
-                    'permissions' => $roleData['permissions'] ?? $roleData['data']['permissions'] ?? []
-                ];
-            }
-
-            \Log::error('Failed to fetch role permissions', [
-                'status' => $response->status(),
-                'response' => $response->body()
-            ]);
-
-            return [
-                'success' => false,
-                'error' => 'Failed to fetch role permissions'
-            ];
-
-        } catch (\Exception $e) {
-            \Log::error('Role permissions API exception: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
-            ];
-        }
+        return [
+            'success' => true,
+            'permissions' => [
+                'dashboard.view',
+                'users.view',
+                'users.create',
+                'users.edit',
+                'users.delete',
+                'companies.view',
+                'companies.create',
+                'tasks.view',
+                'agents.view'
+            ]
+        ];
     }
+
     /**
      * Register new user
      */
     public function register($userData)
     {
-        try {
-            $response = Http::timeout($this->timeout)
-                ->post($this->baseUrl . '/users', $userData);
-
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'user' => $response->json()
-                ];
-            }
-
-            $error = $this->parseError($response);
-            return [
-                'success' => false,
-                'error' => $error
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Registration failed: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
-            ];
-        }
+        return [
+            'success' => true,
+            'user' => array_merge($userData, ['id' => uniqid()])
+        ];
     }
 
     /**
@@ -212,39 +98,37 @@ public function login($email, $password)
      */
     public function listUsers($skip = 0, $limit = 100)
     {
-        $token = $this->getToken();
-        // dd($token);
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
+        $agents = [
+            ['id' => 'agent-nadi', 'full_name' => 'نادي البديري', 'email' => 'nadi@ssc.gov.jo', 'position' => 'Customer Support'],
+            ['id' => 'agent-sara', 'full_name' => 'سارة الخطيب', 'email' => 'sara@ssc.gov.jo', 'position' => 'Account Manager'],
+            ['id' => 'agent-omar', 'full_name' => 'عمر المصري', 'email' => 'omar@ssc.gov.jo', 'position' => 'Technical Support'],
+            ['id' => 'agent-layla', 'full_name' => 'ليلى عودة', 'email' => 'layla@ssc.gov.jo', 'position' => 'Sales Representative'],
+            ['id' => 'agent-khaled', 'full_name' => 'خالد منصور', 'email' => 'khaled@ssc.gov.jo', 'position' => 'Legal Advisor'],
+            ['id' => 'agent-fatima', 'full_name' => 'فاطمة الزهراء', 'email' => 'fatima@ssc.gov.jo', 'position' => 'Public Relations'],
+            ['id' => 'agent-yousef', 'full_name' => 'يوسف إبراهيم', 'email' => 'yousef@ssc.gov.jo', 'position' => 'Support Supervisor'],
+            ['id' => 'agent-nour', 'full_name' => 'نور الهدى', 'email' => 'nour@ssc.gov.jo', 'position' => 'Help Desk'],
+        ];
 
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->get($this->baseUrl . '/users', [
-                    'skip' => $skip,
-                    'limit' => $limit
-                ]);
-            
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'users' => $response->json()
-                ];
-            }
-
-            return [
-                'success' => false,
-                'error' => 'Failed to fetch users'
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('List users failed: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
+        $users = [];
+        foreach ($agents as $agent) {
+            $users[] = [
+                'id' => $agent['id'],
+                'full_name' => $agent['full_name'],
+                'username' => str_replace(' ', '_', strtolower($agent['id'])),
+                'email' => $agent['email'],
+                'position' => $agent['position'],
+                'phone' => "+962 7" . rand(10000000, 99999999),
+                'is_active' => true,
+                'role' => ['name' => 'Agent'],
+                'company' => ['id' => 'ssc-jordan', 'name' => 'الضمان الاجتماعي - الأردن'],
+                'company_name' => 'الضمان الاجتماعي - الأردن'
             ];
         }
+
+        return [
+            'success' => true,
+            'users' => $users
+        ];
     }
 
     /**
@@ -252,35 +136,28 @@ public function login($email, $password)
      */
     public function getUser($userId)
     {
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
+        $allUsers = $this->listUsers()['users'];
+        $user = collect($allUsers)->firstWhere('id', $userId);
 
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->get($this->baseUrl . "/users/{$userId}");
-
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'user' => $response->json()
-                ];
-            }
-
-            return [
-                'success' => false,
-                'error' => 'User not found'
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Get user failed: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
+        if (!$user) {
+            $user = [
+                'id' => $userId,
+                'full_name' => "مستخدم افتراضي",
+                'username' => "user_$userId",
+                'email' => "user$userId@ssc.gov.jo",
+                'position' => 'Agent',
+                'phone' => '+962 79 123 4567',
+                'is_active' => true,
+                'role' => ['id' => 'role-1', 'name' => 'Agent'],
+                'company' => ['id' => 'ssc-jordan', 'name' => 'الضمان الاجتماعي - الأردن'],
+                'company_name' => 'الضمان الاجتماعي - الأردن'
             ];
         }
+
+        return [
+            'success' => true,
+            'user' => $user
+        ];
     }
 
     /**
@@ -288,36 +165,10 @@ public function login($email, $password)
      */
     public function createUser($userData)
     {
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->post($this->baseUrl . '/users', $userData);
-
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'user' => $response->json()
-                ];
-            }
-
-            $error = $this->parseError($response);
-            return [
-                'success' => false,
-                'error' => $error
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Create user failed: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
-            ];
-        }
+        return [
+            'success' => true,
+            'user' => array_merge($userData, ['id' => uniqid()])
+        ];
     }
 
     /**
@@ -325,36 +176,10 @@ public function login($email, $password)
      */
     public function updateUser($userId, $userData)
     {
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->put($this->baseUrl . "/users/{$userId}", $userData);
-
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'user' => $response->json()
-                ];
-            }
-
-            $error = $this->parseError($response);
-            return [
-                'success' => false,
-                'error' => $error
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Update user failed: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
-            ];
-        }
+        return [
+            'success' => true,
+            'user' => array_merge($userData, ['id' => $userId])
+        ];
     }
 
     /**
@@ -362,269 +187,130 @@ public function login($email, $password)
      */
     public function deactivateUser($userId)
     {
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->delete($this->baseUrl . "/users/{$userId}");
-
-            if ($response->status() === 204) {
-                return ['success' => true, 'message' => 'User deactivated successfully'];
-            }
-
-            // Get the actual error message from API response
-            $errorData = $response->json();
-            $errorMessage = $errorData['detail'] ?? $errorData['message'] ?? 'Failed to deactivate user';
-
-            return [
-                'success' => false,
-                'error' => $errorMessage
-            ];
-
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
-            ];
-        }
+        return ['success' => true, 'message' => 'User deactivated successfully (Mock)'];
     }
-        public function changeUserPassword($userId, $newPassword)
+
+    public function changeUserPassword($userId, $newPassword)
     {
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->post($this->baseUrl . "/users/{$userId}/change-password", [
-                    'new_password' => $newPassword
-                ]);
-
-            if ($response->successful()) {
-                return ['success' => true];
-            }
-
-            // Get the actual error message from API response
-            $errorData = $response->json();
-            $errorMessage = $errorData['detail'] ?? $errorData['message'] ?? 'Failed to change password';
-
-            return [
-                'success' => false,
-                'error' => $errorMessage
-            ];
-
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
-            ];
-        }
+        return ['success' => true];
     }
-    /**
-     * Change user password
-     */
+
     public function changePassword($userId, $newPassword)
     {
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->post($this->baseUrl . "/users/{$userId}/change-password", [
-                    'new_password' => $newPassword
-                ]);
-
-            if ($response->successful()) {
-                return ['success' => true];
-            }
-
-            $error = $this->parseError($response);
-            return [
-                'success' => false,
-                'error' => $error
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Change password failed: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
-            ];
-        }
+        return ['success' => true];
     }
 
-    /**
-     * Parse error response from API
-     */
-    private function parseError($response)
-    {
-        $errors = $response->json('detail');
-        
-        if (is_array($errors) && count($errors) > 0) {
-            return $errors[0]['msg'] ?? 'Validation failed';
-        }
-        
-        return $response->json('message', 'Request failed');
-    }
     public function getRoles()
     {
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->get($this->baseUrl . '/roles');
-
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'roles' => $response->json()
-                ];
-            }
-        
+        return [
+            'success' => true,
+            'roles' => [
+                ['id' => 'ecedd3ec-6b66-45e1-9c1b-6cc3ee772762', 'name' => 'Admin'],
+                ['id' => 'role-2', 'name' => 'Manager'],
+                ['id' => 'role-3', 'name' => 'Agent']
+            ]
+        ];
     }
 
-    /**
-     * Get all companies for dropdown
-     */
     public function getCompanies()
     {
-
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->get($this->baseUrl . '/list_of_companies');
-            
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'companies' => $response->json()
-                ];
-            }
-            return [
-                'success' => false,
-                'error' => 'Failed to fetch companies'
-            ];
-
+        return [
+            'success' => true,
+            'companies' => [
+                ['id' => 'ssc-jordan', 'name' => 'الضمان الاجتماعي - الأردن', 'industry' => 'Government'],
+                ['id' => 'arab-bank', 'name' => 'البنك العربي', 'industry' => 'Finance'],
+                ['id' => 'orange-jo', 'name' => 'أورنج الأردن', 'industry' => 'Telecommunications'],
+                ['id' => 'manaseer-group', 'name' => 'مجموعة المناصير', 'industry' => 'Energy'],
+                ['id' => 'royal-jordanian', 'name' => 'الملكية الأردنية', 'industry' => 'Aviation']
+            ]
+        ];
     }
 
     public function getAgentDashboardSummary()
     {
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->get($this->baseUrl . '/agents/dashboard-summary');
-
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'data' => $response->json()
-                ];
-            }
-
-            return [
-                'success' => false,
-                'error' => 'Failed to fetch dashboard summary'
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Get agent dashboard summary failed: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
-            ];
-        }
+        return [
+            'success' => true,
+            'data' => [
+                'total_agents' => 48,
+                'active_sessions' => 32,
+                'total_tasks' => 1245,
+                'completed_tasks' => 1180,
+                'avg_performance' => 92.5,
+                'performance_trend' => [
+                    ['date' => '2024-01-25', 'value' => 88],
+                    ['date' => '2024-01-26', 'value' => 89],
+                    ['date' => '2024-01-27', 'value' => 91],
+                    ['date' => '2024-01-28', 'value' => 90],
+                    ['date' => '2024-01-29', 'value' => 92],
+                    ['date' => '2024-01-30', 'value' => 93],
+                    ['date' => '2024-01-31', 'value' => 92.5]
+                ]
+            ]
+        ];
     }
 
-    /**
-     * Get agents list
-     */
     public function getAgentsList()
     {
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->get($this->baseUrl . '/agents/list');
-
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'agents' => $response->json()
-                ];
-            }
-
-            return [
-                'success' => false,
-                'error' => 'Failed to fetch agents list'
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Get agents list failed: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
+        $allAgents = $this->listUsers()['users'];
+        $agents = [];
+        foreach ($allAgents as $agent) {
+            $agents[] = [
+                'id' => $agent['id'],
+                'name' => $agent['full_name'],
+                'status' => rand(0, 10) > 2 ? 'online' : 'offline',
+                'last_active' => now()->subMinutes(rand(1, 1440))->toIso8601String(),
+                'performance_score' => rand(85, 98)
             ];
         }
+        return [
+            'success' => true,
+            'agents' => $agents
+        ];
     }
 
-    /**
-     * Get agent performance history
-     */
     public function getAgentPerformanceHistory($agentId)
     {
-        $token = $this->getToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Not authenticated'];
-        }
-
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withToken($token)
-                ->get($this->baseUrl . "/agents/{$agentId}/performance-history");
-
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'data' => $response->json()
-                ];
-            }
-
-            return [
-                'success' => false,
-                'error' => 'Failed to fetch agent performance history'
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Get agent performance history failed: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => 'Service unavailable'
-            ];
-        }
+        $userData = $this->getUser($agentId)['user'];
+        
+        return [
+            'success' => true,
+            'data' => [
+                'agent_details' => [
+                    'id' => $agentId,
+                    'display_id' => 'AGT-' . strtoupper(Str::random(5)),
+                    'name' => $userData['full_name'],
+                    'position' => $userData['position'],
+                    'company_name' => 'الضمان الاجتماعي - الأردن'
+                ],
+                'current_scores' => [
+                    'overall_score' => rand(88, 96),
+                    'answer_accuracy' => rand(90, 98),
+                    'response_speed' => rand(85, 95),
+                    'customer_satisfaction' => rand(90, 100),
+                    'professionalism' => rand(92, 100)
+                ],
+                'performance_weights' => [
+                    'answer_accuracy' => 0.40,
+                    'response_speed' => 0.30,
+                    'customer_satisfaction' => 0.30
+                ],
+                'total_tasks' => rand(100, 500),
+                'avg_call_duration' => rand(180, 400),
+                'history' => [
+                    ['date' => '2024-01-25', 'score' => 88],
+                    ['date' => '2024-01-26', 'score' => 89],
+                    ['date' => '2024-01-27', 'score' => 90],
+                    ['date' => '2024-01-28', 'score' => 92],
+                    ['date' => '2024-01-29', 'score' => 91],
+                    ['date' => '2024-01-30', 'score' => 94],
+                    ['date' => '2024-01-31', 'score' => 93]
+                ],
+                'summary' => [
+                    'total_calls' => rand(500, 2000),
+                    'avg_duration' => '3:' . rand(10, 59),
+                    'satisfaction_rate' => rand(90, 98)
+                ]
+            ]
+        ];
     }
 }

@@ -1,9 +1,9 @@
- <!-- Header -->
+    <!-- Header -->
     <div class="page-header mb-4">
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h4 class="fw-bold mb-1">Quality Assurance Dashboard</h4>
-                <p class="text-muted mb-0">Comprehensive overview of call quality metrics and agent performance</p>
+                <p class="text-muted mb-0">Overview of call quality metrics and agent performance</p>
             </div>
             <div class="d-flex gap-2">
                 <div class="dropdown">
@@ -51,7 +51,7 @@
         <div class="col-md-4">
             <div class="dashboard-card h-100 shadow-soft">
                 <div class="card-header bg-white">
-                    <h6 class="fw-bold mb-0">Customer Sentiment Analysis</h6>
+                    <h6 class="fw-bold mb-0">Sentiment Analysis</h6>
                 </div>
                 <div class="chart-container">
                     <canvas id="sentimentChart"></canvas>

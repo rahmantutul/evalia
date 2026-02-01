@@ -1,17 +1,28 @@
 @extends('user.layouts.app')
 
 @php
-    function formatDuration($startTime, $endTime) {
-        if (!$startTime || !$endTime) {
-            return '00:00';
+    if (!function_exists('timeToSeconds')) {
+        function timeToSeconds($time) {
+            if (!$time) return 0;
+            $parts = array_reverse(explode(':', $time));
+            $seconds = 0;
+            if (isset($parts[0])) $seconds += (int)$parts[0];
+            if (isset($parts[1])) $seconds += (int)$parts[1] * 60;
+            if (isset($parts[2])) $seconds += (int)$parts[2] * 3600;
+            return $seconds;
         }
-        $start = strtotime('1970-01-01 ' . substr($startTime, 0, 5) . ' UTC');
-        $end = strtotime('1970-01-01 ' . substr($endTime, 0, 5) . ' UTC');
-        if ($start === false || $end === false) {
-            return '00:00';
+    }
+
+    if (!function_exists('formatDuration')) {
+        function formatDuration($startTime, $endTime) {
+            if (!$startTime || !$endTime) {
+                return '00:00';
+            }
+            $start = timeToSeconds($startTime);
+            $end = timeToSeconds($endTime);
+            $duration = max(0, $end - $start);
+            return gmdate('i:s', $duration);
         }
-        $duration = $end - $start;
-        return gmdate('i:s', $duration);
     }
 @endphp
 
@@ -665,6 +676,11 @@
                     </div>
 
                     <div class="card-body">
+                        <!-- Add Visualization for Timeline -->
+                        <div class="mb-4 p-3 bg-light rounded-3" style="height: 300px;">
+                            <canvas id="sentimentTimelineChart"></canvas>
+                        </div>
+
                         <div class="professional-card">
 
                             <!-- Tabs Navigation -->
@@ -727,38 +743,21 @@
                                                                 </span>
                                                             </td>
                                                             <td>
-                                                                @php
-                                                                    $start = isset($transcript['start_time'])
-                                                                        ? strtotime(
-                                                                            '1970-01-01 ' .
-                                                                                substr(
-                                                                                    $transcript['start_time'],
-                                                                                    0,
-                                                                                    5,
-                                                                                ) .
-                                                                                ' UTC',
-                                                                        )
-                                                                        : 0;
-                                                                    $end = isset($transcript['end_time'])
-                                                                        ? strtotime(
-                                                                            '1970-01-01 ' .
-                                                                                substr($transcript['end_time'], 0, 5) .
-                                                                                ' UTC',
-                                                                        )
-                                                                        : 0;
-                                                                    $duration = $end - $start;
-                                                                    echo gmdate('i:s', $duration);
-                                                                @endphp
+                                                                {{ formatDuration($transcript['start_time'] ?? null, $transcript['end_time'] ?? null) }}
                                                             </td>
                                                             <td>
                                                                 <div class="progress sentiment-progress"
                                                                     style="height: 5px; border-radius: 6px;">
+                                                                    @php
+                                                                        $sentiment = $transcript['sentiment'] ?? 'Neutral';
+                                                                        $intensity = ($sentiment == 'Positive' || $sentiment == 'Negative') ? 85 : 50;
+                                                                    @endphp
                                                                     <div class="progress-bar 
-                                                                @if (($transcript['sentiment'] ?? 'Neutral') == 'Positive') bg-success
-                                                                @elseif(($transcript['sentiment'] ?? 'Neutral') == 'Negative') bg-danger
+                                                                @if ($sentiment == 'Positive') bg-success
+                                                                @elseif($sentiment == 'Negative') bg-danger
                                                                 @else bg-warning @endif"
                                                                         role="progressbar"
-                                                                        style="width: {{ rand(50, 90) }}%; transition: width 0.6s ease;">
+                                                                        style="width: {{ $intensity }}%; transition: width 0.6s ease;">
                                                                     </div>
                                                                 </div>
                                                             </td>
@@ -820,7 +819,7 @@
                                                                     @elseif(($transcript['sentiment'] ?? 'Neutral') == 'Negative') bg-danger
                                                                     @else bg-warning @endif"
                                                                             role="progressbar"
-                                                                            style="width: {{ rand(50, 90) }}%; transition: width 0.6s ease;">
+                                                                                style="width: {{ ($transcript['sentiment'] ?? '') === 'Neutral' ? 50 : 85 }}%; transition: width 0.6s ease;">
                                                                         </div>
                                                                     </div>
                                                                 </td>
@@ -892,7 +891,7 @@
                                                                     @elseif(($transcript['sentiment'] ?? 'Neutral') == 'Negative') bg-danger
                                                                     @else bg-warning @endif"
                                                                             role="progressbar"
-                                                                            style="width: {{ rand(50, 90) }}%; transition: width 0.6s ease;">
+                                                                                style="width: {{ ($transcript['sentiment'] ?? '') === 'Neutral' ? 50 : 85 }}%; transition: width 0.6s ease;">
                                                                         </div>
                                                                     </div>
                                                                 </td>
@@ -1007,35 +1006,14 @@
                                                                             $delay['delay_end'],
                                                                         )
                                                                     ) {
-                                                                        $start = strtotime(
-                                                                            '1970-01-01 ' .
-                                                                                substr(
-                                                                                    $transcript['start_time'],
-                                                                                    0,
-                                                                                    5,
-                                                                                ) .
-                                                                                ' UTC',
-                                                                        );
-                                                                        $end = strtotime(
-                                                                            '1970-01-01 ' .
-                                                                                substr($transcript['end_time'], 0, 5) .
-                                                                                ' UTC',
-                                                                        );
-                                                                        $delayStart = strtotime(
-                                                                            '1970-01-01 ' .
-                                                                                substr($delay['delay_start'], 0, 5) .
-                                                                                ' UTC',
-                                                                        );
-                                                                        $delayEnd = strtotime(
-                                                                            '1970-01-01 ' .
-                                                                                substr($delay['delay_end'], 0, 5) .
-                                                                                ' UTC',
-                                                                        );
+                                                                        $start = timeToSeconds($transcript['start_time']);
+                                                                        $end = timeToSeconds($transcript['end_time']);
+                                                                        $delayStart = timeToSeconds($delay['delay_start']);
+                                                                        $delayEnd = timeToSeconds($delay['delay_end']);
 
                                                                         if (
-                                                                            isset($transcript['start_time'], $transcript['end_time'], $delay['delay_start'], $delay['delay_end']) &&
-                                                                            strtotime('1970-01-01 ' . substr($transcript['start_time'], 0, 5) . ' UTC') >= strtotime('1970-01-01 ' . substr($delay['delay_start'], 0, 5) . ' UTC') - 5 &&
-                                                                            strtotime('1970-01-01 ' . substr($transcript['end_time'], 0, 5) . ' UTC') <= strtotime('1970-01-01 ' . substr($delay['delay_end'], 0, 5) . ' UTC') + 5
+                                                                            $start >= $delayStart - 5 &&
+                                                                            $end <= $delayEnd + 5
                                                                         ) {
                                                                             $context = $transcript['transcript'] ?? 'No context available';
                                                                             break;
@@ -1624,6 +1602,102 @@
                 },
                 plugins: [centerTextPlugin]
             });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced Sentiment Timeline Chart
+            const timelineCtx = document.getElementById('sentimentTimelineChart').getContext('2d');
+            @php
+                $timelinePoints = [];
+                if (isset($data['speakers_transcriptions'])) {
+                    foreach (array_slice($data['speakers_transcriptions'], 0, 100) as $t) {
+                        $s = $t['sentiment'] ?? 'Neutral';
+                        $val = 0;
+                        if ($s == 'Positive') $val = 1;
+                        if ($s == 'Negative') $val = -1;
+                        $timelinePoints[] = [
+                            't' => $t['start_time'] ?? '00:00',
+                            'v' => $val,
+                            'speaker' => ucfirst($t['speaker'] ?? 'Unknown')
+                        ];
+                    }
+                }
+            @endphp
+            
+            const rawTimelineData = @json($timelinePoints);
+            
+            if (rawTimelineData && rawTimelineData.length > 0) {
+                new Chart(timelineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: rawTimelineData.map(d => d.t),
+                        datasets: [{
+                            label: 'Sentiment Flow',
+                            data: rawTimelineData.map(d => d.v),
+                            borderColor: '#8FA998',
+                            backgroundColor: 'rgba(143, 169, 152, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3,
+                            pointBackgroundColor: rawTimelineData.map(d => {
+                                if (d.v > 0) return '#198754';
+                                if (d.v < 0) return '#dc3545';
+                                return '#ffc107';
+                            }),
+                            segment: {
+                                borderColor: ctx => {
+                                    if (!ctx.p1) return '#ffc107';
+                                    const val = ctx.p1.parsed.y;
+                                    if (val > 0) return '#198754';
+                                    if (val < 0) return '#dc3545';
+                                    return '#ffc107';
+                                }
+                            }
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const d = rawTimelineData[context.dataIndex];
+                                        const sentiment = d.v > 0 ? 'Positive' : (d.v < 0 ? 'Negative' : 'Neutral');
+                                        return `${d.speaker || 'Unknown'}: ${sentiment}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                min: -1.2,
+                                max: 1.2,
+                                ticks: {
+                                    callback: function(value) {
+                                        if (value === 1) return 'Positive';
+                                        if (value === 0) return 'Neutral';
+                                        if (value === -1) return 'Negative';
+                                        return '';
+                                    },
+                                    stepSize: 1
+                                },
+                                grid: {
+                                    color: 'rgba(0,0,0,0.05)'
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    maxTicksLimit: 12
+                                }
+                            }
+                        }
+                    }
+                });
+            }
         });
     </script>
 @endpush

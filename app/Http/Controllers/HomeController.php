@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+
 class HomeController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth.api');
     }
+
     public function index()
     {
         return view('user.dashboard');
@@ -23,7 +25,6 @@ class HomeController extends Controller
             'product_1_data',
             'product_2_data',
             'product_3_data',
-            // Add any other product-specific session keys you use
         ]);
         
         // 🔹 Set new active product
@@ -32,103 +33,71 @@ class HomeController extends Controller
         // 🔹 Return success with redirect URL if needed
         return response()->json([
             'success' => true,
-            'redirect_url' => route('user.home') // Optional: you can use this in JS too
+            'redirect_url' => route('user.home')
         ]);
     }
 
-    
-    // public function profile()
-    // {
-    //     return view('user.profile');
-    // }
-    // public function updateProfile(Request $request)
-    // {
-    //     $user = Auth::user();
+    public function profile()
+    {
+        $user = session('user');
+        return view('user.profile', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = session('user');
         
-    //     try {
-    //         $validatedData = $request->validate([
-    //             'name' => 'required|string|max:255',
-    //             'email' => 'required|email|max:255|unique:users,email,'.$user->id,
-    //             'phone' => 'required|string|max:20',
-    //             'company' => 'required|string|max:255',
-    //             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    //             'current_password' => 'required_with:new_password',
-    //             'new_password' => 'nullable|min:8|confirmed|different:current_password',
-    //         ]);
+        $userData = [
+            'id' => $user['id'] ?? '1',
+            'full_name' => $request->input('name', $user['full_name'] ?? 'أحمد حسان'),
+            'email' => $request->input('email', $user['email'] ?? 'ahmed.hassan@ssc.gov.jo'),
+            'phone' => $request->input('phone', $user['phone'] ?? '+962 79 123 4567'),
+            'company_name' => $request->input('company', $user['company_name'] ?? 'الضمان الاجتماعي - الأردن'),
+            'role' => $user['role'] ?? ['name' => 'Admin'],
+        ];
 
-    //         if ($request->hasFile('avatar')) {
-    //             if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-    //                 Storage::disk('public')->delete($user->avatar);
-    //             }
-    //             $avatarPath = $request->file('avatar')->store('avatars', 'public');
-    //             $validatedData['avatar'] = $avatarPath;
-    //         }
+        session(['user' => $userData]);
 
-    //         if ($request->filled('new_password')) {
-    //             if (!Hash::check($request->current_password, $user->password)) {
-    //                 throw ValidationException::withMessages([
-    //                     'current_password' => ['The current password is incorrect']
-    //                 ]);
-    //             }
-    //             $validatedData['password'] = Hash::make($request->new_password);
-    //         }
+        return back()->with('success', 'Profile updated successfully (Mock)!');
+    }
 
-    //         $user->update($validatedData);
+    public function support()
+    {
+        return view('user.support');
+    }
 
-    //         return back()->with('success', 'Profile updated successfully!');
+    public function subscription()
+    {
+        return view('user.subscription');
+    }
 
-    //     } catch (ValidationException $e) {
-    //         return back()->withErrors($e->validator);
-    //     } catch (\Exception $e) {
-    //         return back()->with('error', 'An error occurred: '.$e->getMessage());
-    //     }
-    // }
+    public function bots()
+    {
+        return view('user.bots');
+    }
 
-    // public function support()
-    // {
-    //     return view('user.support');
-    // }
-
-
-
-
-
-
-
-
-
-
-
+    public function bot_create()
+    {
+        return view('user.bot_create');
+    }
     
+    public function bot_store()
+    {
+        return view('user.maintenance');
+    }
 
+    public function overview()
+    {
+        return view('user.overview');
+    }
 
+    public function inbox()
+    {
+        return view('user.inbox');
+    }
 
-    // public function subscription()
-    // {
-    //     return view('user.subscription');
-    // }
-
-    // public function bots()
-    // {
-    //     return view('user.bots');
-    // }
-    // public function bot_create()
-    // {
-    //     return view('user.bot_create');
-    // }
-    
-    // public function bot_store()
-    // {
-    //     return view('user.maintenance');
-    // }
-    // public function overview()
-    // {
-    //     return view('user.overview');
-    // }
-    // public function inbox()
-    // {
-    //     return view('user.inbox');
-    // }
-
-
+    public function performanceBadges()
+    {
+        return view('user.performance_badges');
+    }
 }

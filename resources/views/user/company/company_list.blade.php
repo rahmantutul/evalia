@@ -135,12 +135,10 @@
                         <!-- Total Companies -->
                         <div class="col-md-2 col-sm-4 col-6 stat-item">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded me-3">
-                                    <i class="fas fa-building text-primary fs-5"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h5 class="mb-0 fw-bold" id="totalCompanies">0</h5>
-                                    <small class="text-muted">Total Companies</small>
+                                <i class="fas fa-building text-primary me-2"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold" id="totalCompanies">0</h6>
+                                    <p class="text-muted small mb-0" style="font-size: 10px;">Companies</p>
                                 </div>
                             </div>
                         </div>
@@ -148,12 +146,10 @@
                         <!-- Active Tasks -->
                         <div class="col-md-2 col-sm-4 col-6 stat-item">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded me-3">
-                                    <i class="fas fa-tasks text-success fs-5"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h5 class="mb-0 fw-bold" id="activeTasks">0</h5>
-                                    <small class="text-muted">Active Tasks</small>
+                                <i class="fas fa-tasks text-success me-2"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold" id="activeTasks">0</h6>
+                                    <p class="text-muted small mb-0" style="font-size: 10px;">Active Tasks</p>
                                 </div>
                             </div>
                         </div>
@@ -161,12 +157,10 @@
                         <!-- Completed Tasks -->
                         <div class="col-md-2 col-sm-4 col-6 stat-item">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0 bg-info bg-opacity-10 p-3 rounded me-3">
-                                    <i class="fas fa-check-circle text-info fs-5"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h5 class="mb-0 fw-bold" id="completedTasks">0</h5>
-                                    <small class="text-muted">Completed Tasks</small>
+                                <i class="fas fa-check-circle text-info me-2"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold" id="completedTasks">0</h6>
+                                    <p class="text-muted small mb-0" style="font-size: 10px;">Completed</p>
                                 </div>
                             </div>
                         </div>
@@ -174,12 +168,10 @@
                         <!-- Pending Analysis -->
                         <div class="col-md-2 col-sm-4 col-6 stat-item">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0 bg-warning bg-opacity-10 p-3 rounded me-3">
-                                    <i class="fas fa-clock text-warning fs-5"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h5 class="mb-0 fw-bold" id="pendingAnalysis">0</h5>
-                                    <small class="text-muted">Pending Analysis</small>
+                                <i class="fas fa-clock text-warning me-2"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold" id="pendingAnalysis">0</h6>
+                                    <p class="text-muted small mb-0" style="font-size: 10px;">Pending</p>
                                 </div>
                             </div>
                         </div>
@@ -187,12 +179,10 @@
                         <!-- Total Agents -->
                         <div class="col-md-2 col-sm-4 col-6 stat-item">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0 bg-secondary bg-opacity-10 p-3 rounded me-3">
-                                    <i class="fas fa-users text-secondary fs-5"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h5 class="mb-0 fw-bold" id="totalAgents">0</h5>
-                                    <small class="text-muted">Total Agents</small>
+                                <i class="fas fa-users text-secondary me-2"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold" id="totalAgents">0</h6>
+                                    <p class="text-muted small mb-0" style="font-size: 10px;">Agents</p>
                                 </div>
                             </div>
                         </div>
@@ -200,12 +190,10 @@
                         <!-- Success Rate -->
                         <div class="col-md-2 col-sm-4 col-6 stat-item">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0 bg-danger bg-opacity-10 p-3 rounded me-3">
-                                    <i class="fas fa-chart-line text-danger fs-5"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h5 class="mb-0 fw-bold" id="successRate">0%</h5>
-                                    <small class="text-muted">Success Rate</small>
+                                <i class="fas fa-star text-danger me-2"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold" id="averageQuality">0%</h6>
+                                    <p class="text-muted small mb-0" style="font-size: 10px;">Quality Score</p>
                                 </div>
                             </div>
                         </div>
@@ -261,27 +249,18 @@
                             </thead>
                             <tbody>
                                 @php
-                                    $totalAgents = 0;
-                                    $totalActiveTasks = 0;
-                                    $totalCompletedTasks = 0;
-                                    $totalPendingAnalysis = 0;
+                                    $totalCompanies = count($companies);
                                 @endphp
                                 @foreach($companies as $company)
                                     @php
-                                        $industries = ['Tech', 'Finance', 'Healthcare', 'Education', 'Logistics'];
-                                        $locations = ['New York', 'San Francisco', 'Chicago', 'Los Angeles', 'Miami'];
-                                        $agents = rand(1, 5);
-                                        $activeTasks = rand(1, 8);
-                                        $completedTasks = rand(5, 25);
-                                        $pendingAnalysis = rand(1, 5);
+                                        $industries = ['Banking & Finance', 'Telecommunications', 'E-commerce', 'Government Services', 'Healthcare Provider', 'Airlines', 'Retail'];
+                                        $locations = ['Amman, Jordan', 'Irbid, Jordan', 'Zarqa, Jordan', 'Aqaba, Jordan', 'Ma\'an, Jordan', 'Salt, Jordan'];
                                         
                                         $industry = $industries[array_rand($industries)];
                                         $location = $locations[array_rand($locations)];
                                         
-                                        $totalAgents += $agents;
-                                        $totalActiveTasks += $activeTasks;
-                                        $totalCompletedTasks += $completedTasks;
-                                        $totalPendingAnalysis += $pendingAnalysis;
+                                        // Determine agent count for this specific company
+                                        $agents = rand(8, 15); // Each company has 8-15 agents
                                     @endphp
                                     <tr>
                                         <td>{{ $company['name'] }}</td>
@@ -458,14 +437,14 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Calculate statistics from actual data
+        // Use actual statistics from controller
         const stats = {
-            totalCompanies: {{ count($companies) }},
-            activeTasks: {{ $totalActiveTasks }},
-            completedTasks: {{ $totalCompletedTasks }},
-            pendingAnalysis: {{ $totalPendingAnalysis }},
-            totalAgents: {{ $totalAgents }},
-            successRate: {{ $totalCompletedTasks > 0 ? round(($totalCompletedTasks / ($totalCompletedTasks + $totalActiveTasks + $totalPendingAnalysis)) * 100) : 0 }}
+            totalCompanies: @json(count($companies)),
+            activeTasks: @json($totalActiveTasks ?? 0),
+            completedTasks: @json($totalCompletedTasks ?? 0),
+            pendingAnalysis: @json($totalPendingAnalysis ?? 0),
+            totalAgents: @json(count($companyAgents)),
+            averageQuality: @json($avgQaScore ?? 0)
         };
 
         // Animate counting up for each statistic
@@ -493,7 +472,7 @@
         animateCounter('completedTasks', stats.completedTasks);
         animateCounter('pendingAnalysis', stats.pendingAnalysis);
         animateCounter('totalAgents', stats.totalAgents);
-        animateCounter('successRate', stats.successRate, '%');
+        animateCounter('averageQuality', stats.averageQuality, '%');
 
         // Make the statistics bar sticky when scrolling
         const stickyBar = document.querySelector('.sticky-top-bar');

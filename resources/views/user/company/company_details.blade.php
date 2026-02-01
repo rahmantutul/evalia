@@ -53,20 +53,43 @@
             background-color: rgba(220, 53, 69, 0.05);
             border-left: 4px solid #dc3545;
         }
-        .top-performer-badge {
-            font-size: 0.7rem;
-            padding: 0.2rem 0.5rem;
-            background-color: #198754;
-            color: white;
-            border-radius: 0.25rem;
-        }
-        .needs-improvement-badge {
-            font-size: 0.7rem;
-            padding: 0.2rem 0.5rem;
-            background-color: #dc3545;
-            color: white;
-            border-radius: 0.25rem;
-        }
+    .top-performer-badge, .high-achiever-badge, .consistent-badge, .needs-improvement-badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 50rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+    .top-performer-badge {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754 !important;
+        border: 1px solid rgba(25, 135, 84, 0.2);
+    }
+    .high-achiever-badge {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd !important;
+        border: 1px solid rgba(13, 110, 253, 0.2);
+    }
+    .consistent-badge {
+        background-color: rgba(13, 202, 240, 0.1);
+        color: #0dcaf0 !important;
+        border: 1px solid rgba(13, 202, 240, 0.2);
+    }
+    .needs-improvement-badge {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545 !important;
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+    .top-performer-badge:hover, .high-achiever-badge:hover, .consistent-badge:hover, .needs-improvement-badge:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        color: inherit !important;
+    }
         .progress-thin {
             height: 8px;
         }
@@ -507,218 +530,74 @@
     // Dummy data generators
     const generateDummyData = {
         kpiData: function(period) {
-            // Calculate calls based on period
             let callsEvaluated;
-            if (period === 7) {
-                callsEvaluated = 12; // Last 7 days
-            } else if (period === 30) {
-                callsEvaluated = 53; // Last 30 days (default)
-            } else {
-                callsEvaluated = 158; // Last quarter (90 days)
-            }
+            if (period === 7) callsEvaluated = 124;
+            else if (period === 30) callsEvaluated = 485;
+            else callsEvaluated = 1240;
             
             return {
-                totalCompanies: 7,
-                avgQualityScore: 89.2,
+                totalGroups: 5,
+                avgQualityScore: 92.4,
                 callsEvaluated: callsEvaluated,
-                avgResponseTime: 12.3
+                avgResponseTime: 8.5
             };
         },
         
         trendData: function(granularity, period) {
-    let labels = [];
-    let data = [];
-    
-    const now = new Date();
-    
-    if (granularity === 'daily') {
-        const days = period === 7 ? 7 : 30;
-        for (let i = days; i >= 1; i--) {
-            const date = new Date();
-            date.setDate(now.getDate() - i);
+            let labels = [];
+            let data = [];
+            const now = new Date();
             
-            // Show day name for recent dates, full date for older ones
-            if (i <= 7) {
-                labels.push(date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
+            if (granularity === 'daily') {
+                const days = period === 7 ? 7 : 30;
+                for (let i = days; i >= 1; i--) {
+                    const date = new Date();
+                    date.setDate(now.getDate() - i);
+                    labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                    data.push(85 + Math.random() * 10);
+                }
+            } else if (granularity === 'weekly') {
+                const weeks = period === 90 ? 12 : 4;
+                for (let i = weeks; i >= 1; i--) {
+                    labels.push(`Week ${weeks - i + 1}`);
+                    data.push(88 + Math.random() * 8);
+                }
             } else {
-                labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                for (let i = 5; i >= 0; i--) {
+                    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    labels.push(date.toLocaleDateString('en-US', { month: 'long' }));
+                    data.push(90 + Math.random() * 5);
+                }
             }
-            data.push(80 + Math.random() * 15);
-        }
-    } else if (granularity === 'weekly') {
-        const weeks = period === 7 ? 1 : period === 30 ? 4 : 12;
-        for (let i = weeks; i >= 1; i--) {
-            const date = new Date();
-            date.setDate(now.getDate() - (i * 7));
-            
-            const weekStart = new Date(date);
-            weekStart.setDate(date.getDate() - date.getDay());
-            
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekStart.getDate() + 6);
-            
-            // Format based on whether weeks span different months
-            if (weekStart.getMonth() === weekEnd.getMonth()) {
-                labels.push(`${weekStart.toLocaleDateString('en-US', { month: 'short' })} ${weekStart.getDate()}-${weekEnd.getDate()}`);
-            } else {
-                labels.push(`${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
-            }
-            data.push(80 + Math.random() * 15);
-        }
-    } else {
-        // Monthly granularity
-        const months = period === 90 ? 3 : 6;
-        for (let i = months; i >= 1; i--) {
-            const date = new Date();
-            date.setMonth(now.getMonth() - i);
-            
-            // Include year if it's different from current year
-            const showYear = date.getFullYear() !== now.getFullYear();
-            labels.push(date.toLocaleDateString('en-US', { 
-                month: 'long', 
-                year: showYear ? 'numeric' : undefined 
-            }));
-            data.push(80 + Math.random() * 15);
-        }
-    }
-    
-    return { labels, data };
-},
+            return { labels, data };
+        },
         
         sentimentData: function() {
-            return {
-                positive: 72.5,
-                neutral: 18.3,
-                negative: 9.2
-            };
+            return { positive: 78, neutral: 15, negative: 7 };
         },
         
-        companyPerformance: function(sortBy, period) {
-            // Calculate total calls based on period
-            let totalCalls;
-            if (period === 7) {
-                totalCalls = 12;
-            } else if (period === 30) {
-                totalCalls = 53;
-            } else {
-                totalCalls = 158;
-            }
-            
-            // Distribute calls between 7 companies
-            const companyCalls = this.distributeCalls(totalCalls, 7);
-            
-            const companies = [
-                { name: "TechCorp Inc.", id: "hassan", score: 94.2, trend: 3.2, calls: companyCalls[0] },
-                { name: "Global Solutions", id: "hassan", score: 89.5, trend: 1.1, calls: companyCalls[1] },
-                { name: "Innovate LLC", id: "hassan", score: 87.8, trend: 0.0, calls: companyCalls[2] },
-                { name: "DataSystems", id: "hassan", score: 76.4, trend: -2.4, calls: companyCalls[3] },
-                { name: "FutureTech", id: "hassan", score: 91.2, trend: 2.1, calls: companyCalls[4] },
-                { name: "CloudMasters", id: "hassan", score: 83.7, trend: -1.2, calls: companyCalls[5] },
-                { name: "NextGen Corp", id: "hassan", score: 88.9, trend: 1.5, calls: companyCalls[6] }
+        departmentPerformance: function(sortBy) {
+            const depts = [
+                { name: "Amman Call Center", score: 94, trend: 2.1, calls: 150 },
+                { name: "Technical Support", score: 89, trend: 1.5, calls: 95 },
+                { name: "Tele-Sales", score: 87, trend: -0.5, calls: 120 },
+                { name: "Complaints & Feedback", score: 91, trend: 0.8, calls: 65 },
+                { name: "Customer Relations", score: 93, trend: 1.2, calls: 55 }
             ];
-            
-            // Sort based on selection
-            if (sortBy === 'score') {
-                companies.sort((a, b) => b.score - a.score);
-            } else if (sortBy === 'volume') {
-                companies.sort((a, b) => b.calls - a.calls);
-            } else if (sortBy === 'improvement') {
-                companies.sort((a, b) => b.trend - a.trend);
-            }
-            
-            return companies;
+            return depts.sort((a, b) => b.score - a.score);
         },
         
-        agentPerformance: function(sortBy, period) {
-            // Calculate total calls based on period
-            let totalCalls;
-            if (period === 7) {
-                totalCalls = 12;
-            } else if (period === 30) {
-                totalCalls = 53;
-            } else {
-                totalCalls = 158;
-            }
-            
-            // Distribute calls between agents
-            const agentCalls = this.distributeCalls(totalCalls, 5);
-            
+        agentPerformance: function(sortBy) {
             const agents = [
-                { 
-                    name: "Sarah Lee", 
-                    company: "TechCorp Inc.", 
-                    score: 97.4, 
-                    trend: 4.2, 
-                    calls: agentCalls[0],
-                    avatar: "https://ui-avatars.com/api/?name=Sarah+Lee&background=10B981&color=fff"
-                },
-                { 
-                    name: "Michael Chen", 
-                    company: "Global Solutions", 
-                    score: 93.1, 
-                    trend: 1.8, 
-                    calls: agentCalls[1],
-                    avatar: "https://ui-avatars.com/api/?name=Michael+Chen&background=4F46E5&color=fff"
-                },
-                { 
-                    name: "David Kim", 
-                    company: "DataSystems", 
-                    score: 72.5, 
-                    trend: -3.1, 
-                    calls: agentCalls[2],
-                    avatar: "https://ui-avatars.com/api/?name=David+Kim&background=EF4444&color=fff"
-                },
-                { 
-                    name: "Emma Wilson", 
-                    company: "FutureTech", 
-                    score: 95.2, 
-                    trend: 2.8, 
-                    calls: agentCalls[3],
-                    avatar: "https://ui-avatars.com/api/?name=Emma+Wilson&background=8B5CF6&color=fff"
-                },
-                { 
-                    name: "James Brown", 
-                    company: "CloudMasters", 
-                    score: 88.3, 
-                    trend: -0.5, 
-                    calls: agentCalls[4],
-                    avatar: "https://ui-avatars.com/api/?name=James+Brown&background=F59E0B&color=fff"
-                }
+                { name: "نادي البديري", company: "مركز الاتصال", score: 92.3, trend: 1.5, calls: 5, avatar: "https://ui-avatars.com/api/?name=Nadi+Albidiri&background=0d6efd&color=fff" },
+                { name: "سارة الخطيب", company: "الدعم الفني", score: 89.1, trend: 2.0, calls: 4, avatar: "https://ui-avatars.com/api/?name=Sara+Khatib&background=198754&color=fff" },
+                { name: "محمود المصري", company: "المبيعات", score: 87.5, trend: -1.2, calls: 4, avatar: "https://ui-avatars.com/api/?name=Mahmoud+Masri&background=ffc107&color=fff" },
+                { name: "ليلى حسن", company: "علاقات العملاء", score: 84.2, trend: 0.5, calls: 3, avatar: "https://ui-avatars.com/api/?name=Layla+Hassan&background=0dcaf0&color=fff" },
+                { name: "أحمد منصور", company: "الشكاوى", score: 78.4, trend: -3.5, calls: 3, avatar: "https://ui-avatars.com/api/?name=Ahmed+Mansour&background=dc3545&color=fff" }
             ];
-            
-            // Sort based on selection
-            if (sortBy === 'top') {
-                agents.sort((a, b) => b.score - a.score);
-                return agents.slice(0, 3);
-            } else if (sortBy === 'needs-improvement') {
-                agents.sort((a, b) => a.score - b.score);
-                return agents.slice(0, 3);
-            } else {
-                agents.sort((a, b) => b.score - a.score);
-                return agents;
-            }
-        },
-        
-        // Helper function to distribute calls between entities
-        distributeCalls: function(totalCalls, numberOfEntities) {
-            const calls = [];
-            let remainingCalls = totalCalls;
-            
-            // Distribute calls with some variation
-            for (let i = 0; i < numberOfEntities - 1; i++) {
-                // Allocate between 10% and 25% of remaining calls
-                const maxAllocation = Math.min(Math.floor(remainingCalls * 0.25), Math.floor(remainingCalls / (numberOfEntities - i)));
-                const minAllocation = Math.max(1, Math.floor(remainingCalls * 0.1));
-                
-                const allocated = Math.floor(Math.random() * (maxAllocation - minAllocation + 1)) + minAllocation;
-                calls.push(allocated);
-                remainingCalls -= allocated;
-            }
-            
-            // Add remaining calls to the last entity
-            calls.push(remainingCalls);
-            
-            return calls;
+            if (sortBy === 'top') return agents.sort((a, b) => b.score - a.score).slice(0, 3);
+            if (sortBy === 'needs-improvement') return agents.sort((a, b) => a.score - b.score).slice(0, 3);
+            return agents.sort((a, b) => b.score - a.score);
         }
     };
 
@@ -740,7 +619,6 @@
 
     // Set up event listeners
     function setupEventListeners() {
-        // Period filter
         document.querySelectorAll('.period-filter').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -752,7 +630,6 @@
             });
         });
 
-        // Granularity buttons
         document.querySelectorAll('.btn-period').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
@@ -762,18 +639,6 @@
             });
         });
 
-        // Company sort
-        document.querySelectorAll('.company-sort').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelectorAll('.company-sort').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-                currentCompanySort = this.getAttribute('data-sort');
-                updateCompanyTable();
-            });
-        });
-
-        // Agent sort
         document.querySelectorAll('.agent-sort').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -784,7 +649,6 @@
             });
         });
 
-        // Export button
         document.getElementById('exportBtn').addEventListener('click', exportDashboardData);
     }
 
@@ -807,12 +671,12 @@
                     <div class="card-body p-3">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <p class="text-muted mb-1">Total Companies</p>
-                                <h3 class="metric-value mb-1">${kpiData.totalCompanies}</h3>
-                                <small class="text-muted">+${Math.floor(Math.random() * 5)} from last month</small>
+                                <p class="text-muted mb-1">Total Departments</p>
+                                <h3 class="metric-value mb-1">${kpiData.totalGroups}</h3>
+                                <small class="text-muted">Active units</small>
                             </div>
                             <div class="icon-circle bg-soft-primary">
-                                <i class="fas fa-building text-primary"></i>
+                                <i class="fas fa-th-large text-primary"></i>
                             </div>
                         </div>
                     </div>
@@ -824,7 +688,7 @@
                     <div class="card-body p-3">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <p class="text-muted mb-1">Avg. Quality Score</p>
+                                <p class="text-muted mb-1">Quality Score</p>
                                 <h3 class="metric-value mb-1">${kpiData.avgQualityScore.toFixed(1)}%</h3>
                                 <small class="trend-up"><i class="fas fa-arrow-up me-1"></i> ${(Math.random() * 3).toFixed(1)}% improvement</small>
                             </div>
@@ -841,7 +705,7 @@
                     <div class="card-body p-3">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <p class="text-muted mb-1">Calls Evaluated</p>
+                                <p class="text-muted mb-1">Evaluated Calls</p>
                                 <h3 class="metric-value mb-1">${kpiData.callsEvaluated}</h3>
                                 <small class="text-muted"><i class="fas fa-arrow-up text-success me-1"></i> ${Math.floor(Math.random() * 100)} this week</small>
                             </div>
@@ -860,7 +724,7 @@
                             <div>
                                 <p class="text-muted mb-1">Avg. Response Time</p>
                                 <h3 class="metric-value mb-1">${kpiData.avgResponseTime.toFixed(1)}s</h3>
-                                <small class="trend-down"><i class="fas fa-arrow-down me-1"></i> ${(Math.random() * 2).toFixed(1)}s faster</small>
+                                <small class="trend-down"><i class="fas fa-arrow-down me-1"></i> ${(Math.random() * 1).toFixed(1)}s faster</small>
                             </div>
                             <div class="icon-circle bg-soft-warning">
                                 <i class="fas fa-stopwatch text-warning"></i>
@@ -902,27 +766,19 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    }
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false }
                 },
                 scales: {
                     y: {
                         beginAtZero: false,
                         min: 70,
                         max: 100,
-                        grid: {
-                            drawBorder: false
-                        }
+                        grid: { drawBorder: false }
                     },
                     x: {
-                        grid: {
-                            display: false
-                        }
+                        grid: { display: false },
+                        ticks: { font: { family: 'Inter' } }
                     }
                 }
             }
@@ -963,42 +819,19 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: { font: { family: 'Inter' } }
                     }
                 },
                 cutout: '70%'
             }
         });
         
-        // Update sentiment badges
         document.getElementById('sentimentBadges').innerHTML = `
             <span class="sentiment-badge bg-success bg-opacity-10 text-success">${sentimentData.positive}% Positive</span>
             <span class="sentiment-badge bg-warning bg-opacity-10 text-warning">${sentimentData.neutral}% Neutral</span>
             <span class="sentiment-badge bg-danger bg-opacity-10 text-danger">${sentimentData.negative}% Negative</span>
         `;
-    }
-
-    // Update company table
-    function updateCompanyTable() {
-        const companies = generateDummyData.companyPerformance(currentCompanySort);
-        const tableBody = document.querySelector('#companyTable tbody');
-        
-        let html = '';
-        companies.forEach(company => {
-            const trendClass = company.trend > 0 ? 'trend-up' : (company.trend < 0 ? 'trend-down' : 'trend-neutral');
-            const trendIcon = company.trend > 0 ? 'fa-arrow-up' : (company.trend < 0 ? 'fa-arrow-down' : 'fa-minus');
-            
-            html += `
-                <tr>
-                    <td class="ps-4"><strong>${company.name}</strong></td>
-                    <td><span class="fw-bold">${company.score}%</span></td>
-                    <td><span class="${trendClass}"><i class="fas ${trendIcon} me-1"></i> ${Math.abs(company.trend)}%</span></td>
-                    <td class="pe-4">${company.calls}</td>
-                </tr>
-            `;
-        });
-        
-        tableBody.innerHTML = html;
     }
 
     // Update agent performance
@@ -1007,23 +840,33 @@
         const agentContainer = document.getElementById('agentPerformance');
         
         let html = '';
-        
         agents.forEach(agent => {
-            const isTopPerformer = agent.score >= 90;
-            const isLowPerformer = agent.score < 75;
             const trendClass = agent.trend > 0 ? 'trend-up' : (agent.trend < 0 ? 'trend-down' : 'trend-neutral');
-            const scoreClass = isTopPerformer ? 'text-success' : (isLowPerformer ? 'text-danger' : '');
             
+            let badgeHtml = '';
+            if (agent.score >= 90) {
+                badgeHtml = `<a href="{{ route('user.performance_badges') }}" class="top-performer-badge ms-2"><i class="fas fa-trophy me-1"></i> Top Performer</a>`;
+            } else if (agent.score >= 80) {
+                badgeHtml = `<a href="{{ route('user.performance_badges') }}" class="high-achiever-badge ms-2"><i class="fas fa-medal me-1"></i> High Achiever</a>`;
+            } else if (agent.score >= 70) {
+                badgeHtml = `<a href="{{ route('user.performance_badges') }}" class="consistent-badge ms-2"><i class="fas fa-star me-1"></i> Consistent</a>`;
+            } else {
+                badgeHtml = `<a href="{{ route('user.performance_badges') }}" class="needs-improvement-badge ms-2"><i class="fas fa-graduation-cap me-1"></i> Needs Coaching</a>`;
+            }
+
             html += `
-                <div class="agent-card ${isTopPerformer ? 'top-agent' : ''} ${isLowPerformer ? 'low-agent' : ''}">
+                <div class="agent-card ${agent.score >= 90 ? 'top-agent' : ''} ${agent.score < 75 ? 'low-agent' : ''} shadow-sm border-0 mb-3">
                     <div class="d-flex align-items-center">
-                        <img src="${agent.avatar}" class="avatar-sm me-3">
+                        <img src="${agent.avatar}" class="avatar-sm me-3 border shadow-sm">
                         <div class="flex-grow-1">
-                            <h6 class="mb-0">${agent.name} ${isTopPerformer ? '<span class="top-performer-badge ms-2">Top Performer</span>' : ''} ${isLowPerformer ? '<span class="needs-improvement-badge ms-2">Needs Coaching</span>' : ''}</h6>
+                            <h6 class="mb-0 fw-bold d-flex align-items-center">
+                                <a style="color: #000;" href="{{ route('user.agents.index') }}"> ${agent.name}</a> 
+                                ${badgeHtml}
+                            </h6>
                             <small class="text-muted">${agent.company} • ${agent.calls} calls</small>
                         </div>
                         <div class="text-end">
-                            <h5 class="mb-0 ${scoreClass}">${agent.score}%</h5>
+                            <h5 class="mb-0 ${agent.score >= 90 ? 'text-success' : (agent.score < 75 ? 'text-danger' : '')} fw-bold">${agent.score}%</h5>
                             <small class="${trendClass}">${agent.trend > 0 ? '+' : ''}${agent.trend}%</small>
                         </div>
                     </div>
@@ -1031,90 +874,50 @@
             `;
         });
         
-        // Add performance distribution
         html += `
-            <div class="mt-4">
+            <div class="mt-4 p-3 bg-light rounded-4">
                 <div class="d-flex justify-content-between mb-2">
-                    <small class="text-muted">Performance Distribution</small>
+                    <small class="text-muted fw-bold">Performance Distribution</small>
                     <small class="text-muted">${agents.length} agents</small>
                 </div>
-                <div class="progress progress-thin">
-                    <div class="progress-bar bg-success" style="width: 20%"></div>
-                    <div class="progress-bar bg-primary" style="width: 60%"></div>
+                <div class="progress progress-thin" style="height: 10px;">
+                    <div class="progress-bar bg-success" style="width: 25%"></div>
+                    <div class="progress-bar bg-primary" style="width: 55%"></div>
                     <div class="progress-bar bg-warning" style="width: 15%"></div>
                     <div class="progress-bar bg-danger" style="width: 5%"></div>
                 </div>
-                <div class="d-flex justify-content-between mt-2">
-                    <small class="text-success">Top 20%</small>
-                    <small class="text-primary">Mid 60%</small>
-                    <small class="text-warning">Low 15%</small>
-                    <small class="text-danger">Bottom 5%</small>
+                <div class="d-flex justify-content-between mt-2 flex-wrap text-muted small">
+                    <span><i class="fas fa-circle text-success me-1 small"></i> Exceptional (25%)</span>
+                    <span><i class="fas fa-circle text-primary me-1 small"></i> High (55%)</span>
+                    <span><i class="fas fa-circle text-warning me-1 small"></i> Average (15%)</span>
+                    <span><i class="fas fa-circle text-danger me-1 small"></i> Poor (5%)</span>
                 </div>
             </div>
         `;
-        
         agentContainer.innerHTML = html;
     }
 
     // Export dashboard data to Excel
     function exportDashboardData() {
-        // Prepare data for export
         const kpiData = generateDummyData.kpiData(currentPeriod);
         const trendData = generateDummyData.trendData(currentGranularity, currentPeriod);
-        const sentimentData = generateDummyData.sentimentData();
-        const companies = generateDummyData.companyPerformance(currentCompanySort);
         const agents = generateDummyData.agentPerformance(currentAgentSort);
         
-        // Create workbook
         const wb = XLSX.utils.book_new();
-        
-        // Add KPIs sheet
         const kpiSheetData = [
-            ['Metric', 'Value', 'Trend'],
-            ['Total Companies', kpiData.totalCompanies, `+${Math.floor(Math.random() * 5)} from last month`],
-            ['Average Quality Score', `${kpiData.avgQualityScore.toFixed(1)}%`, `${(Math.random() * 3).toFixed(1)}% improvement`],
-            ['Calls Evaluated', kpiData.callsEvaluated, `${Math.floor(Math.random() * 100)} this week`],
-            ['Average Response Time', `${kpiData.avgResponseTime.toFixed(1)}s`, `${(Math.random() * 2).toFixed(1)}s faster`]
+            ['Metric', 'Value', 'Context'],
+            ['Total Departments', kpiData.totalGroups, 'Internal Units'],
+            ['Average Quality Score', `${kpiData.avgQualityScore}%`, 'Improvement shown'],
+            ['Calls Evaluated', kpiData.callsEvaluated, 'Processed audio'],
+            ['Average Response Time', `${kpiData.avgResponseTime}s`, 'System average']
         ];
-        const kpiSheet = XLSX.utils.aoa_to_sheet(kpiSheetData);
-        XLSX.utils.book_append_sheet(wb, kpiSheet, 'KPIs');
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(kpiSheetData), 'KPIs');
         
-        // Add trend data sheet
-        const trendSheetData = [['Period', 'Quality Score']];
-        trendData.labels.forEach((label, index) => {
-            trendSheetData.push([label, trendData.data[index]]);
-        });
-        const trendSheet = XLSX.utils.aoa_to_sheet(trendSheetData);
-        XLSX.utils.book_append_sheet(wb, trendSheet, 'Quality Trend');
+        const agentSheetData = [['Agent', 'Category', 'Score', 'Trend', 'Calls']];
+        agents.forEach(agent => agentSheetData.push([agent.name, agent.company, `${agent.score}%`, `${agent.trend}%`, agent.calls]));
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(agentSheetData), 'Agent Performance');
         
-        // Add sentiment data sheet
-        const sentimentSheetData = [
-            ['Sentiment', 'Percentage'],
-            ['Positive', `${sentimentData.positive}%`],
-            ['Neutral', `${sentimentData.neutral}%`],
-            ['Negative', `${sentimentData.negative}%`]
-        ];
-        const sentimentSheet = XLSX.utils.aoa_to_sheet(sentimentSheetData);
-        XLSX.utils.book_append_sheet(wb, sentimentSheet, 'Sentiment Analysis');
-        
-        // Add company performance sheet
-        const companySheetData = [['Company', 'Score', 'Trend', 'Calls']];
-        companies.forEach(company => {
-            companySheetData.push([company.name, `${company.score}%`, `${company.trend > 0 ? '+' : ''}${company.trend}%`, company.calls]);
-        });
-        const companySheet = XLSX.utils.aoa_to_sheet(companySheetData);
-        XLSX.utils.book_append_sheet(wb, companySheet, 'Company Performance');
-        
-        // Add agent performance sheet
-        const agentSheetData = [['Agent', 'Company', 'Score', 'Trend', 'Calls']];
-        agents.forEach(agent => {
-            agentSheetData.push([agent.name, agent.company, `${agent.score}%`, `${agent.trend > 0 ? '+' : ''}${agent.trend}%`, agent.calls]);
-        });
-        const agentSheet = XLSX.utils.aoa_to_sheet(agentSheetData);
-        XLSX.utils.book_append_sheet(wb, agentSheet, 'Agent Performance');
-        
-        // Export the workbook
-        const fileName = `Quality_Dashboard_Export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        const fileName = `${document.querySelector('h4').textContent.trim()}_Export_${new Date().toISOString().slice(0, 10)}.xlsx`;
         XLSX.writeFile(wb, fileName);
     }
 </script>

@@ -5,8 +5,8 @@
                 <img src="{{ asset('/') }}assets/images/preview.png" alt="logo-small" class="logo-sm mx-auto">
             </span>
             <span>
-                <img src="{{ asset('/') }}assets/images/PNG-BLACK-BUJbO_jP.png" height="100" alt="logo-large" class="logo-lg logo-light mx-auto">
-                <img src="{{ asset('/') }}assets/images/PNG-BLACK-BUJbO_jP.png" height="100" alt="logo-large" class="logo-lg logo-dark mx-auto">
+                <img src="{{ asset('/') }}assets/images/logo.png" height="100" alt="logo-large" class="logo-lg logo-light mx-auto">
+                <img src="{{ asset('/') }}assets/images/logo.png" height="100" alt="logo-large" class="logo-lg logo-dark mx-auto">
             </span>
         </a>
     </div>
