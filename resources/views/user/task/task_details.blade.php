@@ -270,8 +270,11 @@
                                     <span>{{ ucfirst($data['agent_professionalism']['speech_characteristics']['volume']['loudness_class'] ?? '') }}
                                         Volume</span>
                                     <div class="progress-bar">
+                                        @php
+                                            $volPercent = $data['agent_professionalism']['speech_characteristics']['volume']['optimal_loudness_percentage'] ?? 0;
+                                        @endphp
                                         <div class="progress"
-                                            style="width: {{ $data['agent_professionalism']['speech_characteristics']['volume']['optimal_loudness_percentage'] ?? 0 }}%">
+                                            style="width: {{ $volPercent }}%">
                                         </div>
                                     </div>
                                 </div>
@@ -992,8 +995,8 @@
 
                                                     @forelse($allDelays as $delay)
                                                         @php
-                                                            $context = 'No context available';
-                                                            if (isset($data['speakers_transcriptions'])) {
+                                                            $context = $delay['context'] ?? 'No context available';
+                                                            if ($context == 'No context available' && isset($data['speakers_transcriptions'])) {
                                                                 foreach (
                                                                     $data['speakers_transcriptions']
                                                                     as $transcript
@@ -1414,7 +1417,7 @@
                 data: {
                     labels: ['Positive', 'Neutral', 'Negative'],
                     datasets: [{
-                        data: [{{ $positivePercent }}, {{ $neutralPercent }}, {{ $negativePercent }}],
+                        data: [@json($positivePercent), @json($neutralPercent), @json($negativePercent)],
                         backgroundColor: chartColors.sentiment,
                         borderWidth: 0,
                         hoverOffset: 15
@@ -1443,7 +1446,7 @@
                     labels: ['Agent', 'Customer'],
                     datasets: [{
                         label: 'Words per Minute',
-                        data: [{{ $agentPace }}, {{ $customerPace }}],
+                        data: [@json($agentPace), @json($customerPace)],
                         backgroundColor: chartColors.speechRate,
                         borderWidth: 0,
                         borderRadius: 6,
@@ -1477,7 +1480,7 @@
                 data: {
                     labels: ['Low', 'Optimal', 'High'],
                     datasets: [{
-                        data: [{{ $lowLoudness }}, {{ $optimalLoudness }}, {{ $highLoudness }}],
+                        data: [@json($lowLoudness), @json($optimalLoudness), @json($highLoudness)],
                         backgroundColor: chartColors.loudness,
                         borderWidth: 0,
                         hoverOffset: 15
@@ -1518,14 +1521,14 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('evaluationChart').getContext('2d');
-            const total = {{ $total }};
-            const labels = {!! json_encode($evaluationTypes) !!};
-            const dataValues = {!! json_encode(array_values($evaluationCounts)) !!};
+            const total = @json($total);
+            const labels = @json($evaluationTypes);
+            const dataValues = @json(array_values($evaluationCounts));
 
             // Create gradient colors dynamically
             const gradientColors = labels.map((_, index) => {
                 const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-                const colors = {!! json_encode($gradients) !!};
+                const colors = @json($gradients);
                 gradient.addColorStop(0, colors[index % colors.length][0]);
                 gradient.addColorStop(1, colors[index % colors.length][1]);
                 return gradient;

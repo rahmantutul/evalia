@@ -224,20 +224,29 @@ class TaskController extends Controller
     private function getRealArabicData()
     {
         return [
-            'customer_agent_audio_s3_url' => asset('assets/call center calls sample/Hamsa--Transcript-Job-Details.mp3'),
+            'customer_agent_audio_s3_url' => asset('assets/Transcript-Job-Details.mp3'),
             'pause_delay_information' => [
                 'talking_duration' => [
-                    'agent' => '02:15',
-                    'customer' => '01:30'
+                    'agent' => '02:00',
+                    'customer' => '01:10'
                 ],
                 'speaker_delay_duration' => [
                     'agent' => [
-                        ['duration' => '0.8s', 'time' => '00:06', 'context' => 'After greeting'],
-                        ['duration' => '1.2s', 'time' => '00:27', 'context' => 'Before clarifying installment']
+                        ['delay_duration' => '0.8s', 'delay_start' => '00:06', 'delay_end' => '00:07', 'context' => 'Hesitation before protocol-based identity verification'],
+                        ['delay_duration' => '1.2s', 'delay_start' => '00:27', 'delay_end' => '00:28', 'context' => 'Processing the specific inquiry about Self-Employed (الشمول الحر) installments']
                     ],
                     'customer' => [
-                        ['duration' => '0.5s', 'time' => '00:11', 'context' => 'Before giving name'],
-                        ['duration' => '1.5s', 'time' => '03:05', 'context' => 'Before asking about phone number']
+                        ['delay_duration' => '0.5s', 'delay_start' => '00:11', 'delay_end' => '00:12', 'context' => 'Pause before providing full name (محمود المصري)'],
+                        ['delay_duration' => '1.5s', 'delay_start' => '03:05', 'delay_end' => '03:07', 'context' => 'Slight confusion regarding phone number visibility on system']
+                    ]
+                ],
+                'speaker_pause_duration' => [
+                    'agent' => [
+                        ['pause_duration' => '4.2s', 'pause_start' => '01:15', 'pause_end' => '01:20', 'pause_class' => 'Querying Social Security database for installment eligibility'],
+                        ['pause_duration' => '3.5s', 'pause_start' => '02:10', 'pause_end' => '02:14', 'pause_class' => 'Verifying manual for Self-Employed (الشمول الحر) coverage rules']
+                    ],
+                    'customer' => [
+                        ['pause_duration' => '2.0s', 'pause_start' => '00:45', 'pause_end' => '00:47', 'pause_class' => 'Thinking about the requested installment period']
                     ]
                 ]
             ],
@@ -364,7 +373,7 @@ class TaskController extends Controller
                 ]
             ],
             'transcription_summaries' => [
-                'detail' => 'Customer Mahmoud Al-Masri called to inquire about installment plans for the Self-Employed (شمول حر) social security coverage. The agent, Nadi, was polite and professional. Since data on installments for this specific category was not immediately available, the agent proactively offered to submit a formal inquiry and promised a callback within 24 hours. The customer agreed, verified his details, and ended the call satisfied.'
+                'detail' => 'اتصل العميل محمود المصري للاستفسار عن إمكانية تقسيط مبالغ الضمان الاجتماعي الخاصة بفئة "الشمول الحر". تعامل الموظف نادي بمهنية عالية وأوضح أن المعلومات الخاصة بالتقسيط لهذه الفئة تحديداً غير متوفرة بشكل فوري في النظام. قام الموظف كإجراء استباقي باقتراح رفع استفسار خطي رسمي للدائرة المختصة في الضمان الاجتماعي ووعد العميل بمعاودة الاتصال به خلال 24 ساعة لتزويده بالرد النهائي. أبدى العميل موافقته الكاملة، وتم خلال المكالمة التحقق من بيانات العميل (محمود عبد الله محمود) وتأكيد رقم هاتفه، وانتهت المكالمة برضا العميل عن الحل المقترح.'
             ],
             'topics' => [
                 'main' => ['تقسيط الضمان الاجتماعي'],
@@ -424,22 +433,48 @@ class TaskController extends Controller
             'customer_speakers_transcriptions' => array_fill(0, 12, ['sentiment' => 'Neutral']),
             'analysis_alignment_result_notebook' => [
                 [
-                    'question' => 'هل قام الموظف بتحية العميل بشكل احترافي؟',
+                    'question' => 'هل قام الموظف بتحسين تجربة العميل من خلال تحية احترافية؟',
+                    'answer' => 'نعم، قام الموظف بالتعريف بنفسه وبالجهة الحكومية فوراً.',
                     'evaluation' => 'Pass',
                     'confidence_level' => 'high',
-                    'evidence' => 'معك نادي من الضمان الاجتماعي كيف ممكن أساعد؟'
+                    'evidence' => 'معك نادي من الضمان الاجتماعي كيف ممكن أساعد؟',
+                    'KBtext' => 'يجب على الموظف بدء المكالمة بذكر الاسم والجهة الرسمية بوضوح (سياسة الجودة - القسم الأول).',
+                    'matching_transcript_sections' => ['00:02 - 00:06'],
+                    'notebook_name' => 'معايير جودة المكالمات الحكومية',
+                    'matching_topics' => ['البروتوكول الرسمي', 'التحية الفورية']
                 ],
                 [
-                    'question' => 'هل قام الموظف بالتحقق من هوية العميل؟',
+                    'question' => 'هل تم التحقق من هوية العميل والبيانات الشخصية بدقة؟',
+                    'answer' => 'نعم، تم استخراج الاسم الرباعي وتأكيد رقم الهاتف المسجل.',
                     'evaluation' => 'Pass',
                     'confidence_level' => 'high',
-                    'evidence' => 'أتشرف باسم حضرتك... محمود عبد الله محمود'
+                    'evidence' => 'أتشرف باسم حضرتك... محمود عبد الله محمود... آخره 095',
+                    'KBtext' => 'يتوجب التحقق من هويتين على الأقل (الاسم الرباعي ورقم الهاتف) قبل تقديم أي معلومة تخص الاشتراكات.',
+                    'matching_transcript_sections' => ['00:08 - 03:15'],
+                    'notebook_name' => 'أمن البيانات والخصوصية',
+                    'matching_topics' => ['التحقق من الهوية']
                 ],
                 [
-                    'question' => 'هل تم حل المشكلة أو تصعيدها بشكل صحيح؟',
+                    'question' => 'هل التزم الموظف بدليل سياسات "الشمول الحر" بخصوص التقسيط؟',
+                    'answer' => 'نعم، الموظف لم يعط معلومة مغلوطة لعدم التأكد، بل قام بالتصعيد الصحيح.',
                     'evaluation' => 'Pass',
                     'confidence_level' => 'high',
-                    'evidence' => 'برفع لحضرتك استفسار للضمان الاجتماعي'
+                    'evidence' => 'برفع لحضرتك استفسار للضمان الاجتماعي لأنه ما تمتزلنا لحد الآن معلومة',
+                    'KBtext' => 'برامج التقسيط لفئة الشمول الحر تتطلب دراسة حالة فردية عبر نظام الاستفسارات الموحد (دليل الاشتراكات - البند 42).',
+                    'matching_transcript_sections' => ['02:35 - 02:48'],
+                    'notebook_name' => 'دليل اشتراكات الشمول الحر',
+                    'matching_topics' => ['السياسات المالية', 'برامج التقسيط']
+                ],
+                [
+                    'question' => 'هل قدم الموظف حلولاً استباقية عند عدم توفر المعلومة؟',
+                    'answer' => 'نعم، اقترح رفع استفسار وتحديد مهلة زمنية للرد (24 ساعة).',
+                    'evaluation' => 'Pass',
+                    'confidence_level' => 'high',
+                    'evidence' => 'خلال 24 ساعة إن شاء الله بيتم التواصل مع حضرتك',
+                    'KBtext' => 'في حال عدم توفر المعلومة فورياً، يجب تقديم بديل ملموس (مثل رفع طلب متابعة) وتحديد وقت متوقع للرد.',
+                    'matching_transcript_sections' => ['02:55 - 03:05'],
+                    'notebook_name' => 'بروتوكول حل المشكلات',
+                    'matching_topics' => ['الحلول الاستباقية', 'إدارة التوقعات']
                 ]
             ]
         ];
