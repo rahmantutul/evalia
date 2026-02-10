@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" data-startbar="light" data-bs-theme="light">
+ <html lang="en" dir="ltr" data-startbar="light" data-bs-theme="light">
 
 <head>
     <meta charset="utf-8" />
@@ -70,7 +70,7 @@
             Swal.fire({
                 icon: 'success',
                 title: 'Success!',
-                text: @json(session('success')),
+                text: {!! json_encode(session('success')) !!},
                 timer: 3000,
                 showConfirmButton: false,
                 toast: true,
@@ -84,7 +84,7 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',
-                text: @json(session('error')),
+                text: {!! json_encode(session('error')) !!},
                 timer: 4000,
                 showConfirmButton: true,
                 position: 'center'
@@ -143,6 +143,46 @@
                 event.reason.message.includes('Failed to fetch'))) {
                 event.preventDefault();
                 window.location.href = '{{ route("login") }}?session_expired=1';
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('submit', function(e) {
+            // Allow search/filter forms (typically GET) to proceed
+            if (e.target.method.toLowerCase() === 'get') {
+                return;
+            }
+
+            // Block other submissions (POST/PUT/DELETE) for demo account
+            e.preventDefault();
+            Swal.fire({
+                icon: 'info',
+                title: 'Demo Account',
+                text: 'This is a Demo account. Please contact the administrator for a live testing account.',
+                confirmButtonColor: '#0a66c2',
+                confirmButtonText: 'I Understand'
+            });
+        });
+
+        // Also keep the button click handler for cases where buttons aren't inside formal <form> tags
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('button');
+            if (btn && !btn.closest('form') && (
+                btn.innerText.toLowerCase().includes('save') || 
+                btn.innerText.toLowerCase().includes('register') || 
+                btn.innerText.toLowerCase().includes('update') ||
+                btn.classList.contains('btn-primary')
+            )) {
+                if (btn.dataset.bsToggle === 'modal') return; // Don't block modal triggers
+                
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Demo Account',
+                    text: 'This is a Demo account. Please contact the administrator for a live testing account.',
+                    confirmButtonColor: '#0a66c2',
+                    confirmButtonText: 'I Understand'
+                });
             }
         });
     </script>

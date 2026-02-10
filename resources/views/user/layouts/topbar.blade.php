@@ -26,18 +26,6 @@
                         <span class="product-name">Audio Analysis</span>
                     </button>
                 </li>
-                <li class="ms-2">
-                    <button class="product-btn {{ session('active_product') == 2 ? 'active' : '' }}" data-product="2">
-                        <span class="product-icon">🎙️</span>
-                        <span class="product-name">Voice Agent</span>
-                    </button>
-                </li>
-                <li class="ms-2">
-                    <button class="product-btn {{ session('active_product') == 3 ? 'active' : '' }}" data-product="3">
-                        <span class="product-icon">💬</span>
-                        <span class="product-name">Chatbot</span>
-                    </button>
-                </li>
             </ul>
 
             {{-- 🔹 RIGHT SECTION --}}

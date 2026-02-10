@@ -31,6 +31,7 @@ class ExternalApiService
     {
         // For static dummy site, any login succeeds
         session(['user_access_token' => 'dummy-token-' . uniqid()]);
+        session(['mock_username' => $email]); // Store username for getCurrentUser mock
         
         return [
             'success' => true,
@@ -44,23 +45,35 @@ class ExternalApiService
      */
     public function getCurrentUser()
     {
+        $username = session('mock_username', 'admin');
+        
+        $user = [
+            'id' => '1',
+            'full_name' => 'أحمد حسان',
+            'email' => 'ahmed.hassan@ssc.gov.jo',
+            'position' => 'Senior Quality Analyst',
+            'phone' => '+962 79 123 4567',
+            'role' => [
+                'id' => 'ecedd3ec-6b66-45e1-9c1b-6cc3ee772762',
+                'name' => 'Admin'
+            ],
+            'company' => [
+                'id' => 'ssc-jordan',
+                'name' => 'الضمان الاجتماعي - الأردن'
+            ]
+        ];
+
+        if ($username === 'agent') {
+            $user['full_name'] = 'نادي البديري';
+            $user['role'] = ['id' => 'role-3', 'name' => 'Agent'];
+        } elseif ($username === 'supervisor') {
+            $user['full_name'] = 'Supervisor User';
+            $user['role'] = ['id' => 'role-supervisor', 'name' => 'Supervisor'];
+        }
+
         return [
             'success' => true,
-            'user' => [
-                'id' => '1',
-                'full_name' => 'أحمد حسان',
-                'email' => 'ahmed.hassan@ssc.gov.jo',
-                'position' => 'Senior Quality Analyst',
-                'phone' => '+962 79 123 4567',
-                'role' => [
-                    'id' => 'ecedd3ec-6b66-45e1-9c1b-6cc3ee772762',
-                    'name' => 'Admin'
-                ],
-                'company' => [
-                    'id' => 'ssc-jordan',
-                    'name' => 'الضمان الاجتماعي - الأردن'
-                ]
-            ]
+            'user' => $user
         ];
     }
 
@@ -99,7 +112,7 @@ class ExternalApiService
     public function listUsers($skip = 0, $limit = 100)
     {
         $agents = [
-            ['id' => 'agent-nadi', 'full_name' => 'نادي البديري', 'email' => 'nadi@ssc.gov.jo', 'position' => 'Customer Support'],
+            ['id' => 'agent', 'full_name' => 'نادي البديري', 'email' => 'nadi@ssc.gov.jo', 'position' => 'Customer Support'],
             ['id' => 'agent-sara', 'full_name' => 'سارة الخطيب', 'email' => 'sara@ssc.gov.jo', 'position' => 'Account Manager'],
             ['id' => 'agent-omar', 'full_name' => 'عمر المصري', 'email' => 'omar@ssc.gov.jo', 'position' => 'Technical Support'],
             ['id' => 'agent-layla', 'full_name' => 'ليلى عودة', 'email' => 'layla@ssc.gov.jo', 'position' => 'Sales Representative'],
@@ -107,6 +120,8 @@ class ExternalApiService
             ['id' => 'agent-fatima', 'full_name' => 'فاطمة الزهراء', 'email' => 'fatima@ssc.gov.jo', 'position' => 'Public Relations'],
             ['id' => 'agent-yousef', 'full_name' => 'يوسف إبراهيم', 'email' => 'yousef@ssc.gov.jo', 'position' => 'Support Supervisor'],
             ['id' => 'agent-nour', 'full_name' => 'نور الهدى', 'email' => 'nour@ssc.gov.jo', 'position' => 'Help Desk'],
+            ['id' => 'agent-risk-1', 'full_name' => 'يزن التل', 'email' => 'yazan@ssc.gov.jo', 'position' => 'Customer Agent'],
+            ['id' => 'agent-risk-2', 'full_name' => 'أحمد المومني', 'email' => 'momani@ssc.gov.jo', 'position' => 'Support Staff'],
         ];
 
         $users = [];
@@ -207,7 +222,8 @@ class ExternalApiService
             'roles' => [
                 ['id' => 'ecedd3ec-6b66-45e1-9c1b-6cc3ee772762', 'name' => 'Admin'],
                 ['id' => 'role-2', 'name' => 'Manager'],
-                ['id' => 'role-3', 'name' => 'Agent']
+                ['id' => 'role-3', 'name' => 'Agent'],
+                ['id' => 'role-supervisor', 'name' => 'Supervisor']
             ]
         ];
     }
@@ -283,11 +299,11 @@ class ExternalApiService
                     'company_name' => 'الضمان الاجتماعي - الأردن'
                 ],
                 'current_scores' => [
-                    'overall_score' => rand(88, 96),
-                    'answer_accuracy' => rand(90, 98),
-                    'response_speed' => rand(85, 95),
-                    'customer_satisfaction' => rand(90, 100),
-                    'professionalism' => rand(92, 100)
+                    'overall_score' => str_contains($agentId, 'risk') ? rand(45, 68) : rand(84, 96),
+                    'answer_accuracy' => str_contains($agentId, 'risk') ? rand(50, 70) : rand(85, 98),
+                    'response_speed' => str_contains($agentId, 'risk') ? rand(40, 65) : rand(80, 95),
+                    'customer_satisfaction' => str_contains($agentId, 'risk') ? rand(30, 60) : rand(85, 100),
+                    'professionalism' => str_contains($agentId, 'risk') ? rand(45, 70) : rand(88, 100)
                 ],
                 'performance_weights' => [
                     'answer_accuracy' => 0.40,
@@ -307,6 +323,7 @@ class ExternalApiService
                 ],
                 'summary' => [
                     'total_calls' => rand(500, 2000),
+                    'total_interaction' => rand(500, 2500),
                     'avg_duration' => '3:' . rand(10, 59),
                     'satisfaction_rate' => rand(90, 98)
                 ]

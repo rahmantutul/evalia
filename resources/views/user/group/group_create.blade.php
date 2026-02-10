@@ -318,6 +318,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
@@ -347,7 +348,7 @@
             return;
         }
 
-        form.addEventListener('submit', async function(event) {
+        form.addEventListener('submit', function(event) {
             event.preventDefault();
             event.stopPropagation();
             
@@ -356,47 +357,13 @@
                 return;
             }
 
-            const submitBtn = form.querySelector('button[type="submit"]');
-            if (!submitBtn) {
-                console.error('Submit button not found');
-                return;
-            }
-
-            try {
-                // Disable submit button
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
-
-                // Prepare FormData
-                const formData = new FormData(form);
-                
-                // Submit to Laravel endpoint
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(result.message || 'Failed to submit form');
-                }
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-                showAlert('Group registered successfully!', 'success');
-                
-            } catch (error) {
-                console.error('Submission error:', error);
-                showAlert(`Error: ${error.message}`, 'danger');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Register Group';
-            }
+            Swal.fire({
+                title: 'Demo Account',
+                text: 'This action is restricted in the demo account.',
+                icon: 'info',
+                confirmButtonText: 'I Understand',
+                confirmButtonColor: '#3085d6'
+            });
         });
 
         // Show Bootstrap alert

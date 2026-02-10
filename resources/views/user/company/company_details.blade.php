@@ -107,7 +107,7 @@
         <div class="page-header mb-4">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h4 class="fw-bold mb-1">Company Analysis Dashboard</h4>
+                    <h4 class="fw-bold mb-1">Department Analysis Dashboard</h4>
                     <p class="text-muted mb-0">Comprehensive overview of call quality metrics and agent performance</p>
                 </div>
                 <div class="d-flex gap-2 align-items-center">
@@ -136,7 +136,7 @@
                     </button>
                     <a class="btn btn-outline-secondary fw-600 shadow-sm text-back d-flex align-items-center justify-content-center" 
                     href="{{ route('user.company.list') }}" style="height: 38px;">
-                        Back to Companies
+                        Back to Departments
                     </a>
                 </div>
             </div>
@@ -588,12 +588,12 @@
         },
         
         agentPerformance: function(sortBy) {
-            const agents = [
-                { name: "نادي البديري", company: "مركز الاتصال", score: 92.3, trend: 1.5, calls: 5, avatar: "https://ui-avatars.com/api/?name=Nadi+Albidiri&background=0d6efd&color=fff" },
-                { name: "سارة الخطيب", company: "الدعم الفني", score: 89.1, trend: 2.0, calls: 4, avatar: "https://ui-avatars.com/api/?name=Sara+Khatib&background=198754&color=fff" },
-                { name: "محمود المصري", company: "المبيعات", score: 87.5, trend: -1.2, calls: 4, avatar: "https://ui-avatars.com/api/?name=Mahmoud+Masri&background=ffc107&color=fff" },
-                { name: "ليلى حسن", company: "علاقات العملاء", score: 84.2, trend: 0.5, calls: 3, avatar: "https://ui-avatars.com/api/?name=Layla+Hassan&background=0dcaf0&color=fff" },
-                { name: "أحمد منصور", company: "الشكاوى", score: 78.4, trend: -3.5, calls: 3, avatar: "https://ui-avatars.com/api/?name=Ahmed+Mansour&background=dc3545&color=fff" }
+             const agents = [
+                { name: "نادي البديري", department: "مركز الاتصال", score: 92.3, trend: 1.5, calls: 5, avatar: "https://ui-avatars.com/api/?name=Nadi+Albidiri&background=0d6efd&color=fff" },
+                { name: "سارة الخطيب", department: "الدعم الفني", score: 89.1, trend: 2.0, calls: 4, avatar: "https://ui-avatars.com/api/?name=Sara+Khatib&background=198754&color=fff" },
+                { name: "محمود المصري", department: "المبيعات", score: 87.5, trend: -1.2, calls: 4, avatar: "https://ui-avatars.com/api/?name=Mahmoud+Masri&background=ffc107&color=fff" },
+                { name: "ليلى حسن", department: "علاقات العملاء", score: 84.2, trend: 0.5, calls: 3, avatar: "https://ui-avatars.com/api/?name=Layla+Hassan&background=0dcaf0&color=fff" },
+                { name: "أحمد منصور", department: "الشكاوى", score: 78.4, trend: -3.5, calls: 3, avatar: "https://ui-avatars.com/api/?name=Ahmed+Mansour&background=dc3545&color=fff" }
             ];
             if (sortBy === 'top') return agents.sort((a, b) => b.score - a.score).slice(0, 3);
             if (sortBy === 'needs-improvement') return agents.sort((a, b) => a.score - b.score).slice(0, 3);
@@ -863,7 +863,7 @@
                                 <a style="color: #000;" href="{{ route('user.agents.index') }}"> ${agent.name}</a> 
                                 ${badgeHtml}
                             </h6>
-                            <small class="text-muted">${agent.company} • ${agent.calls} calls</small>
+                            <small class="text-muted">${agent.department} • ${agent.calls} calls</small>
                         </div>
                         <div class="text-end">
                             <h5 class="mb-0 ${agent.score >= 90 ? 'text-success' : (agent.score < 75 ? 'text-danger' : '')} fw-bold">${agent.score}%</h5>
@@ -914,7 +914,7 @@
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(kpiSheetData), 'KPIs');
         
         const agentSheetData = [['Agent', 'Category', 'Score', 'Trend', 'Calls']];
-        agents.forEach(agent => agentSheetData.push([agent.name, agent.company, `${agent.score}%`, `${agent.trend}%`, agent.calls]));
+        agents.forEach(agent => agentSheetData.push([agent.name, agent.department, `${agent.score}%`, `${agent.trend}%`, agent.calls]));
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(agentSheetData), 'Agent Performance');
         
         const fileName = `${document.querySelector('h4').textContent.trim()}_Export_${new Date().toISOString().slice(0, 10)}.xlsx`;

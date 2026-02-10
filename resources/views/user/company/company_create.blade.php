@@ -156,8 +156,8 @@
                                 <i class="fas fa-building-circle-arrow-right text-primary fs-4"></i>
                             </div>
                             <div>
-                                <h3 class="mb-0 text-dark fw-semibold">Company Registration</h3>
-                                <p class="text-muted mb-0 fs-7">Register your business entity with our premium service</p>
+                                <h3 class="mb-0 text-dark fw-semibold">Department Registration</h3>
+                                <p class="text-muted mb-0 fs-7">Register your department with our premium service</p>
                             </div>
                             
                         </div>
@@ -195,9 +195,9 @@
                                         </select>
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="company_name" class="form-label">Company Name:</label>
+                                        <label for="company_name" class="form-label">Department Name:</label>
                                         <input type="text" class="form-control" id="company_name" name="company_name" required>
-                                        <div class="invalid-feedback">Please provide a company name.</div>
+                                        <div class="invalid-feedback">Please provide a department name.</div>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="filler_words" class="form-label">Filler Words:</label>
@@ -205,54 +205,117 @@
                                     </div>
                                     <div class="col-md-4">
                                         <label for="main_topics" class="form-label">Main Topics:</label>
-                                        <input type="text" class="form-control" id="main_topics" name="main_topics" placeholder="Type and press enter to add">
+                                        <input type="text" class="form-control" id="main_topics" name="main_topics"  placeholder="Type and press enter to add">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="restricted_phrases" class="form-label">Restricted Phrases:</label>
+                                        <input type="text" class="form-control" id="restricted_phrases" name="restricted_phrases" placeholder="Phrases agents should avoid...">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="call_types" class="form-label">Call Types:</label>
-                                        <input type="text" class="form-control" id="call_types" name="call_types" placeholder="Type and press enter to add">
+                                        <input type="text" class="form-control" id="call_types" name="call_types"  placeholder="Type and press enter to add">
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="company_policies" class="form-label">Company Policies:</label>
-                                        <input type="text" class="form-control" id="company_policies" name="company_policies" placeholder="Type and press enter to add">
+                                        <label for="source" class="form-label">Integration Source:</label>
+                                        <select name="source" id="source" class="form-control">
+                                            <option value="">Select Source</option>
+                                            <option value="api">API</option>
+                                            <option value="avaya">Avaya</option>
+                                            <option value="genesys">Genesys</option>
+                                            <option value="fb">FB</option>
+                                            <option value="linkedin">LinkedIn</option>
+                                            <option value="inta">Instagram</option>
+                                            <option value="tiktok">TikTok</option>
+                                            <option value="snap">Snapchat</option>
+                                            <option value="x">X (Twitter)</option>
+                                            <option value="whatsapp">WhatsApp</option>
+                                            <option value="email">Email</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <label for="company_overview" class="form-label">Company Overview:</label>
+                                        <textarea class="form-control prompt-field" id="company_overview" name="company_overview" placeholder="Provide a brief overview of the company for AI context..." rows="3" readonly>{{ !empty($company['company_overview']) ? $company['company_overview'] : 'A leading provider of cloud-based enterprise solutions, specializing in AI-driven customer support and technical infrastructure management worldwide.' }}</textarea>
                                     </div>
                                 </div>
                             </div>
-
                             <!-- Prompt Configurations Section -->
-                            <div class="form-section">
-                                <h4 class="section-title"><i class="bi bi-chat-square-text icon-title"></i>Prompt Configurations</h4>
-                                <div class="row g-3">
-                                    <div class="col-12">
-                                        <label for="qna_pair_prompt" class="form-label">QnA Pair Prompt:</label>
-<textarea class="form-control" id="qna_pair_prompt" name="qna_pair_prompt" rows="4">find the answers for the provided customer questions in the following call transcription
+                            <div class="form-section position-relative" id="prompt-section">
+                                <h4 class="section-title"><i class="bi bi-chat-square-text icon-title"></i>Prompt Configurations <span class="badge bg-danger ms-2" style="font-size: 0.7rem;">CRITICAL</span></h4>
+                                
+                                <div class="position-relative">
+                                    <div id="prompt-lock-overlay" class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-white bg-opacity-75 rounded" style="z-index: 10; backdrop-filter: blur(2px);">
+                                        <i class="bi bi-lock-fill text-danger fs-1 mb-2"></i>
+                                        <p class="fw-bold text-dark">Modification Restricted</p>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="unlockPrompts()">Unlock to Modify</button>
+                                    </div>
+                                    
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label for="company_policies" class="form-label">Department Policies :</label>
+                                            <textarea class="form-control prompt-field" id="company_policies" name="company_policies" placeholder="Enter policies, one per line..." rows="6" readonly>
+1. الالتزام بآداب الحديث واللباقة مع العملاء في جميع الأوقات.
+2. يمنع منعا باتا طلب أي معلومات سرية أو كلمات مرور من العميل.
+3. يجب التحقق من هوية المتصل قبل تقديم أي معلومات حساسة.
+4. الالتزام بوقت الاستجابة المحدد (أقل من 30 ثانية لكل رد).
+5. في حال عدم معرفة الإجابة، يتم تصعيد التذكرة للقسم المختص بدلاً من تقديم معلومات مغلوطة.
+6. إنهاء المكالمة بجملة ترحيبية مهذبة والتأكد من رضا العميل.
+                                            </textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label d-flex justify-content-between align-items-center">
+                                                Frequently Asked Questions (FAQ)
+                                                <button type="button" class="btn btn-sm btn-outline-primary prompt-field" id="add-faq-btn" disabled>
+                                                    <i class="bi bi-plus-lg me-1"></i>Add Pair
+                                                </button>
+                                            </label>
+                                            <div id="faq-container">
+                                                <!-- FAQ pairs added here -->
+                                            </div>
+                                        </div>
+                                        <div class="col-12 mt-4">
+                                            <label for="qna_pair_prompt" class="form-label">QnA Pair Prompt:</label>
+                                            <textarea class="form-control prompt-field" id="qna_pair_prompt" name="qna_pair_prompt" rows="4" readonly>find the answers for the provided customer questions in the following call transcription
 TASK RULES:
 - Always give response in Arabic Language 
 - if you did not find answers reply with no-data-found
-- Correct any words that contain linguistic errors in the provided text. The text is generated by AWS Transcribe and contains many errors. Replace words that do not align with the general topic of the call.
-</textarea>
-                                    </div>
-                                    <div class="col-12">
-                                        <label for="gem_qna_pair_eval" class="form-label">GEM QnA Pair Evaluation:</label>
-<textarea class="form-control" id="gem_qna_pair_eval" name="gem_qna_pair_eval" rows="6">أنت مُقيّم ذكاء اصطناعي. قم بتحليل أزواج الأسئلة والأجوبة باستخدام المعلومات من القاعدة المعرفية وفقًا للآتي:
+- Correct any words that contain linguistic errors in the provided text. The text is generated by AWS Transcribe and contains many errors. Replace words that do not align with the general topic of the call.</textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="gem_qna_pair_eval" class="form-label">GEM QnA Pair Evaluation:</label>
+                                            <textarea class="form-control prompt-field" id="gem_qna_pair_eval" name="gem_qna_pair_eval" rows="6" readonly>أنت مُقيّم ذكاء اصطناعي. قم بتحليل أزواج الأسئلة والأجوبة باستخدام المعلومات من القاعدة المعرفية وفقًا للآتي:
     positive: الإجابة تتطابق مع المعلومات في القاعدة.
     يجب تضمين النص الداعم من القاعدة.
     negative: السؤال له إجابة في القاعدة لكن الإجابة المقدمة خاطئة أو تختلف عنها.
     يجب تضمين النص الداعم من القاعدة.
     notAvailable: السؤال لا يستند إلى معلومات في القاعدة.
-    استخدم النص: "لا يوجد نص ذو صلة في القاعدة المعرفية".
-</textarea>
-                                    </div>
-                                    <div class="col-12">
-                                        <label for="gpt_qna_pair_eval" class="form-label">GPT QnA Pair Evaluation:</label>
-<textarea class="form-control" id="gpt_qna_pair_eval" name="gpt_qna_pair_eval" rows="6">زودني بجميع النصوص المتعلقة بالسؤال التالي أو إجابته من قاعدة المعرفة كما هي دون أي تعديل، مع تضمين جميع النصوص ذات الصلة فقط دون إضافة أي محتوى غير مرتبط.
+    استخدم النص: "لا يوجد نص ذو صلة في القاعدة المعرفية".</textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="gpt_qna_pair_eval" class="form-label">GPT QnA Pair Evaluation:</label>
+                                            <textarea class="form-control prompt-field" id="gpt_qna_pair_eval" name="gpt_qna_pair_eval" rows="6" readonly>زودني بجميع النصوص المتعلقة بالسؤال التالي أو إجابته من قاعدة المعرفة كما هي دون أي تعديل، مع تضمين جميع النصوص ذات الصلة فقط دون إضافة أي محتوى غير مرتبط.
     لا تقم بتزويدي بأية روابط فقط النصوص ذات الصله كي أقوم بتقييم السؤال والاجابه بناء عليها.
     لا تقم بأضافة أي شيء للنصوص ذات الصلة فقط زودني بها كما هي 
-    لا تقم بذكر فيما اذا كانت الخدمه متوفرة ام لا , ولا تقم بذكر رأيك في السؤال او الجواب , فقط زودني بالنصوص المرتبطه بالسؤال و الجواب ادناه
-</textarea>
+    لا تقم بذكر فيما اذا كانت الخدمه متوفرة ام لا , ولا تقم بذكر رأيك في السؤال او الجواب , فقط زودني بالنصوص المرتبطه بالسؤال و الجواب ادناه</textarea>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- Operating Hours & Holidays Section -->
+                            <div class="form-section">
+                                <h4 class="section-title"><i class="bi bi-clock icon-title"></i>Operating Hours & Holidays</h4>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="operating_hours" class="form-label">Operating Hours:</label>
+                                        <textarea class="form-control" id="operating_hours" name="operating_hours" placeholder="e.g. Mon-Fri: 9AM-6PM" rows="2"></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="holidays" class="form-label">Holidays:</label>
+                                        <textarea class="form-control" id="holidays" name="holidays" placeholder="e.g. New Year: Jan 1st" rows="2"></textarea>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Thresholds & Limits Section -->
                             <div class="form-section">
                                 <h4 class="section-title"><i class="bi bi-speedometer2 icon-title"></i>Thresholds & Limits</h4>
@@ -340,7 +403,7 @@ TASK RULES:
                             <div class="d-grid gap-2 d-md-flex justify-content-between mt-4">
                                 <a class="btn btn-primary" href="{{ route('user.support') }}"> Need any help?</a>
                                 <button type="submit" class="btn btn-primary px-4 py-2">
-                                    <i class="bi bi-save me-2"></i>Register Company
+                                    <i class="bi bi-save me-2"></i>Register Department
                                 </button>
                             </div>
                         </form>
@@ -356,23 +419,8 @@ TASK RULES:
 
 
 <script>
+    window.tagifyInstances = {}; 
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize Tagify for tag inputs
-        const tagInputs = [
-            'filler_words', 'main_topics', 'call_types', 'company_policies',
-            'call_outcomes', 'agent_assessments_configs', 
-            'agent_cooperation_configs', 'agent_performance_configs'
-        ];
-        
-        tagInputs.forEach(id => {
-            const input = document.getElementById(id);
-            if (input) {
-                new Tagify(input, {
-                    duplicates: false,
-                    dropdown: { enabled: 0 }
-                });
-            }
-        });
 
         // Form submission handler
         const form = document.getElementById('companyRegistrationForm');
@@ -423,21 +471,21 @@ TASK RULES:
             // Determine success message based on telephony_account presence
             const hasTelephonyAccount = formData.has('telephony_account') && formData.get('telephony_account');
             const successMessage = hasTelephonyAccount 
-                ? 'Company registered on both platform successfully!' 
-                : 'Company registered successfully!';
+                ? 'Department registered on both platform successfully!' 
+                : 'Department registered successfully!';
 
             showAlert(successMessage, 'success');
              // Reload page after 3 seconds (3000 milliseconds)
-            setTimeout(() => {
-                window.location.reload();
-            }, 3000);
+            // setTimeout(() => {
+            //     window.location.reload();
+            // }, 3000);
             
         } catch (error) {
             console.error('Submission error:', error);
             showAlert(`Error: ${error.message}`, 'danger');
         } finally {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Register Company';
+            submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Register Department';
         }
         });
 
@@ -457,6 +505,100 @@ TASK RULES:
             form.parentNode.insertBefore(alertDiv, form);
             setTimeout(() => alertDiv.remove(), 50000);
         }
+        // Initialize Tagify for tag inputs
+        const tagInputs = [
+            'filler_words', 'main_topics', 'call_types',
+            'call_outcomes', 'agent_assessments_configs', 
+            'agent_cooperation_configs', 'agent_performance_configs',
+            'restricted_phrases'
+        ];
+        
+        tagInputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                window.tagifyInstances[id] = new Tagify(input, {
+                    duplicates: false,
+                    dropdown: { enabled: 0 }
+                });
+            }
+        });
+
+        // FAQ Management
+        const faqContainer = document.getElementById('faq-container');
+        const addFaqBtn = document.getElementById('add-faq-btn');
+        let faqCount = 0;
+
+        function createFaqPair() {
+            const div = document.createElement('div');
+            div.className = 'faq-pair p-3 border rounded mb-3 bg-light position-relative';
+            div.innerHTML = `
+                <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 remove-faq-btn">
+                    <i class="bi bi-trash"></i>
+                </button>
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label fs-7 mb-1">Question</label>
+                        <input type="text" name="faq[${faqCount}][question]" class="form-control form-control-sm mb-2" placeholder="Enter question..." required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fs-7 mb-1">Answer</label>
+                        <textarea name="faq[${faqCount}][answer]" class="form-control form-control-sm" placeholder="Enter answer..." rows="2" required></textarea>
+                    </div>
+                </div>
+            `;
+            
+            div.querySelector('.remove-faq-btn').addEventListener('click', () => div.remove());
+            faqContainer.appendChild(div);
+            faqCount++;
+        }
+
+        addFaqBtn.addEventListener('click', createFaqPair);
     });
+
+    async function unlockPrompts() {
+        console.log('Unlock requested');
+        const { value: phrase } = await Swal.fire({
+            title: 'Security Verification',
+            text: 'It is highly dangerous to modify prompt configurations. Please type "I KNOW ITS CRITICAL" to proceed.',
+            input: 'text',
+            inputPlaceholder: 'Type here...',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Unlock',
+            inputValidator: (value) => {
+                if (value.trim().toUpperCase() !== 'I KNOW ITS CRITICAL') {
+                    return 'Phrase does not match! Please type exactly: I KNOW ITS CRITICAL';
+                }
+            }
+        });
+
+        if (phrase && phrase.trim().toUpperCase() === 'I KNOW ITS CRITICAL') {
+            console.log('Unlock successful');
+            const overlay = document.getElementById('prompt-lock-overlay');
+            if (overlay) {
+                overlay.remove(); // Completely remove the overlay
+            }
+            
+            document.querySelectorAll('.prompt-field').forEach(field => {
+                field.removeAttribute('readonly');
+                field.removeAttribute('disabled');
+                field.style.backgroundColor = '#fff';
+
+                // Unlock Tagify if this field has an instance
+                if (window.tagifyInstances && window.tagifyInstances[field.id]) {
+                    window.tagifyInstances[field.id].setReadOnly(false);
+                }
+            });
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Unlocked',
+                text: 'You can now modify the prompt configurations.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    }
 </script>
 @endpush

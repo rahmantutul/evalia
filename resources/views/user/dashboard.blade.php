@@ -132,6 +132,7 @@
             
             return {
                 totalCompanies: 5,
+                totalDepartments: 5, // Renamed for clarity
                 avgQualityScore: 86.4, // Realistic average from bell curve distribution
                 callsEvaluated: 54, // Total realistic calls
                 avgResponseTime: 8.4
@@ -232,56 +233,63 @@
             
             const agents = [
                 { 
+                    id: "agent-1",
                     name: "نادي البديري", 
-                    company: "الضمان الاجتماعي", 
+                    department: "الضمان الاجتماعي", 
                     score: 92.3, 
                     trend: 2.2, 
                     calls: agentCalls[0],
                     avatar: "https://ui-avatars.com/api/?name=Nadi+Budiri&background=0d6efd&color=fff"
                 },
                 { 
+                    id: "agent-2",
                     name: "سارة الخطيب", 
-                    company: "الضمان الاجتماعي", 
+                    department: "الضمان الاجتماعي", 
                     score: 89.1, 
                     trend: 1.8, 
                     calls: agentCalls[1],
                     avatar: "https://ui-avatars.com/api/?name=Sara+Khateeb&background=10B981&color=fff"
                 },
                 { 
+                    id: "agent-3",
                     name: "محمود المصري", 
-                    company: "البنك العربي", 
+                    department: "البنك العربي", 
                     score: 87.5, 
                     trend: 1.2, 
                     calls: agentCalls[2],
                     avatar: "https://ui-avatars.com/api/?name=Mahmoud+Masri&background=4F46E5&color=fff"
                 },
                 { 
+                    id: "agent-4",
                     name: "ليلى حسن", 
-                    company: "أورنج الأردن", 
+                    department: "أورنج الأردن", 
                     score: 84.2, 
                     trend: -1.4, 
                     calls: agentCalls[3],
                     avatar: "https://ui-avatars.com/api/?name=Layla+Hassan&background=F59E0B&color=fff"
                 },
                 { 
+                    id: "agent-5",
                     name: "أحمد المناصير", 
-                    company: "مجموعة المناصير", 
+                    department: "مجموعة المناصير", 
                     score: 86.8, 
                     trend: 0.5, 
                     calls: agentCalls[4],
                     avatar: "https://ui-avatars.com/api/?name=Ahmed+Manaseer&background=6c757d&color=fff"
                 },
                 { 
+                    id: "agent-6",
                     name: "فرح الزعبي", 
-                    company: "البنك العربي", 
+                    department: "البنك العربي", 
                     score: 91.2, 
                     trend: 3.1, 
                     calls: agentCalls[5],
                     avatar: "https://ui-avatars.com/api/?name=Farah+Zoubi&background=dc3545&color=fff"
                 },
                 { 
+                    id: "agent-7",
                     name: "يزن التل", 
-                    company: "الملكية الأردنية", 
+                    department: "الملكية الأردنية", 
                     score: 78.9, 
                     trend: -2.3, 
                     calls: agentCalls[6],
@@ -421,8 +429,8 @@
                         <div class="card-body p-3">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <p class="text-muted mb-1 small">Total Companies</p>
-                                    <h3 class="metric-value mb-1 fw-bold">${kpiData.totalCompanies}</h3>
+                                    <p class="text-muted mb-1 small">Total Departments</p>
+                                    <h3 class="metric-value mb-1 fw-bold">${kpiData.totalDepartments}</h3>
                                     <small class="text-primary fw-500">${trendText}</small>
                                 </div>
                                 <div class="icon-circle bg-soft-primary">
@@ -479,6 +487,106 @@
                                 <div class="icon-circle bg-soft-warning">
                                     <i class="fas fa-stopwatch text-warning"></i>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        const roiCards = document.getElementById('roiCards');
+        if (roiCards) {
+            // New Calculations based on Client Excel:
+            // Inputs:
+            const avgCallMinutes = 7;
+            const evaluatedMinutes = kpiData.callsEvaluated * avgCallMinutes;
+            const aiRatePerMin = 0.03;
+            const minBillableMinutes = 5000;
+            const qcSalary = 250;
+            const humanDailyCapacity = 85;
+            const workDaysPerMonth = 22;
+
+            // 1. Saved Working Hours
+            // Formula: (evaluated minutes / 85) = saved working days * 8 = saved hours
+            const savedWorkingDays = evaluatedMinutes / humanDailyCapacity;
+            const savedHours = savedWorkingDays * 8;
+            
+            // 2. Cost Analysis
+            // AI Cost (with minimum 5000 mins)
+            const billableMinutes = Math.max(evaluatedMinutes, minBillableMinutes);
+            const evaliaCost = billableMinutes * aiRatePerMin;
+
+            // Manual Cost (Scaling QC salary to the same volume)
+            // One human can do (85 * 22) minutes per month for $250
+            const humanMinutesPerMonth = humanDailyCapacity * workDaysPerMonth;
+            const manualCostPerMin = qcSalary / humanMinutesPerMonth; // ~$0.133/min
+            
+            // To compare apples to apples, we see how much it would cost humans to do the AI's volume
+            const manualCost = billableMinutes * manualCostPerMin;
+            
+            const totalSavedCost = manualCost - evaliaCost;
+            const roiPercentage = ((totalSavedCost / evaliaCost) * 100);
+
+            roiCards.innerHTML = `
+                <div class="col-md-4">
+                    <div class="dashboard-card h-100 shadow-soft border-start border-primary border-4">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-circle bg-soft-primary me-3">
+                                    <i class="fas fa-clock text-primary"></i>
+                                </div>
+                                <h6 class="mb-0 fw-bold">Human Time Saved</h6>
+                            </div>
+                            <div class="mt-2">
+                                <h3 class="metric-value mb-0 fw-bold text-primary">${Math.round(savedHours)} Hours</h3>
+                                <p class="text-muted small mb-0">Based on <strong>${humanDailyCapacity} min/day</strong> capacity. Equivalent to <strong>${savedWorkingDays.toFixed(1)}</strong> manual working days.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="dashboard-card h-100 shadow-soft border-start border-success border-4">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-circle bg-soft-success me-3">
+                                    <i class="fas fa-hand-holding-usd text-success"></i>
+                                </div>
+                                <h6 class="mb-0 fw-bold">Financial Savings</h6>
+                            </div>
+                            <div class="mt-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="small text-muted">Estimated Manual:</span>
+                                    <span class="fw-bold text-dark">$${manualCost.toFixed(2)}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small text-muted">Evalia AI Cost:</span>
+                                    <span class="fw-bold text-success">$${evaliaCost.toFixed(2)}</span>
+                                </div>
+                                <div class="border-top pt-2 d-flex justify-content-between">
+                                    <span class="fw-bold text-dark">Net Savings:</span>
+                                    <h4 class="text-success fw-bold mb-0">+$${totalSavedCost.toFixed(2)}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="dashboard-card h-100 shadow-soft border-start border-info border-4">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-circle bg-soft-info me-3">
+                                    <i class="fas fa-chart-line text-info"></i>
+                                </div>
+                                <h6 class="mb-0 fw-bold">ROI Indicator</h6>
+                            </div>
+                            <div class="mt-2">
+                                <h3 class="metric-value mb-1 fw-bold text-info">${Math.abs(roiPercentage).toFixed(1)}%</h3>
+                                <div class="progress progress-thin mb-2">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: ${Math.min(roiPercentage, 100)}%"></div>
+                                </div>
+                                <p class="text-muted small mb-0">Efficiency gain vs human capital. Billable minutes: <strong>${Math.round(billableMinutes)}</strong>.</p>
                             </div>
                         </div>
                     </div>
@@ -599,7 +707,7 @@
         companies.forEach(company => {
             const trendClass = company.trend > 0 ? 'trend-up' : (company.trend < 0 ? 'trend-down' : 'trend-neutral');
             const trendIcon = company.trend > 0 ? 'fa-arrow-up' : (company.trend < 0 ? 'fa-arrow-down' : 'fa-minus');
-            let companyViewBaseUrl = "{{ route('user.company.view', ':id') }}"; 
+            let departmentViewBaseUrl = "{{ route('user.company.view', ':id') }}"; 
 
             let badgeHtml = '';
             if (company.score >= 90) {
@@ -617,7 +725,7 @@
                     <td class="ps-4">
                         <div class="d-flex align-items-center">
                             <strong>
-                                <a style="color: #3f4254;" class="text-hover-primary" href="${companyViewBaseUrl.replace(':id', company.id)}">
+                                <a style="color: #3f4254;" class="text-hover-primary" href="${departmentViewBaseUrl.replace(':id', company.id)}">
                                     ${company.name}
                                 </a>
                             </strong>
@@ -661,10 +769,11 @@
                         <img src="${agent.avatar}" class="avatar-sm me-3 border shadow-sm">
                         <div class="flex-grow-1">
                             <h6 class="mb-0 fw-bold d-flex align-items-center">
-                                <a style="color: #000;" href="{{ route('user.agents.index') }}"> ${agent.name}</a> 
+                                @php $agentShowUrl = route('user.agents.show', ':id'); @endphp
+                                <a style="color: #000;" href="${'{{ $agentShowUrl }}'.replace(':id', agent.id)}"> ${agent.name}</a> 
                                 ${badgeHtml}
                             </h6>
-                            <small class="text-muted">${agent.company} • ${agent.calls} calls</small>
+                            <small class="text-muted">${agent.department} • ${agent.calls} calls</small>
                         </div>
                         <div class="text-end">
                             <h5 class="mb-0 ${scoreClass} fw-bold">${agent.score}%</h5>
@@ -715,7 +824,7 @@
         // Add KPIs sheet
         const kpiSheetData = [
             ['Metric', 'Value', 'Trend'],
-            ['Total Companies', kpiData.totalCompanies, `+2 from last period`],
+            ['Total Departments', kpiData.totalDepartments, `+2 from last period`],
             ['Average Quality Score', `${kpiData.avgQualityScore.toFixed(1)}%`, `2.1% improvement`],
             ['Calls Evaluated', kpiData.callsEvaluated, `${Math.floor(kpiData.callsEvaluated * 0.3)} this period`],
             ['Average Response Time', `${kpiData.avgResponseTime.toFixed(1)}s`, `1.2s faster`]
@@ -741,18 +850,18 @@
         const sentimentSheet = XLSX.utils.aoa_to_sheet(sentimentSheetData);
         XLSX.utils.book_append_sheet(wb, sentimentSheet, 'Sentiment Analysis');
         
-        // Add company performance sheet
-        const companySheetData = [['Company', 'Score', 'Trend', 'Calls']];
+        // Add department performance sheet
+        const departmentSheetData = [['Department', 'Score', 'Trend', 'Calls']];
         companies.forEach(company => {
-            companySheetData.push([company.name, `${company.score}%`, `${company.trend > 0 ? '+' : ''}${company.trend}%`, company.calls]);
+            departmentSheetData.push([company.name, `${company.score}%`, `${company.trend > 0 ? '+' : ''}${company.trend}%`, company.calls]);
         });
-        const companySheet = XLSX.utils.aoa_to_sheet(companySheetData);
-        XLSX.utils.book_append_sheet(wb, companySheet, 'Company Performance');
+        const departmentSheet = XLSX.utils.aoa_to_sheet(departmentSheetData);
+        XLSX.utils.book_append_sheet(wb, departmentSheet, 'Department Performance');
         
         // Add agent performance sheet
-        const agentSheetData = [['Agent', 'Company', 'Score', 'Trend', 'Calls']];
+        const agentSheetData = [['Agent', 'Department', 'Score', 'Trend', 'Calls']];
         agents.forEach(agent => {
-            agentSheetData.push([agent.name, agent.company, `${agent.score}%`, `${agent.trend > 0 ? '+' : ''}${agent.trend}%`, agent.calls]);
+            agentSheetData.push([agent.name, agent.department, `${agent.score}%`, `${agent.trend > 0 ? '+' : ''}${agent.trend}%`, agent.calls]);
         });
         const agentSheet = XLSX.utils.aoa_to_sheet(agentSheetData);
         XLSX.utils.book_append_sheet(wb, agentSheet, 'Agent Performance');

@@ -178,7 +178,7 @@
             <p class="text-muted mb-1">Senior Customer Support Agent</p>
             <div class="d-flex gap-2">
                 <span class="badge bg-light text-dark">ID: AG-7892</span>
-                <span class="badge bg-light text-dark">Company A</span>
+                <span class="badge bg-light text-dark">Department A</span>
                 <span class="badge bg-light text-dark">Joined: Jan 15, 2022</span>
             </div>
         </div>
@@ -377,7 +377,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="section-title">Performance Weights</h5>
-                    <p class="text-muted small">These weights are set at the company level and applied to all agents.</p>
+                    <p class="text-muted small">These weights are set at the department level and applied to all agents.</p>
                     
                     <div class="mb-3">
                         <div class="d-flex justify-content-between mb-1">

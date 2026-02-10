@@ -132,13 +132,13 @@
             <div class="card shadow-sm sticky-top-bar">
                 <div class="card-body py-3">
                     <div class="row g-3">
-                        <!-- Total Companies -->
+                        <!-- Total Departments -->
                         <div class="col-md-2 col-sm-4 col-6 stat-item">
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-building text-primary me-2"></i>
                                 <div>
-                                    <h6 class="mb-0 fw-bold" id="totalCompanies">0</h6>
-                                    <p class="text-muted small mb-0" style="font-size: 10px;">Companies</p>
+                                    <h6 class="mb-0 fw-bold" id="totalDepartments">0</h6>
+                                    <p class="text-muted small mb-0" style="font-size: 10px;">Departments</p>
                                 </div>
                             </div>
                         </div>
@@ -209,7 +209,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="col d-flex justify-content-between align-items-center">                      
-                        <h4 class="card-title mb-0">Company List</h4>
+                        <h4 class="card-title mb-0">Department List</h4>
                         <a href="{{ route('user.company.create') }}" class="btn btn-sm btn-primary d-block float-end">+ Create New</a>                  
                     </div>                                 
                 </div>
@@ -240,7 +240,7 @@
                         <table class="table datatable mb-0" id="datatable_1">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Company Name</th>
+                                    <th>Department Name</th>
                                     <th>Industry</th>
                                     <th>Agents</th>
                                     <th>Location</th>
@@ -263,7 +263,11 @@
                                         $agents = rand(8, 15); // Each company has 8-15 agents
                                     @endphp
                                     <tr>
-                                        <td>{{ $company['name'] }}</td>
+                                        <td>
+                                            <a href="{{ route('user.company.view', $company['id']) }}" class="fw-bold text-primary">
+                                                {{ $company['name'] }}
+                                            </a>
+                                        </td>
                                         <td>{{ $industry }}</td>
                                         <td>{{ $agents }}</td>
                                         <td>{{ $location }}</td>
@@ -439,7 +443,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Use actual statistics from controller
         const stats = {
-            totalCompanies: @json(count($companies)),
+            totalDepartments: @json(count($companies)),
             activeTasks: @json($totalActiveTasks ?? 0),
             completedTasks: @json($totalCompletedTasks ?? 0),
             pendingAnalysis: @json($totalPendingAnalysis ?? 0),
@@ -467,7 +471,7 @@
         }
 
         // Start animations
-        animateCounter('totalCompanies', stats.totalCompanies);
+        animateCounter('totalDepartments', stats.totalDepartments);
         animateCounter('activeTasks', stats.activeTasks);
         animateCounter('completedTasks', stats.completedTasks);
         animateCounter('pendingAnalysis', stats.pendingAnalysis);

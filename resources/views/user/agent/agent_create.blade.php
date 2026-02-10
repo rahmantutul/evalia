@@ -98,13 +98,13 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label for="company" class="form-label fw-semibold">Company</label>
+                                    <label for="company" class="form-label fw-semibold">Department</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-building"></i></span>
                                         <input type="text" name="company" id="company"
                                             class="form-control {{ $errors->has('company') ? 'is-invalid' : '' }}"
                                             value="{{ old('company', $agent->company ?? '') }}"
-                                            placeholder="Enter company name">
+                                            placeholder="Enter department name">
                                     </div>
                                 </div>
                             </div>

@@ -28,6 +28,11 @@
         <!-- Cards will be updated dynamically -->
     </div>
 
+    <!-- ROI & Savings Cards -->
+    <div class="row g-4 mb-4" id="roiCards">
+        <!-- ROI cards will be updated dynamically -->
+    </div>
+
     <!-- Charts Row -->
     <div class="row g-4 mb-4">
         <div class="col-md-8">
@@ -69,7 +74,7 @@
             <div class="dashboard-card h-100 shadow-soft">
                 <div class="card-header bg-white">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="fw-bold mb-0">Company Performance</h6>
+                        <h6 class="fw-bold mb-0">Department Performance</h6>
                         <div class="dropdown">
                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="companySortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 By Score
@@ -87,7 +92,7 @@
                         <table class="table table-sm table-hover mb-0" id="companyTable">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="ps-4">Company</th>
+                                    <th class="ps-4">Department</th>
                                     <th>Score</th>
                                     <th>Trend</th>
                                     <th class="pe-4">Calls</th>

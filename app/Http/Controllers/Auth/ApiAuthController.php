@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\ExternalApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class ApiAuthController extends Controller
 {
@@ -59,10 +60,18 @@ class ApiAuthController extends Controller
                 }
                 
                 // Debug: Check what's in session
-                \Log::info('User logged in', [
+                Log::info('User logged in', [
                     'user' => $user,
                     'permissions' => session('permissions')
                 ]);
+                
+                if (isset($user['role']['name'])) {
+                    if ($user['role']['name'] === 'Agent') {
+                        return redirect()->route('agent.dashboard')->with('success', 'Login successful!');
+                    } elseif ($user['role']['name'] === 'Supervisor') {
+                        return redirect()->route('supervisor.dashboard')->with('success', 'Login successful!');
+                    }
+                }
                 
                 return redirect('/user-dashboard')->with('success', 'Login successful!');
             } else {

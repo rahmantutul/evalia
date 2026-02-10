@@ -62,14 +62,7 @@
                                 <span>Client</span>
                             </a>
                         </li>  --}}
-                        @if($hasManageSystem)
-                        <li class="nav-item {{ Route::is('user.group_data.*') ? 'active' : '' }}">
-                            <a class="nav-link {{ Route::is('user.group_data.*') ? 'active' : '' }}" href="{{ route('user.group_data.list') }}">
-                                <i class="iconoir-community menu-icon"></i>
-                                <span>Group</span>
-                            </a>
-                        </li>
-                        @endif
+
                         @if($hasManageSystem)
                         <li class="nav-item {{ Route::is('user.knowledgeBase.*') ? 'active' : '' }}">
                             <a class="nav-link {{ Route::is('user.knowledgeBase.*') ? 'active' : '' }}" href="{{ route('user.knowledgeBase.list') }}">
@@ -78,10 +71,16 @@
                             </a>
                         </li>
                         @endif
+                        <li class="nav-item {{ Route::is('user.group_data.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('user.group_data.*') ? 'active' : '' }}" href="{{ route('user.group_data.list') }}">
+                                <i class="iconoir-community menu-icon"></i>
+                                <span>Groups</span>
+                            </a>
+                        </li>
                         <li class="nav-item {{ Route::is('user.company.*') ? 'active' : '' }}">
                             <a class="nav-link {{ Route::is('user.company.*') ? 'active' : '' }}" href="{{ route('user.company.list') }}">
                                 <i class="icofont-bank-alt menu-icon"></i>
-                                <span>Companies</span>
+                                <span>Departments</span>
                             </a>
                         </li>
                         <li class="nav-item {{ Route::is('user.agents.*') ? 'active' : '' }}">

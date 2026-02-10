@@ -17,9 +17,36 @@ class GroupDataController extends Controller
     public function groupList(Request $request)
     {
         $groups = [
-            ['id' => 'hassan', 'group_name' => 'Default Group', 'description' => 'General purpose group', 'created_at' => now()->toDateTimeString()],
-            ['id' => 'group-2', 'group_name' => 'Premium Group', 'description' => 'High priority group', 'created_at' => now()->toDateTimeString()],
-            ['id' => 'group-3', 'group_name' => 'Enterprise Group', 'description' => 'Large scale operations', 'created_at' => now()->toDateTimeString()]
+            [
+                'group_id' => 'hassan', 
+                'group_name' => 'Support Team', 
+                'description' => 'General customer support keywords', 
+                'created_at' => now()->toDateTimeString(),
+                'keyword_sets' => [
+                    ['name' => 'Greeting', 'keywords' => ['hello', 'hi', 'welcome', 'good morning']],
+                    ['name' => 'Closing', 'keywords' => ['bye', 'thank you', 'have a nice day']]
+                ]
+            ],
+            [
+                'group_id' => 'group-2', 
+                'group_name' => 'Sales Department', 
+                'description' => 'Sales and lead generation keywords', 
+                'created_at' => now()->toDateTimeString(),
+                'keyword_sets' => [
+                    ['name' => 'Pricing', 'keywords' => ['cost', 'price', 'discount', 'quote']],
+                    ['name' => 'Follow up', 'keywords' => ['call back', 'next steps', 'schedule']]
+                ]
+            ],
+            [
+                'group_id' => 'group-3', 
+                'group_name' => 'Tech Infrastructure', 
+                'description' => 'Technical and backend monitoring', 
+                'created_at' => now()->toDateTimeString(),
+                'keyword_sets' => [
+                    ['name' => 'Server Errors', 'keywords' => ['500 error', 'timeout', 'latency', 'database down']],
+                    ['name' => 'Maintenance', 'keywords' => ['upgrade', 'patch', 'reboot']]
+                ]
+            ]
         ];
         
         $paginatedGroups = new LengthAwarePaginator(
@@ -41,7 +68,7 @@ class GroupDataController extends Controller
     public function groupDetails($groupId)
     {
         $group = [
-            'id' => $groupId,
+            'group_id' => $groupId,
             'group_name' => 'Default Group',
             'description' => 'General purpose group',
             'filler_words' => ['err', 'umm'],
@@ -70,7 +97,7 @@ class GroupDataController extends Controller
     public function groupEdit($groupId)
     {
         $group = [
-            'id' => $groupId,
+            'group_id' => $groupId,
             'group_name' => 'Default Group',
             'description' => 'General purpose group',
             'filler_words' => ['err', 'umm'],

@@ -104,7 +104,7 @@
                                     <th>Email</th>
                                     <th>Username</th>
                                     <th>Role</th>
-                                    <th>Company</th>
+                                    <th>Department</th>
                                     <th>Status</th>
                                     <th width="150" class="text-center">Actions</th>
                                 </tr>

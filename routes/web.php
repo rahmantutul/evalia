@@ -129,6 +129,12 @@ Route::group(['middleware' => 'auth.api'], function () {
 
 
     Route::get('/user-dashboard', [HomeController::class, 'index'])->name('user.home');
+    Route::get('/agent-dashboard', function () {
+        return view('agent.dashboard');
+    })->name('agent.dashboard');
+    Route::get('/supervisor-dashboard', function () {
+        return view('supervisor.dashboard');
+    })->name('supervisor.dashboard');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
