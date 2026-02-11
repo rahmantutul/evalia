@@ -1,14 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" data-startbar="light" data-bs-theme="light">
+ <html lang="en" dir="ltr" data-startbar="light" data-bs-theme="light">
 
 <head>
     <meta charset="utf-8" />
-    <title>Dashboard | Creative AI</title>
+   <title>Agent Dashboard | Evalia</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta content="creative ai" name="author" />
+    <meta content="Evalia" name="author" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <link rel="shortcut icon" href="assets/images/normal.png">
-    
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ asset('assets/images/preview.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('assets/images/preview.png') }}" type="image/png">
+
+    <!-- For different devices and browsers -->
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/preview.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/preview.png') }}">
     <!-- CSS Files -->
     <link href="{{ asset('/') }}assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="{{ asset('/') }}assets/css/icons.min.css" rel="stylesheet" type="text/css" />
@@ -17,20 +24,22 @@
     <link href="{{ asset('/') }}assets/libs/mobius1-selectr/selectr.min.css" rel="stylesheet" type="text/css" />
     <link href="{{ asset('/') }}assets/libs/huebee/huebee.min.css" rel="stylesheet" type="text/css" />
     <link href="{{ asset('/') }}assets/libs/vanillajs-datepicker/css/datepicker.min.css" rel="stylesheet" type="text/css" />
-    
+    <link href="{{ asset('/') }}assets/libs/simple-datatables/style.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     @stack('styles')
 </head>
 
 <body>
-    @include('admin.layouts.topbar')
-    @include('admin.layouts.sidebar')
+    @include('agent.layouts.topbar')
+    @include('agent.layouts.sidebar')
 
     <div class="startbar-overlay d-print-none"></div>
 
     <div class="page-wrapper">
         <div class="page-content">
             @yield('content')
-            @include('admin.layouts.footer')
+            @include('agent.layouts.footer')
         </div>
     </div>
 
@@ -49,13 +58,18 @@
     <script src="{{ asset('/') }}assets/js/pages/forms-advanced.js"></script>
     <script src="{{ asset('/') }}assets/js/app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('/') }}assets/libs/simple-datatables/umd/simple-datatables.js"></script>
+    <script src="{{ asset('/') }}assets/js/pages/datatable.init.js"></script>  
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+    
     @if(session('success'))
         <script>
             Swal.fire({
                 icon: 'success',
                 title: 'Success!',
-                text: @json(session('success')),
+                text: {!! json_encode(session('success')) !!},
                 timer: 3000,
                 showConfirmButton: false,
                 toast: true,
@@ -69,29 +83,13 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',
-                text: @json(session('error')),
+                text: {!! json_encode(session('error')) !!},
                 timer: 4000,
                 showConfirmButton: true,
                 position: 'center'
             });
         </script>
     @endif
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const switcher = document.querySelector('.bot-switcher');
-        const btn = document.querySelector('.bot-switcher-btn');
-        
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            switcher.classList.toggle('active');
-        });
-        
-        document.addEventListen~er('click', function() {
-            switcher.classList.remove('active');
-        });
-    });
-    </script>
 
     @stack('scripts')
 </body>

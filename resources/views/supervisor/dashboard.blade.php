@@ -1,25 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supervisor Dashboard - Evalia</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
-    <nav class="bg-white shadow-sm p-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-gray-800">Supervisor Dashboard</h1>
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="text-red-600 font-medium">Logout</button>
-            </form>
+@extends('user.layouts.app')
+@push('styles')
+
+
+@endpush
+
+@section('content')
+<div class="container-fluid">
+   <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box d-md-flex justify-content-md-between align-items-center">
+                <h4 class="page-title">Supervisor Dashboard</h4>
+                <div class="">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="#">Creative AI</a>
+                        </li><!--end nav-item-->
+                        <li class="breadcrumb-item active">Dashboard</li>
+                    </ol>
+                </div>                            
+            </div>
         </div>
-    </nav>
-    <main class="flex-grow flex items-center justify-center">
-        <div class="text-center">
-            <h2 class="text-3xl font-semibold text-gray-700">supervisor dashboardd</h2>
-        </div>
-    </main>
-</body>
-</html>
+    </div>
+    <div class="row justify-content-center">
+                      
+    </div>
+</div>
+@endsection

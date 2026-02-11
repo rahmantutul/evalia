@@ -508,6 +508,18 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
             event.preventDefault();
             event.stopPropagation();
             
+            // Demo account check - show popup and stop here
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Demo Account',
+                    text: 'This is a Demo account. Please contact the administrator for a live testing account.',
+                    confirmButtonColor: '#0a66c2',
+                    confirmButtonText: 'I Understand'
+                });
+                return; // Stop execution here for demo account
+            }
+            
             if (!form.checkValidity()) {
                 form.classList.add('was-validated');
                 return;
@@ -555,6 +567,7 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
                 submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Update Department';
             }
         });
+
 
         // Show Bootstrap alert
         function showAlert(message, type) {

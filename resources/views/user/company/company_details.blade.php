@@ -147,6 +147,11 @@
             <!-- Cards will be updated dynamically -->
         </div>
 
+        <!-- ROI Metrics -->
+        <div class="row g-4 mb-4" id="roiCards">
+            <!-- Cards will be updated dynamically -->
+        </div>
+
         <!-- Charts Row -->
         <div class="row g-4 mb-4">
             <div class="col-md-8">
@@ -533,7 +538,7 @@
             let callsEvaluated;
             if (period === 7) callsEvaluated = 124;
             else if (period === 30) callsEvaluated = 485;
-            else callsEvaluated = 1240;
+            else callsEvaluated = 1245;
             
             return {
                 totalGroups: 5,
@@ -655,6 +660,7 @@
     // Update entire dashboard
     function updateDashboard() {
         updateKpiCards();
+        updateRoiCards();
         updateTrendChart();
         updateSentimentChart();
         updateAgentPerformance();
@@ -734,6 +740,105 @@
                 </div>
             </div>
         `;
+    }
+
+    // Update ROI metrics
+    function updateRoiCards() {
+        const kpiData = generateDummyData.kpiData(currentPeriod);
+        const roiCards = document.getElementById('roiCards');
+        
+        if (roiCards) {
+            // New Calculations based on Client Excel logic:
+            const avgCallMinutes = 7;
+            const evaluatedMinutes = kpiData.callsEvaluated * avgCallMinutes;
+            const aiRatePerMin = 0.03;
+            const minBillableMinutes = 5000;
+            const qcSalary = 250;
+            const humanDailyCapacity = 85;
+            const workDaysPerMonth = 22;
+
+            // 1. Saved Working Hours
+            const savedWorkingDays = evaluatedMinutes / humanDailyCapacity;
+            const savedHours = savedWorkingDays * 8;
+            
+            // 2. Cost Analysis
+            const billableMinutes = Math.max(evaluatedMinutes, minBillableMinutes);
+            const evaliaCost = billableMinutes * aiRatePerMin;
+
+            // Manual Cost (Scaling QC salary to the same volume)
+            const humanMinutesPerMonth = humanDailyCapacity * workDaysPerMonth;
+            const manualCostPerMin = qcSalary / humanMinutesPerMonth;
+            const manualCost = billableMinutes * manualCostPerMin;
+            
+            const totalSavedCost = Math.max(0, manualCost - evaliaCost); // Result must be positive or 0
+            const roiPercentage = ((totalSavedCost / evaliaCost) * 100);
+
+            roiCards.innerHTML = `
+                <div class="col-md-4">
+                    <div class="dashboard-card h-100 shadow-soft border-start border-primary border-4">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-circle bg-soft-primary me-3">
+                                    <i class="fas fa-clock text-primary"></i>
+                                </div>
+                                <h6 class="mb-0 fw-bold">Human Time Saved</h6>
+                            </div>
+                            <div class="mt-2">
+                                <h3 class="metric-value mb-0 fw-bold text-primary">${Math.round(savedHours)} Hours</h3>
+                                <p class="text-muted small mb-0">Based on <strong>${humanDailyCapacity} min/day</strong> capacity. Equivalent to <strong>${savedWorkingDays.toFixed(1)}</strong> manual working days.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="dashboard-card h-100 shadow-soft border-start border-success border-4">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-circle bg-soft-success me-3">
+                                    <i class="fas fa-hand-holding-usd text-success"></i>
+                                </div>
+                                <h6 class="mb-0 fw-bold">Financial Savings</h6>
+                            </div>
+                            <div class="mt-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="small text-muted">Estimated Manual:</span>
+                                    <span class="fw-bold text-dark">$${manualCost.toFixed(2)}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small text-muted">Evalia AI Cost:</span>
+                                    <span class="fw-bold text-success">$${evaliaCost.toFixed(2)}</span>
+                                </div>
+                                <div class="border-top pt-2 d-flex justify-content-between">
+                                    <span class="fw-bold text-dark">Net Savings:</span>
+                                    <h4 class="text-success fw-bold mb-0">+$${totalSavedCost.toFixed(2)}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="dashboard-card h-100 shadow-soft border-start border-info border-4">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-circle bg-soft-info me-3">
+                                    <i class="fas fa-chart-line text-info"></i>
+                                </div>
+                                <h6 class="mb-0 fw-bold">ROI Indicator</h6>
+                            </div>
+                            <div class="mt-2">
+                                <h3 class="metric-value mb-1 fw-bold text-info">${Math.abs(roiPercentage).toFixed(1)}%</h3>
+                                <div class="progress progress-thin mb-2">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: ${Math.min(roiPercentage, 100)}%"></div>
+                                </div>
+                                <p class="text-muted small mb-0">Efficiency gain vs human capital. Billable minutes: <strong>${Math.round(billableMinutes)}</strong>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
     }
 
     // Update trend chart

@@ -134,7 +134,7 @@
                 totalCompanies: 5,
                 totalDepartments: 5, // Renamed for clarity
                 avgQualityScore: 86.4, // Realistic average from bell curve distribution
-                callsEvaluated: 54, // Total realistic calls
+                callsEvaluated: callsEvaluated, // Use the calculated value
                 avgResponseTime: 8.4
             };
         },
@@ -524,7 +524,7 @@
             // To compare apples to apples, we see how much it would cost humans to do the AI's volume
             const manualCost = billableMinutes * manualCostPerMin;
             
-            const totalSavedCost = manualCost - evaliaCost;
+            const totalSavedCost = Math.max(0, manualCost - evaliaCost);
             const roiPercentage = ((totalSavedCost / evaliaCost) * 100);
 
             roiCards.innerHTML = `

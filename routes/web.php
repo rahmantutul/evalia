@@ -132,6 +132,9 @@ Route::group(['middleware' => 'auth.api'], function () {
     Route::get('/agent-dashboard', function () {
         return view('agent.dashboard');
     })->name('agent.dashboard');
+    Route::get('/agent-coaching', function () {
+        return view('agent.coaching');
+    })->name('agent.coaching');
     Route::get('/supervisor-dashboard', function () {
         return view('supervisor.dashboard');
     })->name('supervisor.dashboard');

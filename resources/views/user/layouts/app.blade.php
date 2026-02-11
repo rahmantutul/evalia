@@ -148,33 +148,14 @@
     </script>
     <script>
         document.addEventListener('submit', function(e) {
-            // Allow search/filter forms (typically GET) to proceed
-            if (e.target.method.toLowerCase() === 'get') {
-                return;
-            }
-
-            // Block other submissions (POST/PUT/DELETE) for demo account
-            e.preventDefault();
-            Swal.fire({
-                icon: 'info',
-                title: 'Demo Account',
-                text: 'This is a Demo account. Please contact the administrator for a live testing account.',
-                confirmButtonColor: '#0a66c2',
-                confirmButtonText: 'I Understand'
-            });
-        });
-
-        // Also keep the button click handler for cases where buttons aren't inside formal <form> tags
-        document.addEventListener('click', function(e) {
-            const btn = e.target.closest('button');
-            if (btn && !btn.closest('form') && (
-                btn.innerText.toLowerCase().includes('save') || 
-                btn.innerText.toLowerCase().includes('register') || 
-                btn.innerText.toLowerCase().includes('update') ||
-                btn.classList.contains('btn-primary')
-            )) {
-                if (btn.dataset.bsToggle === 'modal') return; // Don't block modal triggers
-                
+            const form = e.target;
+            
+            // Get the method - check both attribute and property
+            const methodAttr = (form.getAttribute('method') || '').toLowerCase();
+            const methodProp = (form.method || '').toLowerCase();
+            
+            // If form has 'demo-form' class, always block it
+            if (form.classList.contains('demo-form')) {
                 e.preventDefault();
                 Swal.fire({
                     icon: 'info',
@@ -183,7 +164,35 @@
                     confirmButtonColor: '#0a66c2',
                     confirmButtonText: 'I Understand'
                 });
+                return false;
             }
+            
+            // For forms with explicit GET method attribute, allow them (search/filter forms)
+            if (methodAttr === 'get') {
+                return;
+            }
+            
+            // If method property is 'get', check if it's really a search form
+            if (methodProp === 'get' && !methodAttr) {
+                // Allow if it has search-related inputs
+                const hasSearchInputs = form.querySelector('[name*="search"], [name*="filter"], [name*="query"], [name*="agent"], [name*="status"]');
+                if (hasSearchInputs) {
+                    return;
+                }
+            }
+
+            // Block all other submissions:
+            // - POST, PUT, PATCH, DELETE methods
+            // - Forms without method attribute (except search forms caught above)
+            // - Any form that doesn't match the search criteria
+            e.preventDefault();
+            Swal.fire({
+                icon: 'info',
+                title: 'Demo Account',
+                text: 'This is a Demo account. Please contact the administrator for a live testing account.',
+                confirmButtonColor: '#0a66c2',
+                confirmButtonText: 'I Understand'
+            });
         });
     </script>
     @stack('scripts')
