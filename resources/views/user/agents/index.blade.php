@@ -305,6 +305,9 @@
     .btn-view:hover { background: #eff6ff; color: #2563eb; border-color: #dbeafe; }
     .btn-coach:hover { background: #fffbeb; color: #d97706; border-color: #fef3c7; }
 
+    .agent-name { transition: all 0.2s; }
+    .agent-name:hover { color: #0a66c2 !important; }
+
     .btn-excel-item {
         background: var(--success-gradient);
         color: white;
@@ -361,6 +364,7 @@
             <h2 class="fw-900 text-slate-900 mb-1">Agent Workforce</h2>
             <p class="text-slate-500 fs-16 mb-0">Performance, status, and intelligence management.</p>
         </div>
+         @if(session('user.role.name') !== 'Supervisor')
         <div class="col-md-5 text-md-end mt-3 mt-md-0 d-flex justify-content-md-end gap-2">
             <button type="button" class="btn-excel-item" data-bs-toggle="modal" data-bs-target="#uploadExcelModal">
                 <i class="fas fa-file-excel"></i>
@@ -371,6 +375,7 @@
                 <span>Add New Agent</span>
             </a>
         </div>
+        @endif
     </div>
 
     <!-- Compressed Summary Strip -->
@@ -389,7 +394,7 @@
                 <i class="fas fa-graduation-cap"></i>
             </div>
             <div class="summary-content">
-                <div class="summary-value">{{ rand(5, 12) }}</div>
+                <div class="summary-value">{{ $summary['needs_coaching'] ?? 0 }}</div>
                 <div class="summary-label">Needs Coaching</div>
             </div>
         </div>
@@ -398,7 +403,7 @@
                 <i class="fas fa-trophy"></i>
             </div>
             <div class="summary-content">
-                <div class="summary-value">{{ rand(15, 25) }}</div>
+                <div class="summary-value">{{ $summary['top_performers'] ?? 0 }}</div>
                 <div class="summary-label">Top Performers</div>
             </div>
         </div>
@@ -407,7 +412,7 @@
                 <i class="fas fa-rocket"></i>
             </div>
             <div class="summary-content">
-                <div class="summary-value">{{ rand(3, 8) }}</div>
+                <div class="summary-value">{{ $summary['onboarding'] ?? 0 }}</div>
                 <div class="summary-label">Onboarding</div>
             </div>
         </div>
@@ -498,13 +503,13 @@
                         data-risk="{{ $risk }}" 
                         data-channel="{{ $channel }}">
                         <td>
-                            <div class="agent-info">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($agent['full_name'] ?? 'Agent') }}&background=random&color=fff&bold=true" class="agent-avatar" alt="">
-                                <div>
-                                    <div class="agent-name">{{ $agent['full_name'] ?? 'N/A' }}</div>
-                                    <div class="agent-id-badge">{{ $agentDetails['display_id'] ?? 'AGT-'.strtoupper(Str::random(5)) }}</div>
+                                <div class="agent-info">
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($agent['full_name'] ?? 'Agent') }}&background=random&color=fff&bold=true" class="agent-avatar" alt="">
+                                    <div>
+                                        <a href="{{ route('user.agents.show', $agent['id'] ?? 1) }}" class="agent-name text-decoration-none hover-primary">{{ $agent['full_name'] ?? 'N/A' }}</a>
+                                        <div class="agent-id-badge">{{ $agentDetails['display_id'] ?? 'AGT-'.strtoupper(Str::random(5)) }}</div>
+                                    </div>
                                 </div>
-                            </div>
                         </td>
                         <td>
                             <div class="fw-700 text-slate-700">{{ $agent['supervisor_name'] ?? 'محمود علي' }}</div>
@@ -541,9 +546,6 @@
                                 <a href="{{ route('user.agents.show', $agent['id'] ?? 1) }}" class="action-btn btn-view" title="View Details">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <button class="action-btn btn-coach" title="Assign Coaching">
-                                    <i class="fas fa-chalkboard-teacher"></i>
-                                </button>
                             </div>
                         </td>
                     </tr>

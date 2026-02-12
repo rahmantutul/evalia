@@ -18,14 +18,6 @@
                         Hello, {{ session('user.full_name') ?? session('user.username') ?? 'User' }}!
                     </h5>
                 </li>                   
-
-                {{-- 🔹 Product Buttons --}}
-                <li class="ms-3">
-                    <button class="product-btn {{ (session('active_product') ?? 1) == 1 ? 'active' : '' }}" data-product="1">
-                        <span class="product-icon">🎵</span>
-                        <span class="product-name">Audio Analysis</span>
-                    </button>
-                </li>
             </ul>
 
             {{-- 🔹 RIGHT SECTION --}}

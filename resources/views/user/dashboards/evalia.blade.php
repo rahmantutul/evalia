@@ -28,10 +28,12 @@
         <!-- Cards will be updated dynamically -->
     </div>
 
+    @if(session('user.role.name') !== 'Supervisor')
     <!-- ROI & Savings Cards -->
     <div class="row g-4 mb-4" id="roiCards">
         <!-- ROI cards will be updated dynamically -->
     </div>
+    @endif
 
     <!-- Charts Row -->
     <div class="row g-4 mb-4">

@@ -212,21 +212,24 @@
                                             value="inbound_support,outbound_sales,complaint,general_inquiry,technical_assistance,callback_request"value="inbound_support,outbound_sales,complaint,general_inquiry,technical_assistance,callback_request" placeholder="Type and press enter to add">
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="source" class="form-label">Integration Source:</label>
-                                        <select name="source" id="source" class="form-control">
-                                            <option value="">Select Source</option>
-                                            <option value="api" {{ ($company['source'] ?? '') == 'api' ? 'selected' : '' }}>API</option>
-                                            <option value="avaya" {{ ($company['source'] ?? '') == 'avaya' ? 'selected' : '' }}>Avaya</option>
-                                            <option value="genesys" {{ ($company['source'] ?? '') == 'genesys' ? 'selected' : '' }}>Genesys</option>
-                                            <option value="fb" {{ ($company['source'] ?? '') == 'fb' ? 'selected' : '' }}>FB</option>
-                                            <option value="linkedin" {{ ($company['source'] ?? '') == 'linkedin' ? 'selected' : '' }}>LinkedIn</option>
-                                            <option value="inta" {{ ($company['source'] ?? '') == 'inta' ? 'selected' : '' }}>Instagram</option>
-                                            <option value="tiktok" {{ ($company['source'] ?? '') == 'tiktok' ? 'selected' : '' }}>TikTok</option>
-                                            <option value="snap" {{ ($company['source'] ?? '') == 'snap' ? 'selected' : '' }}>Snapchat</option>
-                                            <option value="x" {{ ($company['source'] ?? '') == 'x' ? 'selected' : '' }}>X (Twitter)</option>
-                                            <option value="whatsapp" {{ ($company['source'] ?? '') == 'whatsapp' ? 'selected' : '' }}>WhatsApp</option>
-                                            <option value="email" {{ ($company['source'] ?? '') == 'email' ? 'selected' : '' }}>Email</option>
+                                        <label for="source" class="form-label">Integration Sources:</label>
+                                        @php
+                                            $currentSources = is_array($company['source'] ?? []) ? ($company['source'] ?? []) : (isset($company['source']) ? [$company['source']] : []);
+                                        @endphp
+                                        <select name="source[]" id="source" class="form-control select2" multiple>
+                                            <option value="api" {{ in_array('api', $currentSources) ? 'selected' : '' }}>API</option>
+                                            <option value="avaya" {{ in_array('avaya', $currentSources) ? 'selected' : '' }}>Avaya</option>
+                                            <option value="genesys" {{ in_array('genesys', $currentSources) ? 'selected' : '' }}>Genesys</option>
+                                            <option value="fb" {{ in_array('fb', $currentSources) ? 'selected' : '' }}>FB</option>
+                                            <option value="linkedin" {{ in_array('linkedin', $currentSources) ? 'selected' : '' }}>LinkedIn</option>
+                                            <option value="inta" {{ in_array('inta', $currentSources) ? 'selected' : '' }}>Instagram</option>
+                                            <option value="tiktok" {{ in_array('tiktok', $currentSources) ? 'selected' : '' }}>TikTok</option>
+                                            <option value="snap" {{ in_array('snap', $currentSources) ? 'selected' : '' }}>Snapchat</option>
+                                            <option value="x" {{ in_array('x', $currentSources) ? 'selected' : '' }}>X (Twitter)</option>
+                                            <option value="whatsapp" {{ in_array('whatsapp', $currentSources) ? 'selected' : '' }}>WhatsApp</option>
+                                            <option value="email" {{ in_array('email', $currentSources) ? 'selected' : '' }}>Email</option>
                                         </select>
+                                        <small class="text-muted">You can select multiple sources.</small>
                                     </div>
                                     <div class="col-12">
                                         <label for="company_overview" class="form-label">Company Overview:</label>

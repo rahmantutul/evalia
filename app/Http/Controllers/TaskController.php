@@ -207,7 +207,8 @@ class TaskController extends Controller
             if (File::exists($filePath)) {
                 $data = json_decode(File::get($filePath), true);
             } else {
-                abort(404, "Task analysis not found for ID: {$workId} (Template: {$templateId})");
+                // Fallback to demo data instead of 404
+                $data = $this->getRealArabicData();
             }
         }
 

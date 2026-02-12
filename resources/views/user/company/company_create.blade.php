@@ -216,9 +216,8 @@
                                         <input type="text" class="form-control" id="call_types" name="call_types"  placeholder="Type and press enter to add">
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="source" class="form-label">Integration Source:</label>
-                                        <select name="source" id="source" class="form-control">
-                                            <option value="">Select Source</option>
+                                        <label for="source" class="form-label">Integration Sources:</label>
+                                        <select name="source[]" id="source" class="form-control select2" multiple>
                                             <option value="api">API</option>
                                             <option value="avaya">Avaya</option>
                                             <option value="genesys">Genesys</option>
@@ -231,6 +230,7 @@
                                             <option value="whatsapp">WhatsApp</option>
                                             <option value="email">Email</option>
                                         </select>
+                                        <small class="text-muted">You can select multiple sources.</small>
                                     </div>
                                     
                                     <div class="col-12">

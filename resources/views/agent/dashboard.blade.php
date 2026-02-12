@@ -51,7 +51,7 @@
         position: relative;
         height: 300px;
         padding: 1.25rem;
-    }
+    }`
     
     .agent-card {
         padding: 1rem;

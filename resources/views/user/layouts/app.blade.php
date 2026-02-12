@@ -32,8 +32,13 @@
 </head>
 
 <body>
-    @include('user.layouts.topbar')
-    @include('user.layouts.sidebar')
+    @if(session('user.role.name') === 'Supervisor')
+        @include('supervisor.layouts.topbar')
+        @include('supervisor.layouts.sidebar')
+    @else
+        @include('user.layouts.topbar')
+        @include('user.layouts.sidebar')
+    @endif
 
     <div class="startbar-overlay d-print-none"></div>
 

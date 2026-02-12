@@ -108,7 +108,56 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h4 class="fw-bold mb-1">Department Analysis Dashboard</h4>
-                    <p class="text-muted mb-0">Comprehensive overview of call quality metrics and agent performance</p>
+                    <div class="d-flex align-items-center gap-2 mb-0">
+                        <p class="text-muted mb-0">Comprehensive overview of metrics</p>
+                        <span class="text-muted">|</span>
+                        <div class="d-flex align-items-center gap-1">
+                            <span class="text-muted small fw-bold">Active Sources:</span>
+                            @php
+                                // Use company ID as seed for stable dummy data
+                                $seed = crc32($company['id'] ?? 'default');
+                                mt_srand($seed);
+                                
+                                $allSources = ['api', 'avaya', 'genesys', 'fb', 'linkedin', 'inta', 'tiktok', 'snap', 'x', 'whatsapp', 'email'];
+                                
+                                // Picker: pick 2-4 stable sources
+                                $count = mt_rand(2, 4);
+                                $tempSources = $allSources;
+                                $randSources = [];
+                                for($i = 0; $i < $count; $i++) {
+                                    $idx = mt_rand(0, count($tempSources) - 1);
+                                    $randSources[] = $tempSources[$idx];
+                                    unset($tempSources[$idx]);
+                                    $tempSources = array_values($tempSources);
+                                }
+                                
+                                mt_srand(); // Reset
+                                
+                                $map = [
+                                    'api' => ['name' => 'API', 'color' => '#0a66c2', 'icon' => 'fas fa-code'],
+                                    'avaya' => ['name' => 'Avaya', 'color' => '#d32f2f', 'icon' => 'fas fa-phone'],
+                                    'genesys' => ['name' => 'Genesys', 'color' => '#2e7d32', 'icon' => 'fas fa-headset'],
+                                    'fb' => ['name' => 'Facebook', 'color' => '#1877f2', 'icon' => 'fab fa-facebook-f'],
+                                    'linkedin' => ['name' => 'LinkedIn', 'color' => '#0077b5', 'icon' => 'fab fa-linkedin-in'],
+                                    'inta' => ['name' => 'Instagram', 'color' => '#e4405f', 'icon' => 'fab fa-instagram'],
+                                    'tiktok' => ['name' => 'TikTok', 'color' => '#000000', 'icon' => 'fab fa-tiktok'],
+                                    'snap' => ['name' => 'Snapchat', 'color' => '#fffc00', 'text' => '#000', 'icon' => 'fab fa-snapchat-ghost'],
+                                    'x' => ['name' => 'X', 'color' => '#000000', 'icon' => 'fab fa-x-twitter'],
+                                    'whatsapp' => ['name' => 'WhatsApp', 'color' => '#25d366', 'icon' => 'fab fa-whatsapp'],
+                                    'email' => ['name' => 'Email', 'color' => '#757575', 'icon' => 'fas fa-envelope'],
+                                ];
+                            @endphp
+                            @foreach($randSources as $rs)
+                                @php 
+                                    $s = $map[strtolower($rs)] ?? ['name' => $rs, 'color' => '#6c757d', 'icon' => 'fas fa-link'];
+                                    $textColor = $s['text'] ?? '#fff';
+                                @endphp
+                                <span class="badge d-flex align-items-center gap-1" style="background-color: {{ $s['color'] }}; color: {{ $textColor }}; font-size: 10px; padding: 4px 10px; border-radius: 4px;" title="{{ $s['name'] }}">
+                                    <i class="{{ $s['icon'] }}"></i> {{ $s['name'] }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
                 <div class="d-flex gap-2 align-items-center">
                     <a class="btn btn-outline-secondary fw-600 shadow-sm text-back d-flex align-items-center justify-content-center" 

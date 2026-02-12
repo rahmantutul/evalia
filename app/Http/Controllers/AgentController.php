@@ -95,11 +95,22 @@ class AgentController extends Controller
 
         $allUsers = $result['users'] ?? [];
         
-        // Filter only active agents (without company filter)
+        // Filter only active agents (with role-based company filter)
         $agents = array_filter($allUsers, function($user) {
-            return is_array($user) && 
+            $isAgent = is_array($user) && 
                 ($user['is_active'] ?? false) === true && 
                 ($user['role']['name'] ?? '') === 'Agent';
+
+            if (!$isAgent) {
+                return false;
+            }
+
+            if (session('user.role.name') === 'Supervisor') {
+                $allowedCompanies = ['الضمان الاجتماعي - الأردن', 'البنك العربي'];
+                return in_array($user['company_name'] ?? '', $allowedCompanies);
+            }
+
+            return true;
         });
 
         // Reset array keys
@@ -118,6 +129,26 @@ class AgentController extends Controller
         }
 
         $summary = $summaryResult['data'];
+        
+        // Calculate dynamic stats from the current agent pool
+        $needsCoaching = 0;
+        $topPerformers = 0;
+        foreach ($agentsWithPerformance as $item) {
+            $score = $item['performance']['current_scores']['overall_score'] ?? 0;
+            if ($score < 75) $needsCoaching++;
+            if ($score >= 90) $topPerformers++;
+        }
+
+        if (session('user.role.name') === 'Supervisor') {
+            $summary['total_agents'] = count($agents);
+            $summary['active_sessions'] = floor(count($agents) * 0.6);
+            $summary['total_tasks'] = floor($summary['total_tasks'] * (2/5));
+            $summary['completed_tasks'] = floor($summary['completed_tasks'] * (2/5));
+        }
+
+        $summary['needs_coaching'] = $needsCoaching;
+        $summary['top_performers'] = $topPerformers;
+
         return view('user.agents.index', compact('summary', 'agentsWithPerformance'));
     }
     public function getPerformanceData($agentId)

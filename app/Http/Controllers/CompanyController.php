@@ -36,6 +36,10 @@ class CompanyController extends Controller
             ['id' => 'royal-jordanian', 'name' => 'الملكية الأردنية', 'group_name' => 'القطاع الخاص']
         ];
 
+        if (session('user.role.name') === 'Supervisor') {
+            $companies = array_slice($companies, 0, 2);
+        }
+
         $agentsResult = $this->apiService->getAgentsList();
         $companyAgents = $agentsResult['success'] ? $agentsResult['agents'] : [];
 
@@ -78,6 +82,9 @@ class CompanyController extends Controller
     private function getAllTasks()
     {
         $companies = ['ssc-jordan', 'arab-bank', 'orange-jo', 'manaseer-group', 'royal-jordanian'];
+        if (session('user.role.name') === 'Supervisor') {
+            $companies = array_slice($companies, 0, 2);
+        }
         $agentsPool = [
             'نادي البديري', 'سارة الخطيب', 'محمود المصري', 'ليلى حسن', 'أحمد المناصير', 
             'فرح الزعبي', 'يزن التل', 'رشا عبيدات', 'عمر الحمصي', 'نور السالم', 
@@ -153,6 +160,13 @@ class CompanyController extends Controller
 
     public function companyDetails($id, Request $request)
     {
+        if (session('user.role.name') === 'Supervisor') {
+            $allowedIds = ['ssc-jordan', 'arab-bank'];
+            if (!in_array($id, $allowedIds)) {
+                return redirect()->route('user.company.list')->with('error', 'Unauthorized access to this department.');
+            }
+        }
+
         $allCompanies = [
             'ssc-jordan' => ['id' => 'ssc-jordan', 'name' => 'الضمان الاجتماعي - الأردن', 'group_id' => 'govt-sector', 'filler_words' => ['يعني', 'أمم', 'طيب'], 'main_topics' => ['الاشتراكات', 'التقاعد', 'التقسيط'], 'policies' => ['التحقق من الهوية ضروري', 'الرد خلال 24 ساعة']],
             'arab-bank' => ['id' => 'arab-bank', 'name' => 'البنك العربي', 'group_id' => 'private-sector', 'filler_words' => ['أهلاً', 'تفضل'], 'main_topics' => ['القروض', 'البطاقات'], 'policies' => ['السرية المصرفية']],

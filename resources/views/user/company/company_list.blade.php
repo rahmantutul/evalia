@@ -210,7 +210,9 @@
                 <div class="card-header">
                     <div class="col d-flex justify-content-between align-items-center">                      
                         <h4 class="card-title mb-0">Department List</h4>
+                         @if(session('user.role.name') !== 'Supervisor')
                         <a href="{{ route('user.company.create') }}" class="btn btn-sm btn-primary d-block float-end">+ Create New</a>                  
+                        @endif
                     </div>                                 
                 </div>
                 <div class="card-body pt-0">
@@ -242,6 +244,7 @@
                                 <tr>
                                     <th>Department Name</th>
                                     <th>Industry</th>
+                                    <th>Sources</th>
                                     <th>Agents</th>
                                     <th>Location</th>
                                     <th style="text-align: center">Action</th>
@@ -250,17 +253,66 @@
                             <tbody>
                                 @php
                                     $totalCompanies = count($companies);
+                                    
+                                    function getSourceBadge($source) {
+                                        $map = [
+                                            'api' => ['name' => 'API', 'color' => '#0a66c2', 'icon' => 'fas fa-code'],
+                                            'avaya' => ['name' => 'Avaya', 'color' => '#d32f2f', 'icon' => 'fas fa-phone'],
+                                            'genesys' => ['name' => 'Genesys', 'color' => '#2e7d32', 'icon' => 'fas fa-headset'],
+                                            'fb' => ['name' => 'Facebook', 'color' => '#1877f2', 'icon' => 'fab fa-facebook-f'],
+                                            'linkedin' => ['name' => 'LinkedIn', 'color' => '#0077b5', 'icon' => 'fab fa-linkedin-in'],
+                                            'inta' => ['name' => 'Instagram', 'color' => '#e4405f', 'icon' => 'fab fa-instagram'],
+                                            'tiktok' => ['name' => 'TikTok', 'color' => '#000000', 'icon' => 'fab fa-tiktok'],
+                                            'snap' => ['name' => 'Snapchat', 'color' => '#fffc00', 'text' => '#000', 'icon' => 'fab fa-snapchat-ghost'],
+                                            'x' => ['name' => 'X', 'color' => '#000000', 'icon' => 'fab fa-x-twitter'],
+                                            'whatsapp' => ['name' => 'WhatsApp', 'color' => '#25d366', 'icon' => 'fab fa-whatsapp'],
+                                            'email' => ['name' => 'Email', 'color' => '#757575', 'icon' => 'fas fa-envelope'],
+                                        ];
+                                        
+                                        $s = $map[strtolower($source)] ?? ['name' => $source, 'color' => '#6c757d', 'icon' => 'fas fa-link'];
+                                        $textColor = $s['text'] ?? '#fff';
+                                        
+                                        return "<span class='badge' style='background-color: {$s['color']}; color: {$textColor} ; font-size: 10px; padding: 5px 10px; margin-right: 4px; border-radius: 4px; display: inline-flex; align-items: center; gap: 5px;' title='{$s['name']}'><i class='{$s['icon']}'></i> {$s['name']}</span>";
+                                    }
                                 @endphp
                                 @foreach($companies as $company)
                                     @php
                                         $industries = ['Banking & Finance', 'Telecommunications', 'E-commerce', 'Government Services', 'Healthcare Provider', 'Airlines', 'Retail'];
                                         $locations = ['Amman, Jordan', 'Irbid, Jordan', 'Zarqa, Jordan', 'Aqaba, Jordan', 'Ma\'an, Jordan', 'Salt, Jordan'];
+                                        $allSources = ['api', 'avaya', 'genesys', 'fb', 'linkedin', 'inta', 'tiktok', 'snap', 'x', 'whatsapp', 'email'];
                                         
-                                        $industry = $industries[array_rand($industries)];
-                                        $location = $locations[array_rand($locations)];
+                                        // Use CRC32 of ID to get a stable seed for randomness
+                                        $seed = crc32($company['id']);
+                                        mt_srand($seed);
                                         
-                                        // Determine agent count for this specific company
-                                        $agents = rand(8, 15); // Each company has 8-15 agents
+                                        $industry = $industries[mt_rand(0, count($industries) - 1)];
+                                        $location = $locations[mt_rand(0, count($locations) - 1)];
+                                        
+                                        // Picker: pick 1-3 stable sources
+                                        $count = mt_rand(1, 4); // Increased slightly for variety
+                                        $tempSources = $allSources;
+                                        $randSources = [];
+                                        
+                                        // Force 'api' for the first 3 companies to satisfy requirement
+                                        if ($loop->index < 3) {
+                                            $randSources[] = 'api';
+                                            $tempSources = array_values(array_filter($tempSources, fn($s) => $s !== 'api'));
+                                            $count--;
+                                        }
+
+                                        for($i = 0; $i < $count; $i++) {
+                                            if (empty($tempSources)) break;
+                                            $idx = mt_rand(0, count($tempSources) - 1);
+                                            $randSources[] = $tempSources[$idx];
+                                            unset($tempSources[$idx]);
+                                            $tempSources = array_values($tempSources);
+                                        }
+                                        
+                                        // Determine agent count stably
+                                        $agents = mt_rand(8, 25); 
+                                        
+                                        // Reset generator
+                                        mt_srand();
                                     @endphp
                                     <tr>
                                         <td>
@@ -269,6 +321,13 @@
                                             </a>
                                         </td>
                                         <td>{{ $industry }}</td>
+                                        <td>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach($randSources as $rs)
+                                                    {!! getSourceBadge($rs) !!}
+                                                @endforeach
+                                            </div>
+                                        </td>
                                         <td>{{ $agents }}</td>
                                         <td>{{ $location }}</td>
                                         <td>
@@ -276,18 +335,17 @@
                                                 <a href="{{ route('user.company.view',$company['id']) }}" class="btn btn-icon" title="View">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                {{--  <button type="button" class="btn btn-icon" data-bs-toggle="modal" data-bs-target="#audioUploadModal{{ $company['id'] }}" style="height: 38px;" title="Add a new task">
-                                                    <i class="fas fa-plus"></i>
-                                                </button>  --}}
                                                 <a href="{{ route('user.task.list',$company['id']) }}" class="btn btn-icon" title="Task List">
                                                     <i class="fas fa-list"></i>
                                                 </a>
+                                                  @if(session('user.role.name') !== 'Supervisor')
                                                 <a href="{{ route('user.company.edit',$company['id']) }}" class="btn btn-icon" title="Settings">
                                                     <i class="fas fa-cogs"></i>
                                                 </a>
                                                 <a href="{{ route('user.company.delete',$company['id']) }}" onclick="return confirm('Are you sure to delete this?')" class="btn btn-icon btn-delete" title="Delete">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </a>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

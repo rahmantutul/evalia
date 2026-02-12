@@ -14,31 +14,18 @@
         box-shadow: 0 0.5rem 1.25rem rgba(140, 152, 164, 0.1) !important;
     }
 
-    /* Progress Ring Specifics */
-    .progress-ring {
-        position: relative;
-        width: 120px;
-        height: 120px;
-        margin: 0 auto;
-    }
-    .progress-ring-circle {
-        transition: stroke-dashoffset 0.8s ease-in-out;
-        transform: rotate(-90deg);
-        transform-origin: 50% 50%;
-    }
-
     /* Metric Cards */
     .icon-circle {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.1rem;
+        font-size: 0.95rem;
     }
     .metric-value {
-        font-size: 1.6rem;
+        font-size: 1.4rem;
         font-weight: 800;
         letter-spacing: -0.02em;
         color: #1e2022;
@@ -164,68 +151,68 @@
         </div><!--end col-->
     </div><!--end row-->
 
-    <!-- Progress Overview -->
-    <div class="row g-4 mb-4">
+    <!-- Compressed Progress Overview -->
+    <div class="row g-2 mb-3">
+        <!-- Overall Progress -->
         <div class="col-md-3">
-            <div class="dashboard-card h-100 text-center">
-                <div class="card-body p-4">
-                    <div class="progress-ring">
-                        <svg width="120" height="120">
-                            <circle class="progress-ring-circle" stroke="#e9ecef" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
-                            <circle class="progress-ring-circle" stroke="#0d6efd" stroke-width="8" fill="transparent" r="52" cx="60" cy="60" 
-                                    style="stroke-dasharray: 326.73; stroke-dashoffset: 98;"/>
-                        </svg>
-                        <div class="position-absolute top-50 start-50 translate-middle">
-                            <h3 class="fw-bold text-primary mb-0">70%</h3>
-                            <small class="text-muted">Complete</small>
-                        </div>
+            <div class="dashboard-card h-100">
+                <div class="card-body p-2 px-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="text-muted mb-0 extra-small fw-bold">OVERALL PROGRESS</p>
+                        <h5 class="fw-bold mb-0" style="color: #0d6efd !important;">70%</h5>
                     </div>
-                    <p class="text-muted small mb-0 mt-3">Overall Progress</p>
+                    <div class="progress-container my-1" style="height: 6px; width: 100%; background-color: #e9ecef; border-radius: 10px; overflow: hidden;">
+                        <div class="progress-fill" style="height: 100%; width: 70%; background-color: #0d6efd; border-radius: 10px;"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted extra-small">Level 4 Agent</small>
+                        <small class="text-primary extra-small fw-bold">3 left</small>
+                    </div>
                 </div>
             </div>
         </div>
+        <!-- Tasks -->
         <div class="col-md-3">
             <div class="dashboard-card h-100">
-                <div class="card-body p-3">
+                <div class="card-body p-2 px-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="text-muted mb-1 small fw-bold">TASKS COMPLETED</p>
-                            <h3 class="metric-value mb-1 fw-bold text-success">7/10</h3>
-                            <small class="text-muted">3 remaining</small>
+                            <p class="text-muted mb-0 extra-small fw-bold uppercase">TASKS DONE</p>
+                            <h4 class="mb-0 fw-bold text-success">7/10</h4>
                         </div>
-                        <div class="icon-circle bg-soft-success">
+                        <div class="icon-circle bg-soft-success" style="width: 32px; height: 32px; font-size: 0.8rem;">
                             <i class="fas fa-check-double text-success"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Score -->
         <div class="col-md-3">
             <div class="dashboard-card h-100">
-                <div class="card-body p-3">
+                <div class="card-body p-2 px-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="text-muted mb-1 small fw-bold">SCORE IMPROVEMENT</p>
-                            <h3 class="metric-value mb-1 fw-bold text-primary">+15</h3>
-                            <small class="text-success"><i class="fas fa-arrow-up"></i> From 72 to 87</small>
+                            <p class="text-muted mb-0 extra-small fw-bold uppercase">SCORE IMPROVE.</p>
+                            <h4 class="mb-0 fw-bold text-primary">+15</h4>
                         </div>
-                        <div class="icon-circle bg-soft-primary">
+                        <div class="icon-circle bg-soft-primary" style="width: 32px; height: 32px; font-size: 0.8rem;">
                             <i class="fas fa-chart-line text-primary"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Next Due -->
         <div class="col-md-3">
             <div class="dashboard-card h-100">
-                <div class="card-body p-3">
+                <div class="card-body p-2 px-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="text-muted mb-1 small fw-bold">NEXT DUE</p>
-                            <h3 class="metric-value mb-1 fw-bold text-warning">Feb 15</h3>
-                            <small class="text-muted">5 days left</small>
+                            <p class="text-muted mb-0 extra-small fw-bold uppercase">NEXT DUE</p>
+                            <h4 class="mb-0 fw-bold text-warning">Feb 15</h4>
                         </div>
-                        <div class="icon-circle bg-soft-warning">
+                        <div class="icon-circle bg-soft-warning" style="width: 32px; height: 32px; font-size: 0.8rem;">
                             <i class="fas fa-calendar-alt text-warning"></i>
                         </div>
                     </div>

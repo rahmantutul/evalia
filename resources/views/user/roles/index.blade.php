@@ -15,9 +15,11 @@
                         </ol>
                     </div>
                     <div class="col-auto">
+                          @if(session('user.role.name') !== 'Supervisor')
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createRoleModal">
                             <i class="fas fa-plus me-1"></i> Create Role
                         </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -94,7 +96,8 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <div class="btn-group">
+                                             <div class="btn-group">
+                                                   @if(session('user.role.name') !== 'Supervisor')
                                                 <button type="button" class="btn btn-sm btn-outline-primary"
                                                         data-bs-toggle="modal" data-bs-target="#editRoleModal"
                                                         data-role-id="{{ $role['id'] }}"
@@ -107,6 +110,9 @@
                                                         onclick="confirmDelete('{{ $role['id'] }}', '{{ $role['name'] }}')">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
+                                                @else
+                                                <span class="badge bg-light text-dark">View Only</span>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -117,9 +123,11 @@
                                                 <i class="fas fa-shield-alt fa-3x mb-3"></i>
                                                 <h5>No Roles Found</h5>
                                                 <p>Get started by creating your first role.</p>
+                                                 @if(session('user.role.name') !== 'Supervisor')
                                                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createRoleModal">
                                                     Create Role
                                                 </button>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

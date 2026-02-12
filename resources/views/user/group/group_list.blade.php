@@ -70,9 +70,11 @@
                     <div class="row align-items-center">
                         <div class="col d-flex justify-content-between align-items-center">                      
                             <h4 class="card-title mb-0">Groups Management</h4>
+                             @if(session('user.role.name') !== 'Supervisor')
                             <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
                                 <i class="bi bi-plus-lg me-1"></i>Create New Group
-                            </button>                   
+                            </button>
+                            @endif
                         </div>
                     </div>                                 
                 </div>
@@ -111,12 +113,15 @@
                                             </td> 
                                             <td>
 
+                                                     @if(session('user.role.name') !== 'Supervisor')
                                                 <button type="button" class="btn btn-xs btn-outline-primary mt-1 add-keyword-set-btn" data-group-name="{{ $group['group_name'] }}">
                                                     <i class="bi bi-plus-circle me-1"></i>Add Keyword Set
                                                 </button>
+                                                @endif
                                             </td>
                                             <td>
-                                                <div class="btn-group" role="group">
+                                                 <div class="btn-group" role="group">
+                                                    @if(session('user.role.name') !== 'Supervisor')
                                                     <button type="button" class="btn btn-icon edit-group-btn" 
                                                         data-group-id="{{ $group['group_id'] }}" 
                                                         data-group-name="{{ $group['group_name'] }}" 
@@ -126,6 +131,9 @@
                                                     <button type="button" class="btn btn-icon btn-delete demo-restricted" title="Delete">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
+                                                    @else
+                                                    <span class="badge bg-light text-dark">View Only</span>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>

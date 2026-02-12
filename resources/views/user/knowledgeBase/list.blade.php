@@ -16,9 +16,11 @@
                             <p class="text-muted mb-0 small"> knowledge resources</p>
                         </div>
                     </div>
+                     @if(session('user.role.name') !== 'Supervisor')
                     <a href="{{ route('user.knowledgeBase.create') }}" class="btn btn-primary d-flex align-items-center">
                         <i class="fas fa-plus me-2"></i> New Entry
                     </a>
+                    @endif
                 </div>
                 <!-- Data Table -->
                 <div class="card-body p-4">
@@ -100,9 +102,11 @@
                                             <div class="py-5">
                                                 <i class="fas fa-database fa-2x text-muted mb-3"></i>
                                                 <p class="text-muted">No knowledge base entries found.</p>
+                                                 @if(session('user.role.name') !== 'Supervisor')
                                                 <a href="{{ route('user.knowledgeBase.create') }}" class="btn btn-primary mt-2">
                                                     <i class="fas fa-plus me-1"></i> Create Your First Entry
                                                 </a>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

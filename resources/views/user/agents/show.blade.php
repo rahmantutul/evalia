@@ -1,189 +1,448 @@
 @extends('user.layouts.app')
 
+@push('styles')
+<style>
+    /* Premium Profile Aesthetics */
+    .profile-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .profile-cover {
+        height: 120px;
+        background: linear-gradient(135deg, #0a66c2 0%, #004182 100%);
+        position: relative;
+    }
+
+    .profile-avatar-wrapper {
+        position: absolute;
+        bottom: -40px;
+        left: 25px;
+        padding: 4px;
+        background: #ffffff;
+        border-radius: 18px;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 16px;
+        object-fit: cover;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-content {
+        padding: 55px 25px 30px;
+    }
+
+    .agent-name-lg {
+        font-size: 24px;
+        font-weight: 900;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .display-id-badge {
+        font-size: 11px;
+        font-weight: 800;
+        color: #0a66c2;
+        background: #eff6ff;
+        padding: 3px 8px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0 0;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f8fafc;
+    }
+    .info-item:last-child { border-bottom: none; }
+
+    .info-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    .info-label { font-size: 12px; color: #64748b; margin-bottom: 1px; }
+    .info-value { font-size: 14px; font-weight: 700; color: #1e293b; }
+
+    /* Metric Cards */
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .metric-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s;
+    }
+    .metric-card:hover { transform: translateY(-3px); }
+
+    .metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .metric-icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .metric-value { font-size: 26px; font-weight: 900; color: #0f172a; margin-bottom: 2px; }
+    .metric-label { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Detail Cards */
+    .detail-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        padding: 25px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-title-premium {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 25px;
+    }
+
+    /* Soft & Percent Wise Progress Bars */
+    .progress-classic {
+        height: 8px !important;
+        border-radius: 10px;
+        background-color: #f1f5f9 !important;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .progress-bar-soft {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.6s ease;
+    }
+
+    /* Table Adjustment */
+    .evaluations-container {
+        max-height: 380px !important;
+        overflow-y: auto;
+        margin-top: 10px;
+        scrollbar-width: thin;
+    }
+    
+    .table-premium thead th {
+        position: sticky;
+        top: 0;
+        background: #fff;
+        z-index: 2;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 15px;
+    }
+
+    .status-pill {
+        font-size: 10px;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+
+</style>
+@endpush
+
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <div class="col d-flex justify-content-between align-items-center">
-                        <h4 class="card-title mb-0">Agent Details</h4>
-                        <div class="btn-group">
-                            <a href="{{ route('user.agents.performance', $agent['agent_details']['id'] ?? '') }}" class="btn btn-sm btn-success">
-                                <i class="fas fa-chart-line me-1"></i>Performance
-                            </a>
-                        </div>
+@php
+    function getSoftPctColor($val) {
+        if ($val >= 90) return '#10b981'; // Emerald
+        if ($val >= 75) return '#3b82f6'; // Blue
+        if ($val >= 60) return '#f59e0b'; // Amber
+        return '#ef4444'; // Red
+    }
+@endphp
+
+<div class="container-fluid p-4">
+    <!-- Breadcrumb -->
+    <div class="row align-items-center mb-4 text-white">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('user.agents.index') }}" class="text-dark fw-600">Workforce</a></li>
+                    <li class="breadcrumb-item active fw-600">Agent Intelligence Profile</li>
+                </ol>
+            </nav>
+            <h2 class="fw-900 text-dark mb-0">Agent Performance Dashboard</h2>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-xl-3">
+            <div class="profile-card">
+                <div class="profile-cover">
+                    <div class="profile-avatar-wrapper">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode($agent['agent_details']['name'] ?? 'Agent') }}&background=random&color=fff&bold=true&size=128" class="profile-avatar" alt="Avatar">
                     </div>
                 </div>
-                <div class="card-body">
-                    @if(session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-
-                    @if(session('error'))
-                        <div class="alert alert-danger">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-
-                    <div class="row">
-                        <!-- Agent Information -->
-                        <div class="col-md-6">
-                            <div class="card mb-4">
-                                <div class="card-header bg-light">
-                                    <h5 class="card-title mb-0">Agent Information</h5>
-                                </div>
-                                <div class="card-body">
-                                    <table class="table table-borderless">
-                                        <tr>
-                                            <td class="text-muted" width="40%">Agent ID:</td>
-                                            <td class="fw-bold">
-                                                <span class="badge bg-primary">{{ $agent['agent_details']['display_id'] ?? 'N/A' }}</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Full Name:</td>
-                                            <td class="fw-bold">{{ $agent['agent_details']['name'] ?? 'N/A' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Position:</td>
-                                            <td class="fw-bold">{{ $agent['agent_details']['position'] ?? 'N/A' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Company:</td>
-                                            <td class="fw-bold">{{ $agent['agent_details']['company_name'] ?? 'N/A' }}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Current Performance -->
-                        <div class="col-md-6">
-                            <div class="card mb-4">
-                                <div class="card-header bg-light">
-                                    <h5 class="card-title mb-0">Current Performance</h5>
-                                </div>
-                                <div class="card-body">
-                                    @if(isset($agent['current_scores']))
-                                    <table class="table table-borderless">
-                                        <tr>
-                                            <td class="text-muted" width="50%">Overall Score:</td>
-                                            <td class="fw-bold">
-                                                <span class="badge bg-primary fs-6">
-                                                    {{ number_format($agent['current_scores']['overall_score'] ?? 0, 1) }}/100
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Answer Accuracy:</td>
-                                            <td class="fw-bold">
-                                                <div class="progress" style="height: 20px;">
-                                                    <div class="progress-bar bg-success" role="progressbar" 
-                                                         style="width: {{ $agent['current_scores']['answer_accuracy'] ?? 0 }}%;" 
-                                                         aria-valuenow="{{ $agent['current_scores']['answer_accuracy'] ?? 0 }}" 
-                                                         aria-valuemin="0" aria-valuemax="100">
-                                                        {{ $agent['current_scores']['answer_accuracy'] ?? 0 }}%
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Response Speed:</td>
-                                            <td class="fw-bold">
-                                                <div class="progress" style="height: 20px;">
-                                                    <div class="progress-bar bg-info" role="progressbar" 
-                                                         style="width: {{ $agent['current_scores']['response_speed'] ?? 0 }}%;" 
-                                                         aria-valuenow="{{ $agent['current_scores']['response_speed'] ?? 0 }}" 
-                                                         aria-valuemin="0" aria-valuemax="100">
-                                                        {{ $agent['current_scores']['response_speed'] ?? 0 }}%
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Customer Satisfaction:</td>
-                                            <td class="fw-bold">
-                                                <div class="progress" style="height: 20px;">
-                                                    <div class="progress-bar bg-warning" role="progressbar" 
-                                                         style="width: {{ $agent['current_scores']['customer_satisfaction'] ?? 0 }}%;" 
-                                                         aria-valuenow="{{ $agent['current_scores']['customer_satisfaction'] ?? 0 }}" 
-                                                         aria-valuemin="0" aria-valuemax="100">
-                                                        {{ $agent['current_scores']['customer_satisfaction'] ?? 0 }}%
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    @else
-                                    <p class="text-muted text-center">No performance data available.</p>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
+                <div class="profile-content">
+                    <div class="display-id-badge">{{ $agent['agent_details']['display_id'] ?? 'AGT-77421' }}</div>
+                    <h3 class="agent-name-lg">{{ $agent['agent_details']['name'] ?? 'Sara Al-Khateeb' }}</h3>
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <span class="badge rounded-pill" style="background: #dcfce7; color: #166534; font-weight: 800; font-size: 10px;">
+                           <i class="fas fa-circle me-1" style="font-size: 6px;"></i> ACTIVE
+                        </span>
+                        <span class="text-secondary small fw-bold">|</span>
+                        <span class="text-secondary small fw-bold">{{ $agent['agent_details']['position'] ?? 'Customer Service' }}</span>
                     </div>
 
-                    <!-- Performance Weights -->
-                    @if(isset($agent['performance_weights']))
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <h5 class="card-title mb-0">Performance Weights</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row text-center">
-                                        <div class="col-md-4">
-                                            <div class="card bg-success text-white">
-                                                <div class="card-body">
-                                                    <h4>{{ number_format(($agent['performance_weights']['answer_accuracy'] ?? 0) * 100) }}%</h4>
-                                                    <p class="mb-0">Answer Accuracy</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="card bg-info text-white">
-                                                <div class="card-body">
-                                                    <h4>{{ number_format(($agent['performance_weights']['response_speed'] ?? 0) * 100) }}%</h4>
-                                                    <p class="mb-0">Response Speed</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="card bg-warning text-white">
-                                                <div class="card-body">
-                                                    <h4>{{ number_format(($agent['performance_weights']['customer_satisfaction'] ?? 0) * 100) }}%</h4>
-                                                    <p class="mb-0">Customer Satisfaction</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <div class="info-icon"><i class="fas fa-user-tie"></i></div>
+                            <div>
+                                <div class="info-label">Supervisor</div>
+                                <div class="info-value">محمود علي</div>
                             </div>
                         </div>
-                    </div>
-                    @endif
-
-                    <!-- Quick Stats -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <h5 class="card-title mb-0">Agent ID Information</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-muted mb-0">
-                                        <strong>Internal ID:</strong> {{ $agent['agent_details']['id'] ?? 'N/A' }}
-                                    </p>
-                                </div>
+                        <div class="info-item">
+                            <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                            <div>
+                                <div class="info-label">Organization Email</div>
+                                <div class="info-value">{{ strtolower(Str::slug($agent['agent_details']['name'] ?? 'agent')) }}@ssc.gov.jo</div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon"><i class="fas fa-phone"></i></div>
+                            <div>
+                                <div class="info-label">Direct Extension</div>
+                                <div class="info-value">+962 79 555 {{ rand(1000, 9999) }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Main -->
+        <div class="col-xl-9">
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon-box" style="background: #eff6ff; color: #1d4ed8;"><i class="fas fa-wave-square"></i></div>
+                        <span class="badge bg-soft-success text-success fw-900">+4.2%</span>
+                    </div>
+                    <div class="metric-value">{{ number_format($agent['summary']['total_interaction'] ?? 1420) }}</div>
+                    <div class="metric-label">Interactions</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon-box" style="background: #f0fdf4; color: #15803d;"><i class="fas fa-brain"></i></div>
+                        <span class="badge bg-soft-primary text-primary fw-900">Score</span>
+                    </div>
+                    @php $score = $agent['current_scores']['overall_score'] ?? 92.5; @endphp
+                    <div class="metric-value" style="color: {{ getSoftPctColor($score) }}">{{ number_format($score, 1) }}%</div>
+                    <div class="metric-label">Intelligence Score</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon-box" style="background: #fef3c7; color: #b45309;"><i class="fas fa-heart"></i></div>
+                        <span class="badge bg-soft-warning text-warning fw-900">CSAT</span>
+                    </div>
+                    @php $csat = $agent['summary']['satisfaction_rate'] ?? 96; @endphp
+                    <div class="metric-value" style="color: {{ getSoftPctColor($csat) }}">{{ $csat }}%</div>
+                    <div class="metric-label">Satisfaction Rate</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon-box" style="background: #ecfeff; color: #0e7490;"><i class="fas fa-shield-alt"></i></div>
+                        <span class="badge bg-soft-info text-info fw-900">Low Risk</span>
+                    </div>
+                    <div class="metric-value">98.2%</div>
+                    <div class="metric-label">Compliance</div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="detail-card">
+                        <h4 class="card-title-premium">
+                            <div class="icon-sm bg-primary rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 10px;">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            Intelligence Metrics Breakdown
+                        </h4>
+                        
+                        @foreach([
+                            ['name' => 'Answer Accuracy', 'val' => $agent['current_scores']['answer_accuracy'] ?? 94],
+                            ['name' => 'Response Speed', 'val' => $agent['current_scores']['response_speed'] ?? 88],
+                            ['name' => 'Professionalism', 'val' => $agent['current_scores']['professionalism'] ?? 96],
+                            ['name' => 'Problem Solving', 'val' => 90],
+                            ['name' => 'Tone & Empathy', 'val' => $agent['current_scores']['customer_satisfaction'] ?? 92]
+                        ] as $metric)
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-bold text-secondary" style="font-size: 13px;">{{ $metric['name'] }}</span>
+                                <span class="fw-800" style="font-size: 13px; color: {{ getSoftPctColor($metric['val']) }}">{{ $metric['val'] }}%</span>
+                            </div>
+                            <div class="progress-classic">
+                                <div class="progress-bar-soft" 
+                                     style="width: {{ $metric['val'] }}%; background-color: {{ getSoftPctColor($metric['val']) }} !important;">
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="detail-card">
+                        <h4 class="card-title-premium">
+                            <div class="icon-sm bg-success rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 10px;">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            Performance Trend
+                        </h4>
+                        <div id="performanceTrendChart" style="height: 250px; width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluations Table -->
+            <div class="detail-card mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-0">
+                    <h4 class="card-title-premium mb-0">
+                        <div class="icon-sm bg-dark rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 10px;">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        Recent Intelligence Evaluations
+                    </h4>
+                </div>
+
+                <div class="evaluations-container">
+                    <table class="table table-hover align-middle table-premium">
+                        <thead>
+                            <tr class="text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;">
+                                <th>Session Date</th>
+                                <th>Category</th>
+                                <th>Outcome</th>
+                                <th class="text-center">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $evalLogs = [
+                                    ['date' => 'Today', 'time'=>'10:24 AM', 'cat' => 'Complaints', 'status' => 'Resolved', 'score' => 96],
+                                    ['date' => 'Yesterday', 'time'=>'04:12 PM', 'cat' => 'Inquiry', 'status' => 'Escalated', 'score' => 82],
+                                    ['date' => 'Feb 10', 'time'=>'09:45 AM', 'cat' => 'General', 'status' => 'Resolved', 'score' => 94],
+                                    ['date' => 'Feb 09', 'time'=>'11:00 AM', 'cat' => 'Technical', 'status' => 'Pending', 'score' => 74],
+                                    ['date' => 'Feb 08', 'time'=>'02:30 PM', 'cat' => 'Billing', 'status' => 'Resolved', 'score' => 88],
+                                ];
+                            @endphp
+                            @foreach($evalLogs as $log)
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark" style="font-size: 13px;">{{ $log['date'] }}</div>
+                                    <div class="text-muted" style="font-size: 11px;">{{ $log['time'] }}</div>
+                                </td>
+                                <td><span class="badge bg-light text-secondary border fw-bold" style="font-size: 10px;">{{ $log['cat'] }}</span></td>
+                                <td>
+                                    @php 
+                                        $sc = $log['status'] == 'Resolved' ? 'success' : ($log['status'] == 'Escalated' ? 'danger' : 'warning');
+                                    @endphp
+                                    <span class="status-pill" style="background: var(--bs-soft-{{ $sc }}); color: var(--bs-{{ $sc }});">
+                                        {{ $log['status'] }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-900" style="color: {{ getSoftPctColor($log['score']) }}">{{ $log['score'] }}%</span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const historyData = @json($agent['history'] ?? []);
+        
+        const options = {
+            series: [{
+                name: 'Performance',
+                data: historyData.map(item => item.score || item.value)
+            }],
+            chart: {
+                type: 'area',
+                height: 250,
+                toolbar: { show: false },
+                zoom: { enabled: false }
+            },
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth', width: 3, colors: ['#0a66c2'] },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.4,
+                    opacityTo: 0.05,
+                    stops: [0, 90, 100]
+                }
+            },
+            xaxis: {
+                categories: historyData.map(item => item.date),
+                labels: { style: { colors: '#94a3b8', fontWeight: 600 } }
+            },
+            yaxis: {
+                labels: { style: { colors: '#94a3b8', fontWeight: 600 } }
+            },
+            grid: { borderColor: '#f1f5f9' },
+            tooltip: { theme: 'dark' }
+        };
+
+        const chart = new ApexCharts(document.querySelector("#performanceTrendChart"), options);
+        chart.render();
+    });
+</script>
+@endpush
