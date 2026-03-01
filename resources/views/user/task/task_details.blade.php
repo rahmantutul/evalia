@@ -103,6 +103,113 @@
 
         <div class="row gy-4">
             @php
+                $manualPairs = [
+                    [
+                        'question' => 'هل شمول الضمان الاجتماعي (الشمول الحر) له نظام تقسيط؟',
+                        'answer' => 'طلب توضيح المقصود بالتقسيط ولم يؤكد وجود نظام تقسيط.',
+                        'evaluation' => '❌',
+                        'notebook_name' => 'KB-INS-017',
+                        'matching_topics' => ['الشمول الحر', 'تقسيط الاشتراكات'],
+                        'confidence_level' => '0.90',
+                        'KBtext' => 'سياسات الاشتراك – الشمول الحر',
+                        'matching_transcript_sections' => []
+                    ],
+                    [
+                        'question' => 'هل أصحاب الشمول الحر مشمولون ببرنامج التقسيط؟',
+                        'answer' => 'أوضح أن المعلومة غير متوفرة حاليًا، وعرض رفع استفسار رسمي.',
+                        'evaluation' => '⚠️ مطابق إجرائيًا (اتباع إجراء بديل عند غياب المعلومة)',
+                        'notebook_name' => 'KB-INS-022',
+                        'matching_topics' => ['برامج التقسيط', 'الاستفسارات غير المؤكدة'],
+                        'confidence_level' => '0.60',
+                        'KBtext' => 'إجراءات التعامل مع الاستفسارات غير الموثقة',
+                        'matching_transcript_sections' => []
+                    ],
+                    [
+                        'question' => 'الرقم مبين عندكم ولا؟',
+                        'answer' => 'أكد رقم الهاتف المستخدم للتواصل وانتهائه بـ 095.',
+                        'evaluation' => '✅ مطابق',
+                        'notebook_name' => 'KB-CS-009',
+                        'matching_topics' => ['التحقق من بيانات العميل', 'التواصل اللاحق'],
+                        'confidence_level' => '0.85',
+                        'KBtext' => 'خدمة العملاء – التحقق من بيانات الاتصال',
+                        'matching_transcript_sections' => []
+                    ]
+                ];
+                $data['analysis_alignment_result_notebook'] = $manualPairs;
+
+                $policyCompliance = [
+                    [
+                        'title' => 'Greeting & Identification',
+                        'requirement' => 'Proper greeting and service identification',
+                        'action' => 'Opened call with organization name and offered help',
+                        'evaluation' => 'Meets policy',
+                        'reference' => 'POL-CS-001',
+                        'topics' => ['Call opening', 'professionalism'],
+                        'confidence' => 0.95,
+                        'section' => 'Customer Interaction – Call Opening Standards'
+                    ],
+                    [
+                        'title' => 'Customer Identification',
+                        'requirement' => 'Ask for and confirm customer name respectfully',
+                        'action' => 'Requested customer name and addressed customer formally',
+                        'evaluation' => 'Meets policy',
+                        'reference' => 'POL-CS-003',
+                        'topics' => ['Customer verification', 'respectful communication'],
+                        'confidence' => 0.90,
+                        'section' => 'Customer Verification Procedures'
+                    ],
+                    [
+                        'title' => 'Handling Inquiry',
+                        'requirement' => 'Clarify unclear customer questions before answering',
+                        'action' => 'Asked clarifying questions about “installment” meaning',
+                        'evaluation' => 'Meets policy',
+                        'reference' => 'POL-CS-006',
+                        'topics' => ['Question clarification', 'active listening'],
+                        'confidence' => 0.88,
+                        'section' => 'Inquiry Handling Guidelines'
+                    ],
+                    [
+                        'title' => 'Knowledge Gap Handling',
+                        'requirement' => 'Do not provide unverified information; escalate if unsure',
+                        'action' => 'Did not guess; paused and checked availability of information',
+                        'evaluation' => 'Meets policy',
+                        'reference' => 'POL-KB-004',
+                        'topics' => ['Knowledge limitations', 'accuracy'],
+                        'confidence' => 0.92,
+                        'section' => 'Knowledge Base Usage & Escalation'
+                    ],
+                    [
+                        'title' => 'Escalation & Follow-up',
+                        'requirement' => 'Offer official escalation and set clear expectations',
+                        'action' => 'Offered to raise inquiry and stated 24-hour follow-up timeframe',
+                        'evaluation' => 'Meets policy',
+                        'reference' => 'POL-CS-011',
+                        'topics' => ['Case escalation', 'follow-up commitment'],
+                        'confidence' => 0.90,
+                        'section' => 'Case Management & Follow-up'
+                    ],
+                    [
+                        'title' => 'Data Confirmation',
+                        'requirement' => 'Confirm contact details before closing escalation',
+                        'action' => 'Confirmed phone number ending digits with customer',
+                        'evaluation' => 'Meets policy',
+                        'reference' => 'POL-DATA-002',
+                        'topics' => ['Data accuracy', 'contact verification'],
+                        'confidence' => 0.93,
+                        'section' => 'Customer Data Validation'
+                    ],
+                    [
+                        'title' => 'Call Closing',
+                        'requirement' => 'Proper closing, offer further help, polite farewell',
+                        'action' => 'Asked if further assistance is needed and closed politely',
+                        'evaluation' => 'Meets policy',
+                        'reference' => 'POL-CS-015',
+                        'topics' => ['Call closure', 'customer satisfaction'],
+                        'confidence' => 0.96,
+                        'section' => 'Call Closing Standards'
+                    ]
+                ];
+
                 // Initialize sentiment counters
                 $agentSentiments = ['Positive' => 0, 'Neutral' => 0, 'Negative' => 0];
                 $customerSentiments = ['Positive' => 0, 'Neutral' => 0, 'Negative' => 0];
@@ -929,212 +1036,96 @@
             </div>
 
             <div class="col-lg-6 animate-fade">
+
                 <div class="card shadow-sm border-0 rounded-3">
                     <div class="card-header d-flex justify-content-between align-items-center p-2 bg-white border-bottom">
-                        <h6 class="card-title mb-0 fw-bold text-dark">⏱️ Timeline Analysis</h6>
-                        <div class="info-icon" data-bs-toggle="tooltip" title="Analysis states">i</div>
+                        <h6 class="card-title mb-0 fw-bold text-dark">📋 Policy Compliance Check</h6>
+                        <div class="info-icon" data-bs-toggle="tooltip" title="Analysis of agent performance against organization policies">i</div>
                     </div>
 
-                    <div class="card-body">
-                        <div class="professional-card">
+                    <div class="card-body p-0">
+                        <div class="accordion accordion-flush" id="policyAccordion">
+                            @foreach ($policyCompliance as $index => $item)
+                                <div class="accordion-item border-bottom">
+                                    <h2 class="accordion-header" id="policyHeading{{ $index }}">
+                                        <button class="accordion-button {{ $index === 0 ? '' : 'collapsed' }} d-flex justify-content-between align-items-center py-3"
+                                            type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#policyCollapse{{ $index }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}"
+                                            aria-controls="policyCollapse{{ $index }}">
+                                            <span class="fw-semibold text-dark">
+                                                <i class="fas fa-shield-alt me-2 text-primary"></i>
+                                                {{ $item['title'] }}
+                                            </span>
+                                            <span class="badge bg-success-subtle text-success border ms-2 rounded-pill px-3 py-1">
+                                                <i class="fas fa-check-circle me-1"></i> {{ $item['evaluation'] }}
+                                            </span>
+                                        </button>
+                                    </h2>
+                                    <div id="policyCollapse{{ $index }}" class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}"
+                                        aria-labelledby="policyHeading{{ $index }}" data-bs-parent="#policyAccordion">
+                                        <div class="accordion-body bg-light-subtle">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <div class="small text-muted mb-1 fw-bold text-uppercase" style="font-size: 0.7rem;">
+                                                        <i class="fas fa-file-contract text-primary me-1"></i> Policy Requirement
+                                                    </div>
+                                                    <div class="p-2 border rounded bg-white shadow-sm border-start-0 border-end-0 border-bottom-0 border-top-2 border-primary">
+                                                        {{ $item['requirement'] }}
+                                                    </div>
+                                                </div>
 
-                            <!-- Tabs Navigation -->
-                            <ul class="nav nav-pills nav-fill mb-3 sentiment-tabs" id="timeAnalysisTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="Delays-tab" data-bs-toggle="tab"
-                                        data-bs-target="#Delays" type="button" role="tab">
-                                        Delays
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="Pauses-tab" data-bs-toggle="tab"
-                                        data-bs-target="#Pauses" type="button" role="tab">
-                                        Pauses
-                                    </button>
-                                </li>
-                            </ul>
+                                                <div class="col-12">
+                                                    <div class="small text-muted mb-1 fw-bold text-uppercase" style="font-size: 0.7rem;">
+                                                        <i class="fas fa-user-tie text-secondary me-1"></i> Agent Action
+                                                    </div>
+                                                    <div class="p-2 border rounded bg-white shadow-sm border-start-0 border-end-0 border-bottom-0 border-top-2 border-info">
+                                                        {{ $item['action'] }}
+                                                    </div>
+                                                </div>
 
-                            <!-- Tab Content -->
-                            <div class="tab-content p-0">
+                                                <div class="col-md-6">
+                                                    <div class="small text-muted mb-1 fw-bold text-uppercase" style="font-size: 0.7rem;">
+                                                        <i class="fas fa-bookmark text-info me-1"></i> Policy Reference
+                                                    </div>
+                                                    <span class="badge bg-white text-primary border px-2 py-1 shadow-sm">{{ $item['reference'] }}</span>
+                                                </div>
 
-                                <!-- Delays Tab -->
-                                <div class="tab-pane fade show active" id="Delays" role="tabpanel"
-                                    aria-labelledby="Delays-tab">
-                                    <div class="sentiment-table-container" style="max-height: 400px; overflow-y: auto;">
-                                        <table class="table table-hover align-middle mb-0 sentiment-table">
-                                            <thead class="table-light sticky-top">
-                                                <tr>
-                                                    <th width="20%">Speaker</th>
-                                                    <th width="15%">Duration</th>
-                                                    <th width="25%">Time</th>
-                                                    <th width="40%">Context</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @if (isset($data['pause_delay_information']['speaker_delay_duration']))
-                                                    @php
-                                                        $agentDelays =
-                                                            $data['pause_delay_information']['speaker_delay_duration'][
-                                                                'agent'
-                                                            ] ?? [];
-                                                        $customerDelays =
-                                                            $data['pause_delay_information']['speaker_delay_duration'][
-                                                                'customer'
-                                                            ] ?? [];
-                                                        $allDelays = array_merge(
-                                                            array_map(
-                                                                fn($item) => $item + ['speaker' => 'Agent'],
-                                                                $agentDelays,
-                                                            ),
-                                                            array_map(
-                                                                fn($item) => $item + ['speaker' => 'Customer'],
-                                                                $customerDelays,
-                                                            ),
-                                                        );
-                                                    @endphp
+                                                <div class="col-md-6">
+                                                    <div class="small text-muted mb-1 fw-bold text-uppercase" style="font-size: 0.7rem;">
+                                                        <i class="fas fa-chart-line text-success me-1"></i> Compliance Confidence
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="progress flex-grow-1" style="height: 8px; border-radius: 4px;">
+                                                            <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                                                                role="progressbar" 
+                                                                style="width: {{ $item['confidence'] * 100 }}%"></div>
+                                                        </div>
+                                                        <span class="small fw-bold text-success">{{ $item['confidence'] * 100 }}%</span>
+                                                    </div>
+                                                </div>
 
-                                                    @forelse($allDelays as $delay)
-                                                        @php
-                                                            $context = $delay['context'] ?? 'No context available';
-                                                            if ($context == 'No context available' && isset($data['speakers_transcriptions'])) {
-                                                                foreach (
-                                                                    $data['speakers_transcriptions']
-                                                                    as $transcript
-                                                                ) {
-                                                                    if (
-                                                                        isset(
-                                                                            $transcript['start_time'],
-                                                                            $transcript['end_time'],
-                                                                            $delay['delay_start'],
-                                                                            $delay['delay_end'],
-                                                                        )
-                                                                    ) {
-                                                                        $start = timeToSeconds($transcript['start_time']);
-                                                                        $end = timeToSeconds($transcript['end_time']);
-                                                                        $delayStart = timeToSeconds($delay['delay_start']);
-                                                                        $delayEnd = timeToSeconds($delay['delay_end']);
+                                                <div class="col-md-6">
+                                                    <div class="small text-muted mb-1 fw-bold text-uppercase" style="font-size: 0.7rem;">
+                                                        <i class="fas fa-tags text-warning me-1"></i> Related Topics
+                                                    </div>
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        @foreach ($item['topics'] as $topic)
+                                                            <span class="badge bg-white text-dark border shadow-sm">{{ $topic }}</span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
 
-                                                                        if (
-                                                                            $start >= $delayStart - 5 &&
-                                                                            $end <= $delayEnd + 5
-                                                                        ) {
-                                                                            $context = $transcript['transcript'] ?? 'No context available';
-                                                                            break;
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        @endphp
-                                                        <tr>
-                                                            <td>
-                                                                <span
-                                                                    class="badge {{ $delay['speaker'] == 'Agent' ? 'bg-warning-subtle text-warning' : 'bg-success-subtle text-success' }} px-2 py-1">
-                                                                    <i
-                                                                        class="bi {{ $delay['speaker'] == 'Agent' ? 'bi-headset' : 'bi-person' }} me-1"></i>
-                                                                    {{ $delay['speaker'] }}
-                                                                </span>
-                                                            </td>
-                                                            <td>{{ $delay['delay_duration'] ?? 'N/A' }}</td>
-                                                            <td>{{ $delay['delay_start'] ?? 'N/A' }} -
-                                                                {{ $delay['delay_end'] ?? 'N/A' }}</td>
-                                                            <td class="text-truncate" title="{{ $context }}">
-                                                                {{ $context }}</td>
-                                                        </tr>
-                                                    @empty
-                                                        <tr>
-                                                            <td colspan="4" class="text-center py-4 text-muted">
-                                                                <i class="bi bi-check-circle me-2"></i> No significant
-                                                                delays detected
-                                                            </td>
-                                                        </tr>
-                                                    @endforelse
-                                                @else
-                                                    <tr>
-                                                        <td colspan="4" class="text-center py-4 text-muted">
-                                                            <i class="bi bi-exclamation-triangle me-2"></i> Delay data not
-                                                            available
-                                                        </td>
-                                                    </tr>
-                                                @endif
-                                            </tbody>
-                                        </table>
+                                                <div class="col-md-6">
+                                                    <div class="small text-muted mb-1 fw-bold text-uppercase" style="font-size: 0.7rem;">
+                                                        <i class="fas fa-sitemap text-muted me-1"></i> Policy Section
+                                                    </div>
+                                                    <div class="small fw-medium p-1 px-2 border rounded bg-white shadow-sm">{{ $item['section'] }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <!-- Pauses Tab -->
-                                <div class="tab-pane fade" id="Pauses" role="tabpanel" aria-labelledby="Pauses-tab">
-                                    <div class="sentiment-table-container" style="max-height: 400px; overflow-y: auto;">
-                                        <table class="table table-hover align-middle mb-0 sentiment-table">
-                                            <thead class="table-light sticky-top">
-                                                <tr>
-                                                    <th width="20%">Speaker</th>
-                                                    <th width="15%">Duration</th>
-                                                    <th width="25%">Time</th>
-                                                    <th width="40%">Context</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @if (isset($data['pause_delay_information']['speaker_pause_duration']))
-                                                    @php
-                                                        $agentPauses =
-                                                            $data['pause_delay_information']['speaker_pause_duration'][
-                                                                'agent'
-                                                            ] ?? [];
-                                                        $customerPauses =
-                                                            $data['pause_delay_information']['speaker_pause_duration'][
-                                                                'customer'
-                                                            ] ?? [];
-                                                        $allPauses = array_merge(
-                                                            array_map(
-                                                                fn($item) => $item + ['speaker' => 'Agent'],
-                                                                $agentPauses,
-                                                            ),
-                                                            array_map(
-                                                                fn($item) => $item + ['speaker' => 'Customer'],
-                                                                $customerPauses,
-                                                            ),
-                                                        );
-                                                    @endphp
-
-                                                    @forelse($allPauses as $pause)
-                                                        <tr>
-                                                            <td>
-                                                                <span
-                                                                    class="badge {{ $pause['speaker'] == 'Agent' ? 'bg-warning-subtle text-warning' : 'bg-success-subtle text-success' }} px-2 py-1">
-                                                                    <i
-                                                                        class="bi {{ $pause['speaker'] == 'Agent' ? 'bi-headset' : 'bi-person' }} me-1"></i>
-                                                                    {{ $pause['speaker'] }}
-                                                                </span>
-                                                            </td>
-                                                            <td>{{ $pause['pause_duration'] ?? 'N/A' }}</td>
-                                                            <td>{{ $pause['pause_start'] ?? 'N/A' }} -
-                                                                {{ $pause['pause_end'] ?? 'N/A' }}</td>
-                                                            <td class="text-truncate"
-                                                                title="{{ $pause['pause_class'] ?? 'No context' }}">
-                                                                {{ $pause['pause_class'] ?? 'No context' }}</td>
-                                                        </tr>
-                                                    @empty
-                                                        <tr>
-                                                            <td colspan="4" class="text-center py-4 text-muted">
-                                                                <i class="bi bi-check-circle me-2"></i> No significant
-                                                                pauses detected
-                                                            </td>
-                                                        </tr>
-                                                    @endforelse
-                                                @else
-                                                    <tr>
-                                                        <td colspan="4" class="text-center py-4 text-muted">
-                                                            <i class="bi bi-exclamation-triangle me-2"></i> Pause data not
-                                                            available
-                                                        </td>
-                                                    </tr>
-                                                @endif
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                            </div><!-- tab-content -->
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -1218,7 +1209,7 @@
                                                     {{ Str::limit($result['question'] ?? '', 80) }}
                                                 </span>
                                                 <span class="badge bg-light text-dark border ms-2">
-                                                    {{ ucfirst($result['confidence_level'] ?? '') }}
+                                                    {{ is_numeric($result['confidence_level'] ?? '') ? $result['confidence_level'] : ucfirst($result['confidence_level'] ?? '') }}
                                                 </span>
                                             </button>
                                         </h2>
@@ -1238,7 +1229,7 @@
                                                         <div class="small text-muted mb-1">
                                                             <i class="fas fa-check-circle text-success me-1"></i> Evaluation
                                                         </div>
-                                                        <span class="badge bg-success rounded-pill">
+                                                        <span class="badge bg-{{ str_contains($result['evaluation'] ?? '', '❌') ? 'danger' : (str_contains($result['evaluation'] ?? '', '⚠️') ? 'warning' : 'success') }} rounded-pill">
                                                             {{ $result['evaluation'] ?? '' }}
                                                         </span>
                                                     </div>
@@ -1292,8 +1283,8 @@
                                                             <i class="fas fa-chart-line text-success me-1"></i> Confidence
                                                         </div>
                                                         <span
-                                                            class="badge bg-{{ ($result['confidence_level'] ?? '') == 'high' ? 'success' : (($result['confidence_level'] ?? '') == 'medium' ? 'warning' : 'danger') }}">
-                                                            {{ ucfirst($result['confidence_level'] ?? '') }}
+                                                            class="badge bg-{{ ($result['confidence_level'] ?? '') == 'high' || (is_numeric($result['confidence_level'] ?? '') && $result['confidence_level'] >= 0.8) ? 'success' : (($result['confidence_level'] ?? '') == 'medium' || (is_numeric($result['confidence_level'] ?? '') && $result['confidence_level'] >= 0.5) ? 'warning' : 'danger') }}">
+                                                            {{ is_numeric($result['confidence_level'] ?? '') ? $result['confidence_level'] : ucfirst($result['confidence_level'] ?? '') }}
                                                         </span>
                                                     </div>
 
@@ -1406,7 +1397,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Define new color palette
             const chartColors = {
-                sentiment: ['#A89F96', '#9A8E85', '#C7BCB1'], // Soft taupe, muted brown-gray, warm gray
+                sentiment: ['#8FA998', '#9A8E85', '#BF8F8F'], // Success (Greenish), Neutral (Grayish), Danger (Reddish)
                 speechRate: ['#8FA3A9', '#8FA998'], // Muted slate blue, muted sage green
                 loudness: ['#C9B178', '#8FA998', '#BF8F8F'], // Soft gold, muted sage, dusty rose
             };
@@ -1504,17 +1495,32 @@
     </script>
     @php
         $items = $data['analysis_alignment_result_notebook'] ?? [];
-        $evaluationCounts = collect($items)->groupBy('evaluation')->map->count()->toArray();
+        // Map long evaluation strings to simple categories for the chart
+        $evaluationCounts = collect($items)->map(function($item) {
+            $eval = $item['evaluation'] ?? '';
+            if (str_contains($eval, '✅')) return 'Correct';
+            if (str_contains($eval, '⚠️')) return 'Partial';
+            if (str_contains($eval, '❌')) return 'Incorrect';
+            return 'Other';
+        })->groupBy(fn($i) => $i)->map->count()->toArray();
+        
+        // Ensure consistent order: Correct, Partial, Incorrect, Other
+        $orderedCounts = [];
+        foreach(['Correct', 'Partial', 'Incorrect', 'Other'] as $key) {
+            if (isset($evaluationCounts[$key])) {
+                $orderedCounts[$key] = $evaluationCounts[$key];
+            }
+        }
+        $evaluationCounts = $orderedCounts;
         $evaluationTypes = array_keys($evaluationCounts);
         $total = count($items);
 
-        // Define a gradient palette for premium look
-        $gradients = [
-            ['#D1CDC7', '#E8E5E0'], // Light grays
-            ['#C7BCB1', '#D8D2C9'], // Warm grays
-            ['#A89F96', '#C5BDB5'], // Taupe tones
-            ['#9A8E85', '#B2A89F'], // Muted brown-grays
-            ['#8FA3A9', '#B5C7CC']  // Muted slate blues
+        // Map categories to specific premium colors
+        $categoryGradients = [
+            'Correct' => ['#8FA998', '#B5C7CC'],   // Sage Green
+            'Partial' => ['#C9B178', '#E8E5E0'],   // Soft Gold
+            'Incorrect' => ['#BF8F8F', '#D1CDC7'], // Dusty Rose
+            'Other' => ['#A89F96', '#C5BDB5']      // Taupe
         ];
     @endphp
 
@@ -1525,12 +1531,12 @@
             const labels = @json($evaluationTypes);
             const dataValues = @json(array_values($evaluationCounts));
 
-            // Create gradient colors dynamically
-            const gradientColors = labels.map((_, index) => {
+            // Create gradient colors based on categories
+            const gradientColors = labels.map((label) => {
                 const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-                const colors = @json($gradients);
-                gradient.addColorStop(0, colors[index % colors.length][0]);
-                gradient.addColorStop(1, colors[index % colors.length][1]);
+                const colors = @json($categoryGradients)[label] || ['#A89F96', '#C5BDB5'];
+                gradient.addColorStop(0, colors[0]);
+                gradient.addColorStop(1, colors[1]);
                 return gradient;
             });
 

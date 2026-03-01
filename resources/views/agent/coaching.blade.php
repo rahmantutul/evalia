@@ -410,37 +410,37 @@
                     <!-- Micro Videos -->
                     <h6 class="fw-bold small text-muted mb-3">MICRO-VIDEOS (1-3 MIN)</h6>
                     <div class="row g-3 mb-4">
+                        <!-- Video 1 -->
                         <div class="col-md-4">
-                            <div class="resource-card">
+                            <div class="resource-card cursor-pointer js-video-popup" data-video-id="8K19oXZyAAU" data-title="Handling Angry Customers">
                                 <div class="video-thumbnail mb-2">
                                     <div class="play-icon">
                                         <i class="fas fa-play"></i>
                                     </div>
                                 </div>
                                 <h6 class="fw-bold small mb-1">Handling Angry Customers</h6>
-                                <p class="extra-small text-muted mb-0"><i class="fas fa-clock me-1"></i> 2:15</p>
                             </div>
                         </div>
+                        <!-- Video 2 -->
                         <div class="col-md-4">
-                            <div class="resource-card">
+                            <div class="resource-card cursor-pointer js-video-popup" data-video-id="Eq7Z2i7m57Y" data-title="Verification Best Practices">
                                 <div class="video-thumbnail mb-2" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
                                     <div class="play-icon">
                                         <i class="fas fa-play"></i>
                                     </div>
                                 </div>
                                 <h6 class="fw-bold small mb-1">Verification Best Practices</h6>
-                                <p class="extra-small text-muted mb-0"><i class="fas fa-clock me-1"></i> 1:45</p>
                             </div>
                         </div>
+                        <!-- Video 3 -->
                         <div class="col-md-4">
-                            <div class="resource-card">
+                            <div class="resource-card cursor-pointer js-video-popup" data-video-id="q11TFTK2-FM" data-title="Building Rapport Quickly">
                                 <div class="video-thumbnail mb-2" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
                                     <div class="play-icon">
                                         <i class="fas fa-play"></i>
                                     </div>
                                 </div>
                                 <h6 class="fw-bold small mb-1">Building Rapport Quickly</h6>
-                                <p class="extra-small text-muted mb-0"><i class="fas fa-clock me-1"></i> 2:50</p>
                             </div>
                         </div>
                     </div>
@@ -480,38 +480,29 @@
                             <span class="badge bg-soft-danger text-danger">Score: 72</span>
                         </div>
                         <p class="extra-small text-muted mb-2">Focus on: Empathy & Mirroring</p>
-                        <button class="btn btn-sm btn-white border w-100 shadow-sm" onclick="playMockCall('CUS-3301')">
+                        <button class="btn btn-sm btn-white border w-100 shadow-sm" onclick="playMockCall('CUS-3301', 'Empathy Training', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3')">
                             <i class="fas fa-play me-1 text-primary"></i> Listen & Self-Review
                         </button>
                     </div>
 
                     <div class="call-review-item mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-bold small">Call #CUS-1120</span>
-                            <span class="badge bg-soft-success text-success">Score: 85</span>
+                            <span class="fw-bold small">Call #CUS-4402</span>
+                            <span class="badge bg-soft-warning text-warning">Score: 78</span>
                         </div>
-                        <p class="extra-small text-muted mb-2">Example of: Positive Closing</p>
-                        <button class="btn btn-sm btn-white border w-100 shadow-sm" onclick="playMockCall('CUS-1120')">
-                            <i class="fas fa-play me-1 text-primary"></i> Review Gold Example
+                        <p class="extra-small text-muted mb-2">Focus on: Technical Accuracy</p>
+                        <button class="btn btn-sm btn-white border w-100 shadow-sm" onclick="playMockCall('CUS-4402', 'Product Knowledge', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3')">
+                            <i class="fas fa-play me-1 text-primary"></i> Analyze Interaction
                         </button>
                     </div>
-                    <div class="call-review-item mb-3">
+
+                    <div class="call-review-item">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="fw-bold small">Call #CUS-1120</span>
-                            <span class="badge bg-soft-success text-success">Score: 85</span>
+                            <span class="badge bg-soft-success text-success">Score: 92</span>
                         </div>
                         <p class="extra-small text-muted mb-2">Example of: Positive Closing</p>
-                        <button class="btn btn-sm btn-white border w-100 shadow-sm" onclick="playMockCall('CUS-1120')">
-                            <i class="fas fa-play me-1 text-primary"></i> Review Gold Example
-                        </button>
-                    </div>
-                    <div class="call-review-item mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-bold small">Call #CUS-1120</span>
-                            <span class="badge bg-soft-success text-success">Score: 85</span>
-                        </div>
-                        <p class="extra-small text-muted mb-2">Example of: Positive Closing</p>
-                        <button class="btn btn-sm btn-white border w-100 shadow-sm" onclick="playMockCall('CUS-1120')">
+                        <button class="btn btn-sm btn-white border w-100 shadow-sm" onclick="playMockCall('CUS-1120', 'Gold Standard Example', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3')">
                             <i class="fas fa-play me-1 text-primary"></i> Review Gold Example
                         </button>
                     </div>
@@ -675,54 +666,149 @@
         </div>
     </div> --}}
 </div>
+
+<!-- Video Modal -->
+<div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white py-2 border-0">
+                <h6 class="modal-title fw-bold" id="videoModalLabel">Coaching Video</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="ratio ratio-16x9 h-100">
+                    <iframe id="videoPlayer" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Audio Player Modal -->
+<div class="modal fade" id="audioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header py-2 border-0 bg-primary text-white">
+                <h6 class="modal-title fw-bold" id="audioModalLabel">Practice Audio</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <i class="fas fa-headphones fa-3x text-primary shadow-sm p-3 rounded-circle bg-soft-primary"></i>
+                </div>
+                <h6 id="audioCallId" class="fw-bold mb-1">Call #CUS-0000</h6>
+                <p id="audioFocus" class="small text-muted mb-4">Focus Area: Performance Review</p>
+                <div class="bg-light p-3 rounded-3">
+                    <audio id="audioPlayer" controls class="w-100">
+                        <source src="" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
     // Mini Trend Chart
-    const ctx = document.getElementById('scoreTrendChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-            datasets: [{
-                label: 'Score',
-                data: [72, 76, 82, 87],
-                borderColor: '#0d6efd',
-                backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 4,
-                pointBackgroundColor: '#fff',
-                pointBorderColor: '#0d6efd',
-                pointBorderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#1e293b',
-                    padding: 8,
-                    cornerRadius: 6
-                }
+    const chartElement = document.getElementById('scoreTrendChart');
+    if (chartElement) {
+        const ctx = chartElement.getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Score',
+                    data: [72, 76, 82, 87],
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#0d6efd',
+                    pointBorderWidth: 2
+                }]
             },
-            scales: {
-                x: { 
-                    grid: { display: false },
-                    ticks: { font: { size: 9 } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        padding: 8,
+                        cornerRadius: 6
+                    }
                 },
-                y: { 
-                    min: 60,
-                    max: 100,
-                    grid: { borderDash: [3, 3], color: '#e2e8f0' },
-                    ticks: { stepSize: 10, font: { size: 9 } }
+                scales: {
+                    x: { 
+                        grid: { display: false },
+                        ticks: { font: { size: 9 } }
+                    },
+                    y: { 
+                        min: 60,
+                        max: 100,
+                        grid: { borderDash: [3, 3], color: '#e2e8f0' },
+                        ticks: { stepSize: 10, font: { size: 9 } }
+                    }
                 }
             }
-        }
-    });
+        });
+    }
+
+    // Video Modal Logic
+    const videoModalEl = document.getElementById('videoModal');
+    const videoPlayer = document.getElementById('videoPlayer');
+    const videoModalLabel = document.getElementById('videoModalLabel');
+
+    if (videoModalEl && videoPlayer) {
+        const videoModal = new bootstrap.Modal(videoModalEl);
+
+        document.querySelectorAll('.js-video-popup').forEach(trigger => {
+            trigger.addEventListener('click', function() {
+                const videoId = this.getAttribute('data-video-id');
+                const title = this.getAttribute('data-title');
+                
+                if (videoModalLabel) videoModalLabel.textContent = title;
+                videoPlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                videoModal.show();
+            });
+        });
+
+        // Clean up when modal closes
+        videoModalEl.addEventListener('hidden.bs.modal', function () {
+            videoPlayer.src = '';
+        });
+    }
+
+    // Audio Modal Logic
+    const audioModalEl = document.getElementById('audioModal');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const audioModalLabel = document.getElementById('audioModalLabel');
+    const audioCallId = document.getElementById('audioCallId');
+    const audioFocus = document.getElementById('audioFocus');
+
+    if (audioModalEl && audioPlayer) {
+        const audioModal = new bootstrap.Modal(audioModalEl);
+
+        window.playMockCall = function(id, focus, url) {
+            audioCallId.textContent = `Call #${id}`;
+            audioFocus.textContent = `Focus Area: ${focus}`;
+            audioPlayer.src = url;
+            audioPlayer.load();
+            audioModal.show();
+            audioPlayer.play();
+        };
+
+        // Clean up when modal closes
+        audioModalEl.addEventListener('hidden.bs.modal', function () {
+            audioPlayer.pause();
+            audioPlayer.src = '';
+        });
+    }
 </script>
 @endpush

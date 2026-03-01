@@ -491,7 +491,24 @@
                         $status = $statuses[rand(0, 2)];
                         $overallScore = $scores['overall_score'] ?? rand(60, 98);
                         $perfLevel = $overallScore >= 90 ? 'high' : ($overallScore >= 75 ? 'medium' : 'low');
-                        $risk = $overallScore < 70 ? 'yes' : 'no';
+                        
+                        $dangerSentences = [
+                            "Policy violation during early retirement counseling.",
+                            "Incorrect information provided regarding maternity allowance eligibility.",
+                            "Failed to verify mandatory identification for account modification.",
+                            "Used non-professional terminology during sensitive law inquiry.",
+                            "Missing mandatory silence-gap closure during verification steps.",
+                            "Leaked partial confidential data in unencrypted chat channel.",
+                            "Agent displayed high frustration levels during customer escalation.",
+                            "Inaccurate guidance on Social Security law article 42 procedures."
+                        ];
+
+                        $riskCount = $overallScore < 75 ? rand(1, 4) : 0;
+                        $risk = $riskCount > 0 ? 'yes' : 'no';
+                        $agentRisks = $riskCount > 0 ? (array)array_rand(array_flip($dangerSentences), $riskCount) : [];
+                        // Ensure it's an array if only one item is picked
+                        if ($riskCount == 1) $agentRisks = [$agentRisks];
+
                         $channels = ['phone', 'chat', 'whatsapp', 'social'];
                         $channel = $channels[rand(0, 3)];
                         $impact = rand(-5, 5) + ($overallScore - 80) / 4;
@@ -506,13 +523,13 @@
                                 <div class="agent-info">
                                     <img src="https://ui-avatars.com/api/?name={{ urlencode($agent['full_name'] ?? 'Agent') }}&background=random&color=fff&bold=true" class="agent-avatar" alt="">
                                     <div>
-                                        <a href="{{ route('user.agents.show', $agent['id'] ?? 1) }}" class="agent-name text-decoration-none hover-primary">{{ $agent['full_name'] ?? 'N/A' }}</a>
+                                        <a href="{{ route('user.agents.show', ['agentId' => $agent['id'] ?? 1]) }}?name={{ urlencode($agent['full_name'] ?? 'N/A') }}&company={{ urlencode($agent['company_name'] ?? 'الضمان الاجتماعي - الأردن') }}" class="agent-name text-decoration-none hover-primary">{{ $agent['full_name'] ?? 'N/A' }}</a>
                                         <div class="agent-id-badge">{{ $agentDetails['display_id'] ?? 'AGT-'.strtoupper(Str::random(5)) }}</div>
                                     </div>
                                 </div>
                         </td>
                         <td>
-                            <div class="fw-700 text-slate-700">{{ $agent['supervisor_name'] ?? 'محمود علي' }}</div>
+                            <div class="fw-700 text-slate-700">{{ $agent['supervisor_name'] ?? 'Mahmoud Ali' }}</div>
                             <div class="small text-muted">{{ $role }}</div>
                         </td>
                         <td>
@@ -530,10 +547,20 @@
                             {{ number_format($performance['total_interaction'] ?? rand(500, 2500)) }}
                         </td>
                         <td class="text-center">
-                            <span class="risk-badge risk-{{ $risk }}">
-                                <i class="fas fa-{{ $risk == 'yes' ? 'exclamation-triangle' : 'check-circle' }}"></i>
-                                {{ $risk == 'yes' ? 'HIGH RISK' : 'NO RISK' }}
+                            @if($riskCount > 0)
+                            <span class="risk-badge risk-yes cursor-pointer js-risk-trigger" 
+                                  data-name="{{ $agent['full_name'] ?? 'Agent' }}"
+                                  data-risks='@json($agentRisks)'
+                                  style="cursor: pointer; transition: all 0.2s;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {{ $riskCount }} {{ Str::plural('Risk', $riskCount) }}
                             </span>
+                            @else
+                            <span class="risk-badge risk-no">
+                                <i class="fas fa-check-circle"></i>
+                                NO RISK
+                            </span>
+                            @endif
                         </td>
                         <td>
                             <div class="sentiment-impact {{ $impact >= 0 ? 'impact-pos' : 'impact-neg' }}">
@@ -543,7 +570,7 @@
                         </td>
                         <td class="text-end">
                             <div class="d-flex justify-content-end gap-2">
-                                <a href="{{ route('user.agents.show', $agent['id'] ?? 1) }}" class="action-btn btn-view" title="View Details">
+                                <a href="{{ route('user.agents.show', ['agentId' => $agent['id'] ?? 1]) }}?name={{ urlencode($agent['full_name'] ?? 'N/A') }}&company={{ urlencode($agent['company_name'] ?? 'الضمان الاجتماعي - الأردن') }}" class="action-btn btn-view" title="View Details">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </div>
@@ -556,6 +583,47 @@
     </div>
 </div>
 @endsection
+
+<!-- Risk Details Modal -->
+<div class="modal fade" id="riskDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    Risk Incident Report
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-soft-danger p-3 rounded-circle me-3">
+                        <i class="fas fa-user-shield text-danger fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase" style="letter-spacing: 1px;">Target Agent</div>
+                        <h4 class="fw-bold mb-0 text-slate-900" id="riskAgentName">Nadi Al-Budairi</h4>
+                    </div>
+                </div>
+
+                <div class="mb-3 fw-bold text-slate-700" style="font-size: 13px;">DETECTED RISK FRAGMENTS:</div>
+                <div id="riskSentencesList">
+                    <!-- Sentences will be injected here -->
+                </div>
+
+                <div class="mt-4 p-3 rounded-3 bg-soft-warning border border-warning border-opacity-25">
+                    <div class="d-flex gap-2">
+                        <i class="fas fa-info-circle text-warning mt-1"></i>
+                        <p class="small text-slate-700 mb-0">These flags were automatically identified via <strong>Cognitive Linguistic Analysis</strong>. Direct coaching is recommended within 24 hours.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Dismiss</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Upload Excel Modal -->
 <div class="modal fade" id="uploadExcelModal" tabindex="-1" aria-hidden="true">
@@ -634,6 +702,32 @@
         filterSelects.forEach(select => {
             select.addEventListener('change', applyFilters);
         });
+
+        // Risk Popup dynamic listener
+        document.querySelectorAll('.js-risk-trigger').forEach(trigger => {
+            trigger.addEventListener('click', function() {
+                const name = this.getAttribute('data-name');
+                const risks = JSON.parse(this.getAttribute('data-risks'));
+                showRiskDetails(name, risks);
+            });
+        });
     });
+
+    function showRiskDetails(agentName, sentences) {
+        const modal = new bootstrap.Modal(document.getElementById('riskDetailsModal'));
+        document.getElementById('riskAgentName').textContent = agentName;
+        
+        const list = document.getElementById('riskSentencesList');
+        list.innerHTML = '';
+        
+        sentences.forEach(sentence => {
+            const div = document.createElement('div');
+            div.className = 'p-3 mb-2 rounded-3 border-start border-4 border-danger bg-soft-danger text-danger fw-600 small';
+            div.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i> ${sentence}`;
+            list.appendChild(div);
+        });
+        
+        modal.show();
+    }
 </script>
 @endpush

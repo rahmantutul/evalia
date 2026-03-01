@@ -185,6 +185,36 @@
         text-transform: uppercase;
     }
 
+    .topic-badge {
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 5px 12px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .ai-commentary {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-left: 4px solid #0a66c2;
+        padding: 15px;
+        border-radius: 0 12px 12px 0;
+        margin-top: 15px;
+    }
+
+    .intelligence-tag {
+        font-size: 10px;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        margin-left: 8px;
+    }
+
 </style>
 @endpush
 
@@ -237,21 +267,21 @@
                             <div class="info-icon"><i class="fas fa-user-tie"></i></div>
                             <div>
                                 <div class="info-label">Supervisor</div>
-                                <div class="info-value">محمود علي</div>
+                                <div class="info-value">Mahmoud Ali</div>
                             </div>
                         </div>
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-envelope"></i></div>
                             <div>
                                 <div class="info-label">Organization Email</div>
-                                <div class="info-value">{{ strtolower(Str::slug($agent['agent_details']['name'] ?? 'agent')) }}@ssc.gov.jo</div>
+                                <div class="info-value">{{ strtolower(Str::slug($agent['agent_details']['name'] ?? 'agent')) }}@crtvai.com</div>
                             </div>
                         </div>
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-phone"></i></div>
                             <div>
                                 <div class="info-label">Direct Extension</div>
-                                <div class="info-value">+962 79 555 {{ rand(1000, 9999) }}</div>
+                                <div class="info-value">+962 7 9008 7879</div>
                             </div>
                         </div>
                     </div>
@@ -339,6 +369,64 @@
                             Performance Trend
                         </h4>
                         <div id="performanceTrendChart" style="height: 250px; width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-4 mt-1">
+                <div class="col-lg-12">
+                    <div class="detail-card">
+                        <div class="row">
+                            <div class="col-md-7">
+                                <h4 class="card-title-premium">
+                                    <div class="icon-sm bg-info rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 10px;">
+                                        <i class="fas fa-microchip"></i>
+                                    </div>
+                                    Knowledge Proficiency & Cognitive Insights
+                                </h4>
+                                
+                                <div class="mt-4">
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <div class="p-3 border rounded-3 bg-light">
+                                                <div class="small text-muted fw-bold text-uppercase mb-1" style="font-size: 10px;">Policy Compliance</div>
+                                                <div class="h5 fw-900 text-dark mb-0">98.4% <span class="text-success" style="font-size: 11px;"><i class="fas fa-caret-up"></i> 1.2%</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-3 border rounded-3 bg-light">
+                                                <div class="small text-muted fw-bold text-uppercase mb-1" style="font-size: 10px;">Sentiment Accuracy</div>
+                                                <div class="h5 fw-900 text-dark mb-0">92.1% <span class="text-danger" style="font-size: 11px;"><i class="fas fa-caret-down"></i> 0.5%</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <div class="fw-bold text-secondary small text-uppercase mb-2" style="font-size: 10px; letter-spacing: 1px;">Top Proficiency Topics</div>
+                                    <div>
+                                        <span class="topic-badge">Pension Inquiries</span>
+                                        <span class="topic-badge">Maternity Support</span>
+                                        <span class="topic-badge">Early Retirement</span>
+                                        <span class="topic-badge">Digital Registration</span>
+                                        <span class="topic-badge">Social Security Law</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="ai-commentary h-100">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="fw-bold text-primary small text-uppercase" style="letter-spacing: 1px;"><i class="fas fa-robot me-1"></i> Intelligence Summary</div>
+                                        <span class="intelligence-tag bg-soft-success text-success">Balanced</span>
+                                    </div>
+                                    <p class="text-slate-600 small mb-0" style="line-height: 1.6;">
+                                        Agent demonstrates exceptional <strong>"Answer Accuracy"</strong> especially in <em>Pension and Law</em> categories. 
+                                        Cognitive analysis suggests high emotional intelligence during escalation handle. 
+                                        <br><br>
+                                        <i class="fas fa-lightbulb text-warning me-1"></i> <strong>Coaching Tip:</strong> Focus on reducing "Silence Gap" during technical law verification steps.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

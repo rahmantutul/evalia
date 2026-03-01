@@ -19,152 +19,33 @@ class TaskController extends Controller
         $this->apiService = $apiService;
     }
 
-    /**
-     * Get all "Real" tasks from the storage or hardcoded list.
-     */
-    private function getRealTasks($companyId = null, $realAgents = [])
-    {
-        $realTasks = [];
-        $totalTasksCount = 50;
-        
-        // Agent logic: use real names if available, plus fallback
-        $agentsPool = array_values(array_map(function($a) { return $a['full_name']; }, $realAgents));
-        if (empty($agentsPool)) {
-            $agentsPool = [
-                'نادي البديري', 'سارة الخطيب', 'محمود المصري', 'ليلى حسن', 'أحمد المناصير', 
-                'فرح الزعبي', 'يزن التل', 'رشا عبيدات', 'عمر الحمصي', 'نور السالم'
-            ];
-        }
-
-        $customersPool = [
-            'Mousa Ali', 'Fatima Al-Sayed', 'Zaid Al-Hariri', 'Yara Suleiman', 'Omar Al-Bakr', 
-            'Hala Al-Fares', 'Sami Al-Masri', 'Nour Al-Din', 'Mariam Al-Khalid', 'Ibrahim Al-Zahrani'
-        ];
-        
-        $scoreDistribution = [
-            98, 95, 92, 88, 85, 82, 78, 75, 72, 68,
-            96, 94, 91, 87, 84, 81, 77, 74, 71, 67,
-            97, 93, 90, 86, 83, 80, 76, 73, 70, 66,
-            95, 92, 89, 85, 82, 79, 75, 72, 69, 65,
-            94, 91, 88, 84, 81, 78, 74, 71, 68, 64
-        ];
-        
-        $statusDistribution = array_merge(
-            array_fill(0, 45, 'completed'),
-            array_fill(0, 4, 'processing'),
-            array_fill(0, 1, 'pending')
-        );
-        
-        $supervisors = ['محمود علي', 'سارة ناصر', 'أحمد حسن', 'ليلى خالد'];
-        $sources = ['api', 'avaya', 'genesys', 'fb', 'linkedin', 'inta', 'tiktok', 'snap', 'x', 'whatsapp', 'email'];
-        $outcomes = ['Resolved', 'Follow-up Needed', 'Escalated', 'Customer Satisfied', 'Information Provided'];
-        $languages = ['Arabic', 'English'];
-        $sentiments = ['Positive', 'Neutral', 'Negative'];
-
-        for ($i = 0; $i < $totalTasksCount; $i++) {
-            // Assign to the REQUESTED company ID
-            $targetCompanyId = $companyId ?? 'comp-001';
-            
-            $agentName = $agentsPool[$i % count($agentsPool)];
-            $customer = $customersPool[$i % count($customersPool)];
-            $supervisor = $supervisors[($i + 2) % count($supervisors)];
-            $source = $sources[$i % count($sources)];
-            
-            $messagingSources = ['fb', 'linkedin', 'inta', 'tiktok', 'snap', 'x', 'whatsapp', 'email'];
-            $channel = in_array($source, $messagingSources) ? 'Messaging' : 'Call';
-
-            $score = $scoreDistribution[$i] ?? 85;
-            $status = $statusDistribution[$i] ?? 'completed';
-            
-            $daysAgo = floor(pow((($i+1) / $totalTasksCount), 2) * 30);
-            $businessHour = rand(8, 17);
-            $minute = rand(0, 59);
-            
-            $duration = ($score < 75) ? (rand(6, 12) . "m " . rand(10, 59) . "s") : (rand(2, 5) . "m " . rand(10, 59) . "s");
-            
-            $taskId = "task-" . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
-            $realTasks[$taskId] = [
-                'id' => $taskId,
-                'company_id' => $targetCompanyId,
-                'work_id' => 'real-analysis-' . $i,
-                'status' => $status,
-                'agent_id' => 'agent-' . ($i % 10),
-                'created_at' => now()->subDays($daysAgo)->setHour($businessHour)->setMinute($minute)->toDateTimeString(),
-                'duration' => $duration,
-                'score' => $score,
-                'customer_name' => $customer,
-                'agent_name' => $agentName,
-                'supervisor_name' => $supervisor,
-                'source' => $source,
-                'channel' => $channel,
-                'outcome' => $outcomes[rand(0, count($outcomes)-1)],
-                'coaching_required' => $score < 80 ? 'Yes' : 'No',
-                'sentiment' => $sentiments[rand(0, count($sentiments)-1)],
-                'call_type' => rand(0, 1) ? 'Inbound' : 'Outbound',
-                'lang' => $languages[rand(0, count($languages)-1)],
-                'risk_flag' => $score < 75 ? 'High' : 'No'
-            ];
-        }
-
-        // 2. Dynamically load any JSON files from storage/app/analyses/
-        $storagePath = storage_path('app/analyses');
-        if (File::exists($storagePath)) {
-            $files = File::files($storagePath);
-            foreach ($files as $file) {
-                if ($file->getExtension() === 'json') {
-                    $content = json_decode(File::get($file), true);
-                    $id = $content['work_id'] ?? $file->getFilenameWithoutExtension();
-                    
-                    if (!isset($realTasks[$id])) {
-                        $score = $content['agent_professionalism']['total_score']['percentage'] ?? rand(70, 95);
-                        $realTasks[$id] = [
-                            'id' => $id,
-                            'company_id' => $companyId ?? 'comp-001',
-                            'work_id' => $id,
-                            'status' => $content['status'] ?? 'completed',
-                            'agent_id' => $content['agent_id'] ?? 'unknown',
-                            'created_at' => $content['created_at'] ?? now()->toDateTimeString(),
-                            'duration' => $content['call_duration']['call_duration'] ?? '0:00',
-                            'score' => $score,
-                            'customer_name' => $content['customer_name'] ?? 'Mousa Ali',
-                            'agent_name' => $content['agent_name'] ?? 'Sara Al-Khateeb',
-                            'supervisor_name' => 'سارة ناصر',
-                            'source' => 'api',
-                            'channel' => 'Call',
-                            'outcome' => 'Resolved',
-                            'coaching_required' => $score < 80 ? 'Yes' : 'No',
-                            'sentiment' => 'Positive',
-                            'call_type' => 'Inbound',
-                            'lang' => 'Arabic',
-                            'risk_flag' => $score < 75 ? 'High' : 'No'
-                        ];
-                    }
-                }
-            }
-        }
-
-        return $realTasks;
-    }
 
     /**
      * Helper to find a specific task by ID.
      */
     private function findTaskById($taskId)
     {
-        $allTasks = $this->getRealTasks();
-        return $allTasks[$taskId] ?? null;
+        $allTasks = app(CompanyController::class)->getAllTasks();
+        foreach ($allTasks as $task) {
+            if ($task['id'] === $taskId) return $task;
+        }
+        return null;
     }
 
     public function TaskList($companyId, Request $request)
     {
         // 1. Fetch real agents for this company first
         $result = $this->apiService->listUsers(0, 100);
-        $companyAgents = array_filter($result['users'] ?? [], function($user) {
+        $allUsers = $result['users'] ?? [];
+        $companyAgents = array_filter($allUsers, function($user) {
             return ($user['role']['name'] ?? '') === 'Agent';
         });
 
-        // 2. Generate tasks using these real agents and for this specific company
-        $allTasks = collect($this->getRealTasks($companyId, $companyAgents))->values()->all();
+        // 2. Use common tasks from CompanyController and filter by companyId
+        $allTasksPool = app(CompanyController::class)->getAllTasks();
+        $allTasks = array_filter($allTasksPool, function($t) use ($companyId) {
+            return $t['company_id'] === $companyId;
+        });
 
         // 3. Apply search filters
         $filteredTasks = $this->applyFilters($allTasks, $request);

@@ -150,7 +150,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <a href="{{ route('user.task.details', $task['id']) }}" class="text-decoration-none">
+                                            <a href="{{ route('user.agents.show', ['agentId' => 'agent']) }}?name={{ urlencode($task['agent_name'] ?? 'N/A') }}&company={{ urlencode($task['company_id'] ?? 'ssc-jordan') }}" class="text-decoration-none">
                                                 <div class="d-flex align-items-center">
                                                     <div class="avatar-xs bg-soft-primary text-primary rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; font-size: 0.7rem;">
                                                         {{ strtoupper(substr($task['agent_name'] ?? 'A', 0, 1)) }}

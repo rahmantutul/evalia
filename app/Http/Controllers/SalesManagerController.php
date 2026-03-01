@@ -25,7 +25,7 @@ class SalesManagerController extends Controller
         [
             'id' => 1, 
             'name' => 'Ahmed Al Mansoori', 
-            'email' => 'ahmed.mansoori@example.com', 
+            'email' => 'ahmed.mansoori@crtvai.com', 
             'phone' => '+971501234567',
             'description' => 'Senior Real Estate Consultant',
             'criteria_ids' => [1, 4, 7, 10], // Budget 10M+, Dubai, Luxury Villa, Investor
@@ -34,7 +34,7 @@ class SalesManagerController extends Controller
         [
             'id' => 2, 
             'name' => 'Sarah Johnson', 
-            'email' => 'sarah.j@example.com', 
+            'email' => 'sarah.j@crtvai.com', 
             'phone' => '+971502345678',
             'description' => 'Luxury Property Specialist',
             'criteria_ids' => [1, 5, 7, 12], // Budget 10M+, Abu Dhabi, Luxury Villa, Urgent
@@ -43,7 +43,7 @@ class SalesManagerController extends Controller
         [
             'id' => 3, 
             'name' => 'Mohammed Hassan', 
-            'email' => 'm.hassan@example.com', 
+            'email' => 'm.hassan@crtvai.com', 
             'phone' => '+971503456789',
             'description' => 'Commercial Properties Expert',
             'criteria_ids' => [2, 4, 9, 10], // Budget 5M-10M, Dubai, Commercial, Investor
@@ -52,7 +52,7 @@ class SalesManagerController extends Controller
         [
             'id' => 4, 
             'name' => 'Fatima Al Rais', 
-            'email' => 'fatima.rais@example.com', 
+            'email' => 'fatima.rais@crtvai.com', 
             'phone' => '+971504567890',
             'description' => 'First-time Buyer Specialist',
             'criteria_ids' => [3, 6, 8, 11], // Budget Below 5M, Sharjah, Apartment, End User
@@ -61,7 +61,7 @@ class SalesManagerController extends Controller
         [
             'id' => 5, 
             'name' => 'David Chen', 
-            'email' => 'd.chen@example.com', 
+            'email' => 'd.chen@crtvai.com', 
             'phone' => '+971505678901',
             'description' => 'International Clients Manager',
             'criteria_ids' => [1, 2, 4, 5, 10], // Multiple budgets and locations

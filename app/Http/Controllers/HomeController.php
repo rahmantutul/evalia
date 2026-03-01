@@ -13,7 +13,22 @@ class HomeController extends Controller
 
     public function index()
     {
-        return view('user.dashboard');
+        // Get common task stats for the dashboard
+        $allTasks = app(CompanyController::class)->getAllTasks();
+        
+        $totalCompletedTasks = count(array_filter($allTasks, function($t) { return $t['status'] === 'completed'; }));
+        $totalActiveTasks = count(array_filter($allTasks, function($t) { return $t['status'] === 'processing'; }));
+        $totalPendingAnalysis = count(array_filter($allTasks, function($t) { return $t['status'] === 'pending'; }));
+        
+        $totalScore = array_sum(array_column($allTasks, 'score'));
+        $avgQaScore = count($allTasks) > 0 ? round($totalScore / count($allTasks), 1) : 0;
+        
+        return view('user.dashboard', compact(
+            'totalCompletedTasks',
+            'totalActiveTasks',
+            'totalPendingAnalysis',
+            'avgQaScore'
+        ));
     }
 
     public function setActiveProduct(Request $request)

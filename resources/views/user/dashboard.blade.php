@@ -102,15 +102,7 @@
 
 @section('content')
 <div class="container-fluid p-4">
-    @if (session('active_product') == 1)
-        @include('user.dashboards.evalia')
-    @elseif (session('active_product') == 2)
-        @include('user.dashboards.kayan')
-    @elseif (session('active_product') == 3)
-        @include('user.dashboards.chatbot')
-    @else
-        @include('user.dashboards.evalia')
-    @endif
+    @include('user.dashboards.evalia')
 </div>
 @endsection
 
@@ -120,21 +112,19 @@
     // Fixed data generators
     const generateDummyData = {
         kpiData: function(period) {
-            // Calculate calls based on period
-            let callsEvaluated;
-            if (period === 7) {
-                callsEvaluated = 124; // Last 7 days
-            } else if (period === 30) {
-                callsEvaluated = 485; // Last 30 days (default)
-            } else {
-                callsEvaluated = 1245; // Last quarter (90 days)
-            }
+            // Use real data from PHP
+            const baseCalls = Number("{{ $totalCompletedTasks ?? 75 }}");
+            const baseQuality = Number("{{ $avgQaScore ?? 86.4 }}");
+            
+            // Scaled based on period (30 days is the baseline)
+            let multiplier = (period === 7) ? 0.25 : (period === 90 ? 3 : 1);
+            let callsEvaluated = Math.round(baseCalls * multiplier);
             
             return {
                 totalCompanies: 5,
-                totalDepartments: 5, // Renamed for clarity
-                avgQualityScore: 86.4, // Realistic average from bell curve distribution
-                callsEvaluated: callsEvaluated, // Use the calculated value
+                totalDepartments: 5,
+                avgQualityScore: baseQuality,
+                callsEvaluated: callsEvaluated,
                 avgResponseTime: 8.4
             };
         },
@@ -198,18 +188,16 @@
         },
         
         companyPerformance: function(sortBy, period) {
-            // Use realistic total of 54 calls distributed across 5 companies
-            const totalCalls = 54;
-            
-            // Each company gets 10-11 calls realistically
-            const companyCalls = [11, 11, 11, 11, 10];
+            const baseCallsPerDept = 15; // 75 total / 5 depts
+            let multiplier = (period === 7) ? 0.25 : (period === 90 ? 3 : 1);
+            const calls = Math.round(baseCallsPerDept * multiplier);
             
             const companies = [
-                { name: "الضمان الاجتماعي - الأردن", id: "ssc-jordan", score: 88.2, trend: 1.4, calls: companyCalls[0] },
-                { name: "البنك العربي", id: "arab-bank", score: 85.9, trend: 0.8, calls: companyCalls[1] },
-                { name: "أورنج الأردن", id: "orange-jo", score: 84.6, trend: 2.3, calls: companyCalls[2] },
-                { name: "مجموعة المناصير", id: "manaseer-group", score: 87.1, trend: -0.6, calls: companyCalls[3] },
-                { name: "الملكية الأردنية", id: "royal-jordanian", score: 86.3, trend: 1.2, calls: companyCalls[4] }
+                { name: "Social Security Corporation - Jordan", id: "ssc-jordan", score: 88.2, trend: 1.4, calls: calls },
+                { name: "Arab Bank", id: "arab-bank", score: 85.9, trend: 0.8, calls: calls },
+                { name: "Orange Jordan", id: "orange-jo", score: 84.6, trend: 2.3, calls: calls },
+                { name: "Manaseer Group", id: "manaseer-group", score: 87.1, trend: -0.6, calls: calls },
+                { name: "Royal Jordanian", id: "royal-jordanian", score: 86.3, trend: 1.2, calls: calls }
             ];
             
             // Sort based on selection
@@ -225,71 +213,72 @@
         },
         
         agentPerformance: function(sortBy, period) {
-            // Use realistic total of 54 calls distributed across agents
-            const totalCalls = 54;
+            const totalCallsBase = 75;
+            let multiplier = (period === 7) ? 0.25 : (period === 90 ? 3 : 1);
+            const totalCalls = Math.round(totalCallsBase * multiplier);
             
-            // Each agent gets 3-5 calls realistically
-            const agentCalls = [5, 4, 4, 3, 4, 3, 3];
+            // Distribute 75 calls across 7 agents (~10-11 each)
+            const agentCalls = [12, 11, 11, 10, 11, 10, 10];
             
             const agents = [
                 { 
-                    id: "agent-1",
-                    name: "نادي البديري", 
-                    department: "الضمان الاجتماعي", 
+                    id: "nadi-al-budairi",
+                    name: "Nadi Al-Budairi", 
+                    department: "Social Security Corporation - Jordan", 
                     score: 92.3, 
                     trend: 2.2, 
                     calls: agentCalls[0],
-                    avatar: "https://ui-avatars.com/api/?name=Nadi+Budiri&background=0d6efd&color=fff"
+                    avatar: "https://ui-avatars.com/api/?name=Nadi+Budairi&background=0d6efd&color=fff"
                 },
                 { 
-                    id: "agent-2",
-                    name: "سارة الخطيب", 
-                    department: "الضمان الاجتماعي", 
+                    id: "sara-al-khateeb",
+                    name: "Sara Al-Khateeb", 
+                    department: "Social Security Corporation - Jordan", 
                     score: 89.1, 
                     trend: 1.8, 
                     calls: agentCalls[1],
                     avatar: "https://ui-avatars.com/api/?name=Sara+Khateeb&background=10B981&color=fff"
                 },
                 { 
-                    id: "agent-3",
-                    name: "محمود المصري", 
-                    department: "البنك العربي", 
+                    id: "mahmoud-al-masri",
+                    name: "Mahmoud Al-Masri", 
+                    department: "Arab Bank", 
                     score: 87.5, 
                     trend: 1.2, 
                     calls: agentCalls[2],
                     avatar: "https://ui-avatars.com/api/?name=Mahmoud+Masri&background=4F46E5&color=fff"
                 },
                 { 
-                    id: "agent-4",
-                    name: "ليلى حسن", 
-                    department: "أورنج الأردن", 
+                    id: "layla-hassan",
+                    name: "Layla Hassan", 
+                    department: "Orange Jordan", 
                     score: 84.2, 
                     trend: -1.4, 
                     calls: agentCalls[3],
                     avatar: "https://ui-avatars.com/api/?name=Layla+Hassan&background=F59E0B&color=fff"
                 },
                 { 
-                    id: "agent-5",
-                    name: "أحمد المناصير", 
-                    department: "مجموعة المناصير", 
+                    id: "ahmed-al-manaseer",
+                    name: "Ahmed Al-Manaseer", 
+                    department: "Manaseer Group", 
                     score: 86.8, 
                     trend: 0.5, 
                     calls: agentCalls[4],
                     avatar: "https://ui-avatars.com/api/?name=Ahmed+Manaseer&background=6c757d&color=fff"
                 },
                 { 
-                    id: "agent-6",
-                    name: "فرح الزعبي", 
-                    department: "البنك العربي", 
+                    id: "farah-al-zoubi",
+                    name: "Farah Al-Zoubi", 
+                    department: "Arab Bank", 
                     score: 91.2, 
                     trend: 3.1, 
                     calls: agentCalls[5],
                     avatar: "https://ui-avatars.com/api/?name=Farah+Zoubi&background=dc3545&color=fff"
                 },
                 { 
-                    id: "agent-7",
-                    name: "يزن التل", 
-                    department: "الملكية الأردنية", 
+                    id: "yazan-al-tall",
+                    name: "Yazan Al-Tall", 
+                    department: "Royal Jordanian", 
                     score: 78.9, 
                     trend: -2.3, 
                     calls: agentCalls[6],
@@ -476,16 +465,16 @@
                 </div>
                 
                 <div class="col-md-3">
-                    <div class="dashboard-card h-100 shadow-soft border-bottom border-warning border-3">
+                    <div class="dashboard-card h-100 shadow-soft border-bottom border-success border-3">
                         <div class="card-body p-3">
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <p class="text-muted mb-1 small">Response Time</p>
-                                    <h3 class="metric-value mb-1 fw-bold text-warning">${kpiData.avgResponseTime.toFixed(1)}s</h3>
-                                    <small class="trend-down"><i class="fas fa-arrow-down me-1"></i> 1.2s faster</small>
+                                    <h3 class="metric-value mb-1 fw-bold text-success">${kpiData.avgResponseTime.toFixed(1)}s</h3>
+                                    <small class="trend-up"><i class="fas fa-arrow-up me-1"></i> 1.2s faster</small>
                                 </div>
-                                <div class="icon-circle bg-soft-warning">
-                                    <i class="fas fa-stopwatch text-warning"></i>
+                                <div class="icon-circle bg-soft-success">
+                                    <i class="fas fa-stopwatch text-success"></i>
                                 </div>
                             </div>
                         </div>
@@ -770,7 +759,7 @@
                         <div class="flex-grow-1">
                             <h6 class="mb-0 fw-bold d-flex align-items-center">
                                 @php $agentShowUrl = route('user.agents.show', ':id'); @endphp
-                                <a style="color: #000;" href="${'{{ $agentShowUrl }}'.replace(':id', agent.id)}"> ${agent.name}</a> 
+                                <a style="color: #000;" href="${'{{ $agentShowUrl }}'.replace(':id', agent.id)}?name=${encodeURIComponent(agent.name)}&company=${encodeURIComponent(agent.department)}"> ${agent.name}</a> 
                                 ${badgeHtml}
                             </h6>
                             <small class="text-muted">${agent.department} • ${agent.calls} calls</small>

@@ -21,23 +21,33 @@ class CompanyController extends Controller
     private function groupList()
     {
         return [
-            ['id' => 'govt-sector', 'group_id' => 'govt-sector', 'name' => 'القطاع الحكومي', 'group_name' => 'القطاع الحكومي'],
-            ['id' => 'private-sector', 'group_id' => 'private-sector', 'name' => 'القطاع الخاص', 'group_name' => 'القطاع الخاص']
+            ['id' => 'govt-sector', 'group_id' => 'govt-sector', 'name' => 'Government Sector', 'group_name' => 'Government Sector'],
+            ['id' => 'private-sector', 'group_id' => 'private-sector', 'name' => 'Private Sector', 'group_name' => 'Private Sector']
         ];
     }
 
     public function companyList()
     {
         $companies = [
-            ['id' => 'ssc-jordan', 'name' => 'الضمان الاجتماعي - الأردن', 'group_name' => 'القطاع الحكومي'],
-            ['id' => 'arab-bank', 'name' => 'البنك العربي', 'group_name' => 'القطاع الخاص'],
-            ['id' => 'orange-jo', 'name' => 'أورنج الأردن', 'group_name' => 'القطاع الخاص'],
-            ['id' => 'manaseer-group', 'name' => 'مجموعة المناصير', 'group_name' => 'القطاع الخاص'],
-            ['id' => 'royal-jordanian', 'name' => 'الملكية الأردنية', 'group_name' => 'القطاع الخاص']
+            ['id' => 'ssc-jordan', 'name' => 'Social Security Jordan', 'group_name' => 'Government Sector'],
+            ['id' => 'arab-bank', 'name' => 'Arab Bank', 'group_name' => 'Private Sector'],
+            ['id' => 'orange-jo', 'name' => 'Orange Jordan', 'group_name' => 'Private Sector'],
+            ['id' => 'manaseer-group', 'name' => 'Manaseer Group', 'group_name' => 'Private Sector'],
+            ['id' => 'royal-jordanian', 'name' => 'Royal Jordanian', 'group_name' => 'Private Sector']
         ];
+
+        // Stable Agent Calculation for Total - Aiming for 30-40 Total
+        $totalAgentsCount = 0;
+        foreach ($companies as $c) {
+            $seed = crc32($c['id']);
+            mt_srand($seed);
+            $totalAgentsCount += mt_rand(6, 8); // ~7 per company * 5 = ~35 total
+        }
+        mt_srand(); // Reset
 
         if (session('user.role.name') === 'Supervisor') {
             $companies = array_slice($companies, 0, 2);
+            // Re-calculate total for supervisor if needed
         }
 
         $agentsResult = $this->apiService->getAgentsList();
@@ -72,84 +82,17 @@ class CompanyController extends Controller
             'totalActiveTasks',
             'totalCompletedTasks',
             'totalPendingAnalysis',
-            'avgQaScore'
+            'avgQaScore',
+            'totalAgentsCount'
         ));
     }
 
     /**
      * Get all tasks across all companies
      */
-    private function getAllTasks()
+    public function getAllTasks()
     {
-        $companies = ['ssc-jordan', 'arab-bank', 'orange-jo', 'manaseer-group', 'royal-jordanian'];
-        if (session('user.role.name') === 'Supervisor') {
-            $companies = array_slice($companies, 0, 2);
-        }
-        $agentsPool = [
-            'نادي البديري', 'سارة الخطيب', 'محمود المصري', 'ليلى حسن', 'أحمد المناصير', 
-            'فرح الزعبي', 'يزن التل', 'رشا عبيدات', 'عمر الحمصي', 'نور السالم', 
-            'خالد الجزار', 'منى السعيد', 'باسل الرواشدة', 'ديما النسور'
-        ];
-        $customersPool = [
-            'قيس النمري', 'دعاء الصالح', 'سامر بطرس', 'ماهر القاسم', 'هبة الله', 
-            'زيد الفايز', 'طارق الخطيب', 'لينا المصري', 'فارس الحموري', 'سلمى الأحمد', 
-            'رامي الكيلاني', 'جنى الروسان', 'يوسف القضاة', 'أمل حداد'
-        ];
-        
-        $allTasks = [];
-        $totalTasksCount = 54;
-        
-        // Realistic score distribution
-        $scoreDistribution = [
-            65, 68, 72, 75, 77,
-            79, 80, 81, 82, 83, 84, 85, 86, 87, 88,
-            82, 83, 84, 85, 86, 87, 88, 89, 90, 91,
-            85, 86, 87, 88, 89, 90, 91, 92, 93, 94,
-            88, 89, 90, 91, 92, 93, 94, 95,
-            91, 92, 93, 94, 95, 96, 97, 98, 98, 97, 96
-        ];
-        
-        // Realistic status distribution
-        $statusDistribution = array_merge(
-            array_fill(0, 49, 'completed'),
-            array_fill(0, 4, 'processing'),
-            array_fill(0, 1, 'pending')
-        );
-        
-        for ($i = 1; $i <= $totalTasksCount; $i++) {
-            $targetCompanyId = $companies[($i - 1) % count($companies)];
-            $agent = $agentsPool[$i % count($agentsPool)];
-            $customer = $customersPool[($i + 5) % count($customersPool)];
-            $score = $scoreDistribution[$i - 1];
-            $status = $statusDistribution[$i - 1];
-            
-            // Realistic timestamps
-            $daysAgo = floor(pow(($i / $totalTasksCount), 2) * 30);
-            $businessHour = rand(8, 17);
-            $minute = rand(0, 59);
-            
-            // Realistic duration
-            if ($score < 75) {
-                $duration = rand(6, 12) . "m " . rand(10, 59) . "s";
-            } elseif ($score < 85) {
-                $duration = rand(3, 6) . "m " . rand(10, 59) . "s";
-            } else {
-                $duration = rand(2, 4) . "m " . rand(10, 59) . "s";
-            }
-            
-            $allTasks[] = [
-                'id' => "task-" . str_pad($i, 3, '0', STR_PAD_LEFT),
-                'company_id' => $targetCompanyId,
-                'score' => $score,
-                'status' => $status,
-                'agent_name' => $agent,
-                'customer_name' => $customer,
-                'duration' => $duration,
-                'created_at' => now()->subDays($daysAgo)->setHour($businessHour)->setMinute($minute)->toDateTimeString()
-            ];
-        }
-        
-        return $allTasks;
+        return $this->apiService->getGlobalTaskPool();
     }
 
     public function companyCreate()
@@ -168,16 +111,16 @@ class CompanyController extends Controller
         }
 
         $allCompanies = [
-            'ssc-jordan' => ['id' => 'ssc-jordan', 'name' => 'الضمان الاجتماعي - الأردن', 'group_id' => 'govt-sector', 'filler_words' => ['يعني', 'أمم', 'طيب'], 'main_topics' => ['الاشتراكات', 'التقاعد', 'التقسيط'], 'policies' => ['التحقق من الهوية ضروري', 'الرد خلال 24 ساعة']],
-            'arab-bank' => ['id' => 'arab-bank', 'name' => 'البنك العربي', 'group_id' => 'private-sector', 'filler_words' => ['أهلاً', 'تفضل'], 'main_topics' => ['القروض', 'البطاقات'], 'policies' => ['السرية المصرفية']],
-            'orange-jo' => ['id' => 'orange-jo', 'name' => 'أورنج الأردن', 'group_id' => 'private-sector', 'filler_words' => ['هلا', 'نعم'], 'main_topics' => ['الفواتير', 'الإنترنت'], 'policies' => ['حل المشكلة من أول مرة']],
+            'ssc-jordan' => ['id' => 'ssc-jordan', 'name' => 'Social Security Jordan', 'group_id' => 'govt-sector', 'filler_words' => ['Umm', 'Well', 'Okay'], 'main_topics' => ['Subscriptions', 'Retirement', 'Installments'], 'policies' => ['Identity Verification Required', 'Response within 24h']],
+            'arab-bank' => ['id' => 'arab-bank', 'name' => 'Arab Bank', 'group_id' => 'private-sector', 'filler_words' => ['Hello', 'Please'], 'main_topics' => ['Loans', 'Cards'], 'policies' => ['Banking Secrecy']],
+            'orange-jo' => ['id' => 'orange-jo', 'name' => 'Orange Jordan', 'group_id' => 'private-sector', 'filler_words' => ['Hi', 'Yes'], 'main_topics' => ['Bills', 'Internet'], 'policies' => ['First Call Resolution']],
         ];
 
         $companyData = $allCompanies[$id] ?? [
             'id' => $id,
             'company_id' => $id,
-            'name' => 'شركة عامة',
-            'company_name' => 'شركة عامة',
+            'name' => 'General Company',
+            'company_name' => 'General Company',
             'group_id' => 'private-sector',
             'filler_words' => ['umm', 'so'],
             'main_topics' => ['support'],
@@ -198,11 +141,37 @@ class CompanyController extends Controller
         ];
         
         // Task List logic (using real tasks if available)
-        $result = $this->apiService->listUsers(0, 100);
-        $allUsers = $result['users'] ?? [];
-        $companyAgents = array_filter($allUsers, function($user) {
-            return ($user['role']['name'] ?? '') === 'Agent';
+        $agentsResult = $this->apiService->listUsers(0, 100);
+        $allUsers = $agentsResult['users'] ?? [];
+        $companyAgents = array_filter($allUsers, function($user) use ($company) {
+            return ($user['role']['name'] ?? '') === 'Agent' && ($user['company_name'] ?? '') === $company['name'];
         });
+
+        // Ensure we show the same mock agents if needed
+        if (count($companyAgents) == 0) {
+            $seed = crc32($id);
+            mt_srand($seed);
+            $targetCount = mt_rand(6, 8);
+            
+            $firstNames = ['Ahmed', 'Sara', 'Omar', 'Nour', 'Zaid', 'Layla', 'Fadi', 'Mona', 'Hassan', 'Rania', 'Yousif', 'Dana', 'Khaled', 'Maya', 'Ibrahim', 'Salma'];
+            $lastNames = ['Al-Masri', 'Al-Abadi', 'Al-Khouri', 'Haddad', 'Nassar', 'Sayegh', 'Jaber', 'Zeidan', 'Salem', 'Hamdan', 'Badwan', 'Hijazi'];
+            
+            for ($i = 0; $i < $targetCount; $i++) {
+                $fName = $firstNames[($i) % count($firstNames)];
+                $lName = $lastNames[($i) % count($lastNames)];
+                $fullName = $fName . ' ' . $lName;
+                $companyAgents[] = [
+                    'id' => 'mock-' . $id . '-' . $i,
+                    'full_name' => $fullName,
+                    'name' => $fullName,
+                    'email' => 'agent' . ($i+1) . '@crtvai.com',
+                    'phone' => '+962 7 9008 7879',
+                    'company_name' => $company['name'],
+                    'position' => 'Customer Agent'
+                ];
+            }
+            mt_srand();
+        }
 
         // Get real tasks for this company
         $allRealTasks = $this->getAllTasks();
@@ -232,24 +201,38 @@ class CompanyController extends Controller
             ]
         );
 
+        // Calculate company counts
+        $callsEvaluated = count($companyTasks);
+        $totalScore = array_sum(array_column($companyTasks, 'score'));
+        $avgQualityScore = $callsEvaluated > 0 ? round($totalScore / $callsEvaluated, 1) : 0;
+        
+        // Stable Agent count for this company (same logic as company list)
+        $seed = crc32($id);
+        mt_srand($seed);
+        $activeAgents = mt_rand(6, 8);
+        mt_srand(); // Reset
+
         return view('user.company.company_details', [
             'company' => $company,
             'taskList' => $paginatedTasks,
             'company_id' => $id,
             'companyAgents' => $companyAgents,
+            'callsEvaluated' => $callsEvaluated,
+            'avgQualityScore' => $avgQualityScore,
+            'activeAgents' => $activeAgents
         ]);
     }
 
     public function companyDelete($id)
     {
-        return redirect()->back()->with('success', 'تم حذف الشركة بنجاح (رسمي).');
+        return redirect()->back()->with('success', 'Company deleted successfully (official).');
     }
 
     public function companyStore(Request $request)
     {
         return response()->json([
             'success' => true,
-            'message' => 'تم تسجيل الشركة بنجاح',
+            'message' => 'Company registered successfully',
             'data' => ['company_id' => Str::uuid()->toString()],
         ]);
     }
@@ -259,13 +242,13 @@ class CompanyController extends Controller
         $company = [
             'id' => $id,
             'company_id' => $id,
-            'name' => 'الضمان الاجتماعي - الأردن',
-            'company_name' => 'الضمان الاجتماعي - الأردن',
+            'name' => 'Social Security Jordan',
+            'company_name' => 'Social Security Jordan',
             'group_id' => 'govt-sector',
-            'filler_words' => ['يعني', 'أمم'],
-            'main_topics' => ['التقاعد'],
+            'filler_words' => ['Umm', 'Amm'],
+            'main_topics' => ['Retirement'],
             'call_types' => ['inbound'],
-            'company_policies' => ['سياسة 1']
+            'company_policies' => ['Policy 1']
         ];
         $groups = $this->groupList();
         
@@ -276,7 +259,7 @@ class CompanyController extends Controller
     {
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث بيانات الشركة بنجاح',
+            'message' => 'Company data updated successfully',
             'data' => [],
         ]);
     }

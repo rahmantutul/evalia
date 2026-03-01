@@ -102,22 +102,7 @@
 
 @section('content')
 <div class="container-fluid p-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2 class="fw-bold text-dark">Supervisor Dashboard</h2>
-            <p class="text-muted">Welcome back, Supervisor. Here's a summary of your team's performance.</p>
-        </div>
-    </div>
-
-    @if (session('active_product') == 1)
         @include('user.dashboards.evalia')
-    @elseif (session('active_product') == 2)
-        @include('user.dashboards.kayan')
-    @elseif (session('active_product') == 3)
-        @include('user.dashboards.chatbot')
-    @else
-        @include('user.dashboards.evalia')
-    @endif
 </div>
 @endsection
 
@@ -130,11 +115,11 @@
             // Calculate calls based on period
             let callsEvaluated;
             if (period === 7) {
-                callsEvaluated = 124; // Last 7 days
+                callsEvaluated = 11; // Last 7 days
             } else if (period === 30) {
-                callsEvaluated = 485; // Last 30 days (default)
+                callsEvaluated = 22; // Last 30 days (default)
             } else {
-                callsEvaluated = 1245; // Last quarter (90 days)
+                callsEvaluated = 45; // Last quarter (90 days)
             }
             
             const isSupervisor = "{{ session('user.role.name') }}" === 'Supervisor';
@@ -143,7 +128,7 @@
                 totalDepartments: isSupervisor ? 2 : 5, // Renamed for clarity
                 avgQualityScore: 86.4, // Realistic average from bell curve distribution
                 callsEvaluated: callsEvaluated, // Use the calculated value
-                avgResponseTime: 8.4
+                avgResponseTime: 5.4
             };
         },
         
@@ -214,11 +199,11 @@
             
             const isSupervisor = "{{ session('user.role.name') }}" === 'Supervisor';
             let companies = [
-                { name: "الضمان الاجتماعي - الأردن", id: "ssc-jordan", score: 88.2, trend: 1.4, calls: companyCalls[0] },
-                { name: "البنك العربي", id: "arab-bank", score: 85.9, trend: 0.8, calls: companyCalls[1] },
-                { name: "أورنج الأردن", id: "orange-jo", score: 84.6, trend: 2.3, calls: companyCalls[2] },
-                { name: "مجموعة المناصير", id: "manaseer-group", score: 87.1, trend: -0.6, calls: companyCalls[3] },
-                { name: "الملكية الأردنية", id: "royal-jordanian", score: 86.3, trend: 1.2, calls: companyCalls[4] }
+                { name: "Social Security Jordan", id: "ssc-jordan", score: 88.2, trend: 1.4, calls: companyCalls[0] },
+                { name: "Arab Bank", id: "arab-bank", score: 85.9, trend: 0.8, calls: companyCalls[1] },
+                { name: "Orange Jordan", id: "orange-jo", score: 84.6, trend: 2.3, calls: companyCalls[2] },
+                { name: "Manaseer Group", id: "manaseer-group", score: 87.1, trend: -0.6, calls: companyCalls[3] },
+                { name: "Royal Jordanian", id: "royal-jordanian", score: 86.3, trend: 1.2, calls: companyCalls[4] }
             ];
 
             if (isSupervisor) {
@@ -249,8 +234,8 @@
             let agents = [
                 { 
                     id: "agent-1",
-                    name: "نادي البديري", 
-                    department: "الضمان الاجتماعي", 
+                    name: "Nadi Budiri", 
+                    department: "Social Security", 
                     score: 92.3, 
                     trend: 2.2, 
                     calls: agentCalls[0],
@@ -258,8 +243,8 @@
                 },
                 { 
                     id: "agent-2",
-                    name: "سارة الخطيب", 
-                    department: "الضمان الاجتماعي", 
+                    name: "Sara Khateeb", 
+                    department: "Social Security", 
                     score: 89.1, 
                     trend: 1.8, 
                     calls: agentCalls[1],
@@ -267,8 +252,8 @@
                 },
                 { 
                     id: "agent-3",
-                    name: "محمود المصري", 
-                    department: "البنك العربي", 
+                    name: "Mahmoud Masri", 
+                    department: "Arab Bank", 
                     score: 87.5, 
                     trend: 1.2, 
                     calls: agentCalls[2],
@@ -276,8 +261,8 @@
                 },
                 { 
                     id: "agent-6",
-                    name: "فرح الزعبي", 
-                    department: "البنك العربي", 
+                    name: "Farah Zoubi", 
+                    department: "Arab Bank", 
                     score: 91.2, 
                     trend: 3.1, 
                     calls: agentCalls[5],
@@ -285,8 +270,8 @@
                 },
                 { 
                     id: "agent-4",
-                    name: "ليلى حسن", 
-                    department: "أورنج الأردن", 
+                    name: "Layla Hassan", 
+                    department: "Orange Jordan", 
                     score: 84.2, 
                     trend: -1.4, 
                     calls: agentCalls[3],
@@ -294,8 +279,8 @@
                 },
                 { 
                     id: "agent-5",
-                    name: "أحمد المناصير", 
-                    department: "مجموعة المناصير", 
+                    name: "Ahmed Manaseer", 
+                    department: "Manaseer Group", 
                     score: 86.8, 
                     trend: 0.5, 
                     calls: agentCalls[4],
@@ -303,8 +288,8 @@
                 },
                 { 
                     id: "agent-7",
-                    name: "يزن التل", 
-                    department: "الملكية الأردنية", 
+                    name: "Yazan Tell", 
+                    department: "Royal Jordanian", 
                     score: 78.9, 
                     trend: -2.3, 
                     calls: agentCalls[6],
@@ -314,7 +299,7 @@
 
             if (isSupervisor) {
                 // Return only 2 agents from assigned departments (SSC and Arab Bank)
-                agents = agents.filter(a => a.department === "الضمان الاجتماعي" || a.department === "البنك العربي").slice(0, 2);
+                agents = agents.filter(a => a.department === "Social Security" || a.department === "Arab Bank").slice(0, 2);
             }
 
             // Sort based on selection
@@ -484,7 +469,7 @@
                                 <div>
                                     <p class="text-muted mb-1 small">Response Time</p>
                                     <h3 class="metric-value mb-1 fw-bold text-warning">${kpiData.avgResponseTime.toFixed(1)}s</h3>
-                                    <small class="trend-down"><i class="fas fa-arrow-down me-1"></i> 1.2s faster</small>
+                                    <small class="trend-up"><i class="fas fa-arrow-up me-1"></i> 1.2s faster</small>
                                 </div>
                                 <div class="icon-circle bg-soft-warning">
                                     <i class="fas fa-stopwatch text-warning"></i>
@@ -709,17 +694,17 @@
         companies.forEach(company => {
             const trendClass = company.trend > 0 ? 'trend-up' : (company.trend < 0 ? 'trend-down' : 'trend-neutral');
             const trendIcon = company.trend > 0 ? 'fa-arrow-up' : (company.trend < 0 ? 'fa-arrow-down' : 'fa-minus');
-            let departmentViewBaseUrl = "{{ route('user.company.view', ':id') }}"; 
+            let departmentViewBaseUrl = "{{ route('user.company.view', ':id') }}".replace(':id', company.id);
 
             let badgeHtml = '';
             if (company.score >= 90) {
-                badgeHtml = `<a href="{{ route('supervisor.dashboard') }}" class="top-performer-badge ms-2"><i class="fas fa-trophy me-1"></i> Top</a>`;
+                badgeHtml = `<a href="${departmentViewBaseUrl}" class="top-performer-badge ms-2"><i class="fas fa-trophy me-1"></i> Top</a>`;
             } else if (company.score >= 80) {
-                badgeHtml = `<a href="{{ route('supervisor.dashboard') }}" class="high-achiever-badge ms-2"><i class="fas fa-medal me-1"></i> High</a>`;
+                badgeHtml = `<a href="${departmentViewBaseUrl}" class="high-achiever-badge ms-2"><i class="fas fa-medal me-1"></i> High</a>`;
             } else if (company.score >= 70) {
-                badgeHtml = `<a href="{{ route('supervisor.dashboard') }}" class="consistent-badge ms-2"><i class="fas fa-star me-1"></i> Stable</a>`;
+                badgeHtml = `<a href="${departmentViewBaseUrl}" class="consistent-badge ms-2"><i class="fas fa-star me-1"></i> Stable</a>`;
             } else {
-                badgeHtml = `<a href="{{ route('supervisor.dashboard') }}" class="needs-improvement-badge ms-2"><i class="fas fa-exclamation-circle me-1"></i> Alert</a>`;
+                badgeHtml = `<a href="${departmentViewBaseUrl}" class="needs-improvement-badge ms-2"><i class="fas fa-exclamation-circle me-1"></i> Alert</a>`;
             }
 
            html += `
@@ -727,7 +712,7 @@
                     <td class="ps-4">
                         <div class="d-flex align-items-center">
                             <strong>
-                                <a style="color: #3f4254;" class="text-hover-primary" href="{{ route('supervisor.dashboard') }}">
+                                <a style="color: #3f4254;" class="text-hover-primary" href="${departmentViewBaseUrl}">
                                     ${company.name}
                                 </a>
                             </strong>
@@ -744,26 +729,27 @@
         tableBody.innerHTML = html;
     }
 
-    // Update agent performance
     function updateAgentPerformance() {
-        const agents = generateDummyData.agentPerformance(currentAgentSort, currentPeriod);
+        const agents = generateDummyData.agentPerformance(currentAgentSort);
         const agentContainer = document.getElementById('agentPerformance');
         
         let html = '';
         agents.forEach(agent => {
             const trendClass = agent.trend > 0 ? 'trend-up' : (agent.trend < 0 ? 'trend-down' : 'trend-neutral');
-            const scoreClass = agent.score >= 90 ? 'text-success' : (agent.score < 75 ? 'text-danger' : '');
-
+            
             let badgeHtml = '';
             if (agent.score >= 90) {
-                badgeHtml = `<a href="{{ route('supervisor.dashboard') }}" class="top-performer-badge ms-2"><i class="fas fa-trophy me-1"></i> Top Performer</a>`;
+                badgeHtml = `<a href="{{ route('user.performance_badges') }}" class="top-performer-badge ms-2"><i class="fas fa-trophy me-1"></i> Top Performer</a>`;
             } else if (agent.score >= 80) {
-                badgeHtml = `<a href="{{ route('supervisor.dashboard') }}" class="high-achiever-badge ms-2"><i class="fas fa-medal me-1"></i> High Achiever</a>`;
+                badgeHtml = `<a href="{{ route('user.performance_badges') }}" class="high-achiever-badge ms-2"><i class="fas fa-medal me-1"></i> High Achiever</a>`;
             } else if (agent.score >= 70) {
-                badgeHtml = `<a href="{{ route('supervisor.dashboard') }}" class="consistent-badge ms-2"><i class="fas fa-star me-1"></i> Consistent</a>`;
+                badgeHtml = `<a href="{{ route('user.performance_badges') }}" class="consistent-badge ms-2"><i class="fas fa-star me-1"></i> Consistent</a>`;
             } else {
-                badgeHtml = `<a href="{{ route('supervisor.dashboard') }}" class="needs-improvement-badge ms-2"><i class="fas fa-graduation-cap me-1"></i> Needs Coaching</a>`;
+                badgeHtml = `<a href="{{ route('user.performance_badges') }}" class="needs-improvement-badge ms-2"><i class="fas fa-graduation-cap me-1"></i> Needs Coaching</a>`;
             }
+
+            const agentUrl = '{{ route('user.agents.show', ['agentId' => ':id']) }}'.replace(':id', agent.id);
+            const queryParams = `?name=${encodeURIComponent(agent.name)}&company=${encodeURIComponent(agent.department)}`;
 
             html += `
                 <div class="agent-card ${agent.score >= 90 ? 'top-agent' : ''} ${agent.score < 75 ? 'low-agent' : ''} shadow-sm border-0 mb-3">
@@ -771,23 +757,22 @@
                         <img src="${agent.avatar}" class="avatar-sm me-3 border shadow-sm">
                         <div class="flex-grow-1">
                             <h6 class="mb-0 fw-bold d-flex align-items-center">
-                                <a style="color: #000;" href="{{ route('supervisor.dashboard') }}"> ${agent.name}</a> 
+                                <a style="color: #000;" href="${agentUrl}${queryParams}"> ${agent.name}</a> 
                                 ${badgeHtml}
                             </h6>
                             <small class="text-muted">${agent.department} • ${agent.calls} calls</small>
                         </div>
                         <div class="text-end">
-                            <h5 class="mb-0 ${scoreClass} fw-bold">${agent.score}%</h5>
+                            <h5 class="mb-0 ${agent.score >= 90 ? 'text-success' : (agent.score < 75 ? 'text-danger' : '')} fw-bold">${agent.score}%</h5>
                             <small class="${trendClass}">${agent.trend > 0 ? '+' : ''}${agent.trend}%</small>
                         </div>
                     </div>
                 </div>
             `;
-
         });
         
         html += `
-            <div class="mt-4 p-3 bg-light rounded-3">
+            <div class="mt-4 p-3 bg-light rounded-4">
                 <div class="d-flex justify-content-between mb-2">
                     <small class="text-muted fw-bold">Performance Distribution</small>
                     <small class="text-muted">${agents.length} agents</small>
@@ -798,17 +783,17 @@
                     <div class="progress-bar bg-warning" style="width: 15%"></div>
                     <div class="progress-bar bg-danger" style="width: 5%"></div>
                 </div>
-                <div class="d-flex justify-content-between mt-2 flex-wrap">
-                    <small class="text-success small fw-500">Exceptional (25%)</small>
-                    <small class="text-primary small fw-500">Target (55%)</small>
-                    <small class="text-warning small fw-500">Needs Review (15%)</small>
-                    <small class="text-danger small fw-500">At Risk (5%)</small>
+                <div class="d-flex justify-content-between mt-2 flex-wrap text-muted small">
+                    <span><i class="fas fa-circle text-success me-1 small"></i> Exceptional (25%)</span>
+                    <span><i class="fas fa-circle text-primary me-1 small"></i> High (55%)</span>
+                    <span><i class="fas fa-circle text-warning me-1 small"></i> Average (15%)</span>
+                    <span><i class="fas fa-circle text-danger me-1 small"></i> Poor (5%)</span>
                 </div>
             </div>
         `;
-        
         agentContainer.innerHTML = html;
     }
+
 
     function exportDashboardData() {
         const kpiData = generateDummyData.kpiData(currentPeriod);

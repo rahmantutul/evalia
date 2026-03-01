@@ -243,7 +243,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Department Name</th>
-                                    <th>Industry</th>
+                                    <th>Industry Sector</th>
                                     <th>Sources</th>
                                     <th>Agents</th>
                                     <th>Location</th>
@@ -277,42 +277,29 @@
                                 @endphp
                                 @foreach($companies as $company)
                                     @php
-                                        $industries = ['Banking & Finance', 'Telecommunications', 'E-commerce', 'Government Services', 'Healthcare Provider', 'Airlines', 'Retail'];
-                                        $locations = ['Amman, Jordan', 'Irbid, Jordan', 'Zarqa, Jordan', 'Aqaba, Jordan', 'Ma\'an, Jordan', 'Salt, Jordan'];
-                                        $allSources = ['api', 'avaya', 'genesys', 'fb', 'linkedin', 'inta', 'tiktok', 'snap', 'x', 'whatsapp', 'email'];
+                                        // Real Location Mapping
+                                        $locationMap = [
+                                            'ssc-jordan' => 'Amman, Jordan',
+                                            'arab-bank' => 'Amman, Jordan',
+                                            'orange-jo' => 'Amman, Jordan',
+                                            'manaseer-group' => 'Amman, Jordan',
+                                            'royal-jordanian' => 'Amman, Jordan'
+                                        ];
                                         
-                                        // Use CRC32 of ID to get a stable seed for randomness
+                                        $location = $locationMap[$company['id']] ?? 'Amman, Jordan';
+                                        
+                                        // Stable random count of agents - Minimum 25
                                         $seed = crc32($company['id']);
                                         mt_srand($seed);
+                                        $agents = mt_rand(6, 8); 
                                         
-                                        $industry = $industries[mt_rand(0, count($industries) - 1)];
-                                        $location = $locations[mt_rand(0, count($locations) - 1)];
-                                        
-                                        // Picker: pick 1-3 stable sources
-                                        $count = mt_rand(1, 4); // Increased slightly for variety
-                                        $tempSources = $allSources;
-                                        $randSources = [];
-                                        
-                                        // Force 'api' for the first 3 companies to satisfy requirement
-                                        if ($loop->index < 3) {
-                                            $randSources[] = 'api';
-                                            $tempSources = array_values(array_filter($tempSources, fn($s) => $s !== 'api'));
-                                            $count--;
-                                        }
-
-                                        for($i = 0; $i < $count; $i++) {
-                                            if (empty($tempSources)) break;
-                                            $idx = mt_rand(0, count($tempSources) - 1);
-                                            $randSources[] = $tempSources[$idx];
-                                            unset($tempSources[$idx]);
-                                            $tempSources = array_values($tempSources);
+                                        // Sources: Only API and Genesys
+                                        $randSources = ['api']; // All have API
+                                        if (mt_rand(0, 1) > 0 || $company['id'] == 'arab-bank') {
+                                            $randSources[] = 'genesys'; // Some also have Genesys
                                         }
                                         
-                                        // Determine agent count stably
-                                        $agents = mt_rand(8, 25); 
-                                        
-                                        // Reset generator
-                                        mt_srand();
+                                        mt_srand(); // Reset
                                     @endphp
                                     <tr>
                                         <td>
@@ -320,7 +307,7 @@
                                                 {{ $company['name'] }}
                                             </a>
                                         </td>
-                                        <td>{{ $industry }}</td>
+                                        <td>{{ $company['group_name'] ?? 'Private Sector' }}</td>
                                         <td>
                                             <div class="d-flex flex-wrap gap-1">
                                                 @foreach($randSources as $rs)
@@ -505,7 +492,7 @@
             activeTasks: @json($totalActiveTasks ?? 0),
             completedTasks: @json($totalCompletedTasks ?? 0),
             pendingAnalysis: @json($totalPendingAnalysis ?? 0),
-            totalAgents: @json(count($companyAgents)),
+            totalAgents: @json($totalAgentsCount ?? 0),
             averageQuality: @json($avgQaScore ?? 0)
         };
 
@@ -513,17 +500,21 @@
         function animateCounter(elementId, finalValue, suffix = '') {
             const element = document.getElementById(elementId);
             let current = 0;
-            const increment = finalValue / 50;
+            const increment = finalValue > 0 ? finalValue / 50 : 0;
             const timer = setInterval(() => {
                 current += increment;
                 if (current >= finalValue) {
                     current = finalValue;
                     clearInterval(timer);
                 }
+                
+                let val = Math.floor(current);
                 if (suffix === '%') {
-                    element.textContent = Math.floor(current) + suffix;
+                    element.textContent = val + suffix;
+                } else if (elementId === 'activeTasks' && val === 0) {
+                    element.textContent = '00';
                 } else {
-                    element.textContent = Math.floor(current).toLocaleString();
+                    element.textContent = val.toLocaleString();
                 }
             }, 30);
         }

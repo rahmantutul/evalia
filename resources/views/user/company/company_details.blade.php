@@ -114,21 +114,10 @@
                         <div class="d-flex align-items-center gap-1">
                             <span class="text-muted small fw-bold">Active Sources:</span>
                             @php
-                                // Use company ID as seed for stable dummy data
-                                $seed = crc32($company['id'] ?? 'default');
-                                mt_srand($seed);
-                                
-                                $allSources = ['api', 'avaya', 'genesys', 'fb', 'linkedin', 'inta', 'tiktok', 'snap', 'x', 'whatsapp', 'email'];
-                                
-                                // Picker: pick 2-4 stable sources
-                                $count = mt_rand(2, 4);
-                                $tempSources = $allSources;
-                                $randSources = [];
-                                for($i = 0; $i < $count; $i++) {
-                                    $idx = mt_rand(0, count($tempSources) - 1);
-                                    $randSources[] = $tempSources[$idx];
-                                    unset($tempSources[$idx]);
-                                    $tempSources = array_values($tempSources);
+                                // Sources: Mostly API, some also have Genesys
+                                $randSources = ['api'];
+                                if (mt_rand(0, 1) > 0 || ($company['id'] ?? '') == 'arab-bank') {
+                                    $randSources[] = 'genesys';
                                 }
                                 
                                 mt_srand(); // Reset
@@ -581,19 +570,23 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-    // Dummy data generators
     const generateDummyData = {
         kpiData: function(period) {
-            let callsEvaluated;
-            if (period === 7) callsEvaluated = 124;
-            else if (period === 30) callsEvaluated = 485;
-            else callsEvaluated = 1245;
+            // Use real data from PHP
+            const baseCalls = Number("{{ $callsEvaluated ?? 15 }}");
+            const baseQuality = Number("{{ $avgQualityScore ?? 92.4 }}");
+            const baseAgents = Number("{{ $activeAgents ?? 7 }}");
             
+            // Scaled based on period (30 days is the baseline)
+            let multiplier = (period === 7) ? 0.25 : (period === 90 ? 3 : 1);
+            let callsEvaluated = Math.round(baseCalls * multiplier);
+
             return {
                 totalGroups: 5,
-                avgQualityScore: 92.4,
+                avgQualityScore: baseQuality + (Math.random() * 2 - 1),
                 callsEvaluated: callsEvaluated,
-                avgResponseTime: 8.5
+                avgResponseTime: 8.5 + (Math.random() * 1 - 0.5),
+                activeAgents: baseAgents
             };
         },
         
@@ -642,13 +635,22 @@
         },
         
         agentPerformance: function(sortBy) {
-             const agents = [
-                { name: "نادي البديري", department: "مركز الاتصال", score: 92.3, trend: 1.5, calls: 5, avatar: "https://ui-avatars.com/api/?name=Nadi+Albidiri&background=0d6efd&color=fff" },
-                { name: "سارة الخطيب", department: "الدعم الفني", score: 89.1, trend: 2.0, calls: 4, avatar: "https://ui-avatars.com/api/?name=Sara+Khatib&background=198754&color=fff" },
-                { name: "محمود المصري", department: "المبيعات", score: 87.5, trend: -1.2, calls: 4, avatar: "https://ui-avatars.com/api/?name=Mahmoud+Masri&background=ffc107&color=fff" },
-                { name: "ليلى حسن", department: "علاقات العملاء", score: 84.2, trend: 0.5, calls: 3, avatar: "https://ui-avatars.com/api/?name=Layla+Hassan&background=0dcaf0&color=fff" },
-                { name: "أحمد منصور", department: "الشكاوى", score: 78.4, trend: -3.5, calls: 3, avatar: "https://ui-avatars.com/api/?name=Ahmed+Mansour&background=dc3545&color=fff" }
-            ];
+            const phpAgents = @json($companyAgents);
+            const agents = phpAgents.map((a, index) => {
+                const seed = (index + 1) * 10;
+                const score = 75 + (seed % 20) + (Math.random() * 5);
+                const calls = 5 + (seed % 10);
+                return {
+                    id: a.id,
+                    name: a.full_name || a.name,
+                    department: a.company_name,
+                    score: parseFloat(score.toFixed(1)),
+                    trend: parseFloat((Math.random() * 4 - 1).toFixed(1)),
+                    calls: calls,
+                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(a.full_name || a.name)}&background=random&color=fff`
+                };
+            });
+            
             if (sortBy === 'top') return agents.sort((a, b) => b.score - a.score).slice(0, 3);
             if (sortBy === 'needs-improvement') return agents.sort((a, b) => a.score - b.score).slice(0, 3);
             return agents.sort((a, b) => b.score - a.score);
@@ -722,16 +724,16 @@
         
         kpiCards.innerHTML = `
             <div class="col-md-3">
-                <div class="dashboard-card h-100 shadow-soft">
+                <div class="dashboard-card h-100 shadow-soft border-bottom border-primary border-3">
                     <div class="card-body p-3">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <p class="text-muted mb-1">Total Departments</p>
-                                <h3 class="metric-value mb-1">${kpiData.totalGroups}</h3>
-                                <small class="text-muted">Active units</small>
+                                <p class="text-muted mb-1 small text-uppercase fw-bold">Active Agents</p>
+                                <h3 class="metric-value mb-1 fw-bold text-primary">${kpiData.activeAgents}</h3>
+                                <small class="text-muted">Currently online</small>
                             </div>
                             <div class="icon-circle bg-soft-primary">
-                                <i class="fas fa-th-large text-primary"></i>
+                                <i class="fas fa-users text-primary"></i>
                             </div>
                         </div>
                     </div>
@@ -739,12 +741,12 @@
             </div>
             
             <div class="col-md-3">
-                <div class="dashboard-card h-100 shadow-soft">
+                <div class="dashboard-card h-100 shadow-soft border-bottom border-success border-3">
                     <div class="card-body p-3">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <p class="text-muted mb-1">Quality Score</p>
-                                <h3 class="metric-value mb-1">${kpiData.avgQualityScore.toFixed(1)}%</h3>
+                                <p class="text-muted mb-1 small text-uppercase fw-bold">Quality Score</p>
+                                <h3 class="metric-value mb-1 fw-bold text-success">${kpiData.avgQualityScore.toFixed(1)}%</h3>
                                 <small class="trend-up"><i class="fas fa-arrow-up me-1"></i> ${(Math.random() * 3).toFixed(1)}% improvement</small>
                             </div>
                             <div class="icon-circle bg-soft-success">
@@ -756,12 +758,12 @@
             </div>
             
             <div class="col-md-3">
-                <div class="dashboard-card h-100 shadow-soft">
+                <div class="dashboard-card h-100 shadow-soft border-bottom border-info border-3">
                     <div class="card-body p-3">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <p class="text-muted mb-1">Evaluated Calls</p>
-                                <h3 class="metric-value mb-1">${kpiData.callsEvaluated}</h3>
+                                <p class="text-muted mb-1 small text-uppercase fw-bold">Evaluated Calls</p>
+                                <h3 class="metric-value mb-1 fw-bold text-info">${kpiData.callsEvaluated}</h3>
                                 <small class="text-muted"><i class="fas fa-arrow-up text-success me-1"></i> ${Math.floor(Math.random() * 100)} this week</small>
                             </div>
                             <div class="icon-circle bg-soft-info">
@@ -773,13 +775,13 @@
             </div>
             
             <div class="col-md-3">
-                <div class="dashboard-card h-100 shadow-soft">
+                <div class="dashboard-card h-100 shadow-soft border-bottom border-warning border-3">
                     <div class="card-body p-3">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <p class="text-muted mb-1">Avg. Response Time</p>
-                                <h3 class="metric-value mb-1">${kpiData.avgResponseTime.toFixed(1)}s</h3>
-                                <small class="trend-down"><i class="fas fa-arrow-down me-1"></i> ${(Math.random() * 1).toFixed(1)}s faster</small>
+                                <p class="text-muted mb-1 small text-uppercase fw-bold">Avg. Response Time</p>
+                                <h3 class="metric-value mb-1 fw-bold text-warning">${kpiData.avgResponseTime.toFixed(1)}s</h3>
+                                <small class="trend-up text-success"><i class="fas fa-arrow-down me-1"></i> ${(Math.random() * 1).toFixed(1)}s faster</small>
                             </div>
                             <div class="icon-circle bg-soft-warning">
                                 <i class="fas fa-stopwatch text-warning"></i>
@@ -1008,13 +1010,16 @@
                 badgeHtml = `<a href="{{ route('user.performance_badges') }}" class="needs-improvement-badge ms-2"><i class="fas fa-graduation-cap me-1"></i> Needs Coaching</a>`;
             }
 
+            const agentUrl = '{{ route('user.agents.show', ['agentId' => ':id']) }}'.replace(':id', agent.id);
+            const queryParams = `?name=${encodeURIComponent(agent.name)}&company=${encodeURIComponent(agent.department)}`;
+
             html += `
                 <div class="agent-card ${agent.score >= 90 ? 'top-agent' : ''} ${agent.score < 75 ? 'low-agent' : ''} shadow-sm border-0 mb-3">
                     <div class="d-flex align-items-center">
                         <img src="${agent.avatar}" class="avatar-sm me-3 border shadow-sm">
                         <div class="flex-grow-1">
                             <h6 class="mb-0 fw-bold d-flex align-items-center">
-                                <a style="color: #000;" href="{{ route('user.agents.index') }}"> ${agent.name}</a> 
+                                <a style="color: #000;" href="${agentUrl}${queryParams}"> ${agent.name}</a> 
                                 ${badgeHtml}
                             </h6>
                             <small class="text-muted">${agent.department} • ${agent.calls} calls</small>
