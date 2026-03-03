@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Log;
 
+use Illuminate\Support\Facades\Auth;
+
 class AuthenticateWithApi
 {
     /**
@@ -19,9 +21,18 @@ class AuthenticateWithApi
             return $next($request);
         }
 
-        // For static dummy site, ensure a dummy user is in session if not there
-        if (!session()->has('user')) {
+        if (!Auth::check()) {
              return $this->redirectToLogin('Please login to access the dashboard.');
+        }
+
+        // Repopulate session if it's missing (e.g. after a session timeout but remembered login)
+        if (!session()->has('user')) {
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            if ($user) {
+                session(['user' => $user->toSessionArray()]);
+                session(['permissions' => $user->getAllPermissions()->pluck('name')->toArray()]);
+            }
         }
 
         return $next($request);

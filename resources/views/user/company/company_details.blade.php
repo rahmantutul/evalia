@@ -107,7 +107,7 @@
         <div class="page-header mb-4">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h4 class="fw-bold mb-1">Department Analysis Dashboard</h4>
+                    <h4 class="fw-bold mb-1">Company Analysis Dashboard</h4>
                     <div class="d-flex align-items-center gap-2 mb-0">
                         <p class="text-muted mb-0">Comprehensive overview of metrics</p>
                         <span class="text-muted">|</span>
@@ -174,7 +174,7 @@
                     </button>
                     <a class="btn btn-outline-secondary fw-600 shadow-sm text-back d-flex align-items-center justify-content-center" 
                     href="{{ route('user.company.list') }}" style="height: 38px;">
-                        Back to Departments
+                        Back to Companies
                     </a>
                 </div>
             </div>
@@ -623,15 +623,15 @@
             return { positive: 78, neutral: 15, negative: 7 };
         },
         
-        departmentPerformance: function(sortBy) {
-            const depts = [
+        companyPerformance: function(sortBy) {
+            const companies = [
                 { name: "Amman Call Center", score: 94, trend: 2.1, calls: 150 },
                 { name: "Technical Support", score: 89, trend: 1.5, calls: 95 },
                 { name: "Tele-Sales", score: 87, trend: -0.5, calls: 120 },
                 { name: "Complaints & Feedback", score: 91, trend: 0.8, calls: 65 },
                 { name: "Customer Relations", score: 93, trend: 1.2, calls: 55 }
             ];
-            return depts.sort((a, b) => b.score - a.score);
+            return companies.sort((a, b) => b.score - a.score);
         },
         
         agentPerformance: function(sortBy) {
@@ -643,7 +643,7 @@
                 return {
                     id: a.id,
                     name: a.full_name || a.name,
-                    department: a.company_name,
+                    company: a.company_name,
                     score: parseFloat(score.toFixed(1)),
                     trend: parseFloat((Math.random() * 4 - 1).toFixed(1)),
                     calls: calls,
@@ -1011,7 +1011,7 @@
             }
 
             const agentUrl = '{{ route('user.agents.show', ['agentId' => ':id']) }}'.replace(':id', agent.id);
-            const queryParams = `?name=${encodeURIComponent(agent.name)}&company=${encodeURIComponent(agent.department)}`;
+            const queryParams = `?name=${encodeURIComponent(agent.name)}&company=${encodeURIComponent(agent.company)}`;
 
             html += `
                 <div class="agent-card ${agent.score >= 90 ? 'top-agent' : ''} ${agent.score < 75 ? 'low-agent' : ''} shadow-sm border-0 mb-3">
@@ -1022,7 +1022,7 @@
                                 <a style="color: #000;" href="${agentUrl}${queryParams}"> ${agent.name}</a> 
                                 ${badgeHtml}
                             </h6>
-                            <small class="text-muted">${agent.department} • ${agent.calls} calls</small>
+                            <small class="text-muted">${agent.company} • ${agent.calls} calls</small>
                         </div>
                         <div class="text-end">
                             <h5 class="mb-0 ${agent.score >= 90 ? 'text-success' : (agent.score < 75 ? 'text-danger' : '')} fw-bold">${agent.score}%</h5>
@@ -1065,7 +1065,7 @@
         const wb = XLSX.utils.book_new();
         const kpiSheetData = [
             ['Metric', 'Value', 'Context'],
-            ['Total Departments', kpiData.totalGroups, 'Internal Units'],
+            ['Total Companies', kpiData.totalGroups, 'Internal Units'],
             ['Average Quality Score', `${kpiData.avgQualityScore}%`, 'Improvement shown'],
             ['Calls Evaluated', kpiData.callsEvaluated, 'Processed audio'],
             ['Average Response Time', `${kpiData.avgResponseTime}s`, 'System average']
@@ -1073,7 +1073,7 @@
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(kpiSheetData), 'KPIs');
         
         const agentSheetData = [['Agent', 'Category', 'Score', 'Trend', 'Calls']];
-        agents.forEach(agent => agentSheetData.push([agent.name, agent.department, `${agent.score}%`, `${agent.trend}%`, agent.calls]));
+        agents.forEach(agent => agentSheetData.push([agent.name, agent.company, `${agent.score}%`, `${agent.trend}%`, agent.calls]));
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(agentSheetData), 'Agent Performance');
         
         const fileName = `${document.querySelector('h4').textContent.trim()}_Export_${new Date().toISOString().slice(0, 10)}.xlsx`;

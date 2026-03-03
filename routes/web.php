@@ -1,13 +1,12 @@
 <?php
 
-use App\Http\Controllers\Auth\ApiAuthController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SalesManagerController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\Admin\{
     AuthController as AdminAuthController,
     AdminController,
@@ -24,11 +23,9 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TelephonyAccountController;
 use App\Http\Controllers\HamsaController;
 
-Route::get('/login', [ApiAuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [ApiAuthController::class, 'login']);
-Route::get('/register', [ApiAuthController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [ApiAuthController::class, 'register']);
-Route::post('/logout', [ApiAuthController::class, 'logout'])->name('logout');
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 // Criteria Routes
@@ -152,14 +149,15 @@ Route::group(['middleware' => 'auth.api'], function () {
     // Role management routes
     Route::prefix('roles')->group(function () {
         Route::get('/', [RoleController::class, 'index'])->name('roles.index');
+        Route::get('/create', [RoleController::class, 'create'])->name('roles.create');
         Route::post('/', [RoleController::class, 'store'])->name('roles.store');
         Route::get('/{id}', [RoleController::class, 'show'])->name('roles.show');
+        Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('roles.edit');
         Route::put('/{id}', [RoleController::class, 'update'])->name('roles.update');
         Route::delete('/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
         
         // API endpoints for AJAX calls
         Route::get('/api/permissions', [RoleController::class, 'permissions'])->name('roles.permissions');
-        Route::get('/api/{id}/details', [RoleController::class, 'getRole'])->name('roles.api.get');
     });
 
     Route::get('/user-profile', [HomeController::class, 'profile'])->name('user.profile');
@@ -181,7 +179,7 @@ Route::group(['middleware' => 'auth.api'], function () {
     Route::get('/user/company/view/{id}', [CompanyController::class, 'companyDetails'])->name('user.company.view');
     Route::get('/user/company/edit/{id}', [CompanyController::class, 'companyEdit'])->name('user.company.edit');
     Route::post('/user/company/store', [CompanyController::class, 'companyStore'])->name('user.company.store');
-    Route::put('/user/company/update/{company_id}', [CompanyController::class, 'companyUpdate'])->name('user.company.update');
+    Route::put('/user/company/update/{id}', [CompanyController::class, 'companyUpdate'])->name('user.company.update');
     Route::get('/user/company/delete/{id}', [CompanyController::class, 'companyDelete'])->name('user.company.delete');
 
 

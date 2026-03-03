@@ -156,8 +156,8 @@
                                 <i class="fas fa-building-circle-arrow-right text-primary fs-4"></i>
                             </div>
                             <div>
-                                <h3 class="mb-0 text-dark fw-semibold">Department Registration</h3>
-                                <p class="text-muted mb-0 fs-7">Register your department with our premium service</p>
+                                <h3 class="mb-0 text-dark fw-semibold">Company Registration</h3>
+                                <p class="text-muted mb-0 fs-7">Register your company with our premium service</p>
                             </div>
                             
                         </div>
@@ -185,7 +185,7 @@
                                         </select>
                                         <small style="color: red">Optional: connect a telephony account.</small>
                                     </div>  --}}
-                                     <div class="col-md-4">
+                                     <!-- <div class="col-md-4">
                                         <label for="company_name" class="form-label">Select a group:</label>
                                         <select name="group_id" id="" class="form-control">
                                             <option value="">Select group</option>
@@ -193,49 +193,37 @@
                                                 <option value="{{ $group['group_id'] }}">{{ $group['group_name'] }}</option>
                                             @endforeach
                                         </select>
-                                    </div>
+                                    </div> -->
                                     <div class="col-md-4">
-                                        <label for="company_name" class="form-label">Department Name:</label>
+                                        <label for="company_name" class="form-label">Company Name:</label>
                                         <input type="text" class="form-control" id="company_name" name="company_name" required>
-                                        <div class="invalid-feedback">Please provide a department name.</div>
+                                        <div class="invalid-feedback">Please provide a company name.</div>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="filler_words" class="form-label">Filler Words:</label>
-                                        <input type="text" class="form-control" id="filler_words" name="filler_words" placeholder="Type and press enter to add">
+                                        <input type="text" class="form-control" id="filler_words" name="filler_words" value="um,uh,basically,honestly,you know,actually" placeholder="Type and press enter to add">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="main_topics" class="form-label">Main Topics:</label>
-                                        <input type="text" class="form-control" id="main_topics" name="main_topics"  placeholder="Type and press enter to add">
+                                        <input type="text" class="form-control" id="main_topics" name="main_topics" value="billing,technical_issue,feature_request,refund,account_access,order_status,cancellation,shipping_query"  placeholder="Type and press enter to add">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="restricted_phrases" class="form-label">Restricted Phrases:</label>
-                                        <input type="text" class="form-control" id="restricted_phrases" name="restricted_phrases" placeholder="Phrases agents should avoid...">
+                                        <input type="text" class="form-control" id="restricted_phrases" name="restricted_phrases" value="I dont know,not my job,shutup,idiot,wait forever" placeholder="Phrases agents should avoid...">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="call_types" class="form-label">Call Types:</label>
-                                        <input type="text" class="form-control" id="call_types" name="call_types"  placeholder="Type and press enter to add">
+                                        <input type="text" class="form-control" id="call_types" name="call_types" value="inbound_support,outbound_sales,complaint,general_inquiry,technical_assistance,callback_request"  placeholder="Type and press enter to add">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="source" class="form-label">Integration Sources:</label>
-                                        <select name="source[]" id="source" class="form-control select2" multiple>
-                                            <option value="api">API</option>
-                                            <option value="avaya">Avaya</option>
-                                            <option value="genesys">Genesys</option>
-                                            <option value="fb">FB</option>
-                                            <option value="linkedin">LinkedIn</option>
-                                            <option value="inta">Instagram</option>
-                                            <option value="tiktok">TikTok</option>
-                                            <option value="snap">Snapchat</option>
-                                            <option value="x">X (Twitter)</option>
-                                            <option value="whatsapp">WhatsApp</option>
-                                            <option value="email">Email</option>
-                                        </select>
-                                        <small class="text-muted">You can select multiple sources.</small>
+                                        <input type="text" class="form-control" id="source" name="source" placeholder="Select integration sources">
+                                        <small class="text-muted">Choose from available integration sources.</small>
                                     </div>
                                     
                                     <div class="col-12">
                                         <label for="company_overview" class="form-label">Company Overview:</label>
-                                        <textarea class="form-control prompt-field" id="company_overview" name="company_overview" placeholder="Provide a brief overview of the company for AI context..." rows="3" readonly>{{ !empty($company['company_overview']) ? $company['company_overview'] : 'A leading provider of cloud-based enterprise solutions, specializing in AI-driven customer support and technical infrastructure management worldwide.' }}</textarea>
+                                        <textarea class="form-control prompt-field" id="company_overview" name="company_overview" placeholder="Provide a brief overview of the company for AI context..." rows="3" readonly></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -252,7 +240,7 @@
                                     
                                     <div class="row g-3">
                                         <div class="col-12">
-                                            <label for="company_policies" class="form-label">Department Policies :</label>
+                                            <label for="company_policies" class="form-label">Company Policies :</label>
                                             <textarea class="form-control prompt-field" id="company_policies" name="company_policies" placeholder="Enter policies, one per line..." rows="6" readonly>
 1. الالتزام بآداب الحديث واللباقة مع العملاء في جميع الأوقات.
 2. يمنع منعا باتا طلب أي معلومات سرية أو كلمات مرور من العميل.
@@ -403,7 +391,7 @@ TASK RULES:
                             <div class="d-grid gap-2 d-md-flex justify-content-between mt-4">
                                 <a class="btn btn-primary" href="{{ route('user.support') }}"> Need any help?</a>
                                 <button type="submit" class="btn btn-primary px-4 py-2">
-                                    <i class="bi bi-save me-2"></i>Register Department
+                                    <i class="bi bi-save me-2"></i>Register Company
                                 </button>
                             </div>
                         </form>
@@ -433,17 +421,7 @@ TASK RULES:
             event.preventDefault();
             event.stopPropagation();
             
-            // Demo account check - show popup and stop here
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Demo Account',
-                    text: 'This is a Demo account. Please contact the administrator for a live testing account.',
-                    confirmButtonColor: '#0a66c2',
-                    confirmButtonText: 'I Understand'
-                });
-                return; // Stop execution here for demo account
-            }
+
             
             if (!form.checkValidity()) {
                 form.classList.add('was-validated');
@@ -483,8 +461,8 @@ TASK RULES:
             // Determine success message based on telephony_account presence
             const hasTelephonyAccount = formData.has('telephony_account') && formData.get('telephony_account');
             const successMessage = hasTelephonyAccount 
-                ? 'Department registered on both platform successfully!' 
-                : 'Department registered successfully!';
+                ? 'Company registered on both platform successfully!' 
+                : 'Company registered successfully!';
 
             showAlert(successMessage, 'success');
              // Reload page after 3 seconds (3000 milliseconds)
@@ -497,7 +475,7 @@ TASK RULES:
             showAlert(`Error: ${error.message}`, 'danger');
         } finally {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Register Department';
+            submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Register Company';
         }
         });
 
@@ -522,16 +500,31 @@ TASK RULES:
             'filler_words', 'main_topics', 'call_types',
             'call_outcomes', 'agent_assessments_configs', 
             'agent_cooperation_configs', 'agent_performance_configs',
-            'restricted_phrases'
+            'restricted_phrases', 'source'
         ];
         
         tagInputs.forEach(id => {
             const input = document.getElementById(id);
             if (input) {
-                window.tagifyInstances[id] = new Tagify(input, {
+                const config = {
                     duplicates: false,
-                    dropdown: { enabled: 0 }
-                });
+                    dropdown: { 
+                        enabled: 0,
+                        closeOnSelect: true
+                    }
+                };
+
+                // Add whitelist for source field
+                if (id === 'source') {
+                    config.whitelist = [
+                        'API', 'Avaya', 'Genesys', 'FB', 'LinkedIn', 
+                        'Instagram', 'TikTok', 'Snapchat', 
+                        'X (Twitter)', 'WhatsApp', 'Email'
+                    ];
+                    config.enforceWhitelist = false; // Allow custom inputs like Main Topics
+                }
+
+                window.tagifyInstances[id] = new Tagify(input, config);
             }
         });
 

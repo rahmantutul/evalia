@@ -158,13 +158,13 @@
                                 <i class="fas fa-building-circle-arrow-right text-primary fs-4"></i>
                             </div>
                             <div>
-                                <h3 class="mb-0 text-dark fw-semibold">Department Settings</h3>
-                                <p class="text-muted mb-0 fs-7">Update your department settings with our premium service</p>
+                                <h3 class="mb-0 text-dark fw-semibold">Company Settings</h3>
+                                <p class="text-muted mb-0 fs-7">Update your company settings with our premium service</p>
                             </div>
                         </div>
                     </div>
                     <div class="card-body p-4">
-                        <form id="companyRegistrationForm" method="PUT" action="{{ route('user.company.update', $company['company_id'])}}" class="needs-validation" novalidate>
+                        <form id="companyRegistrationForm" method="PUT" action="{{ route('user.company.update', $company['id'])}}" class="needs-validation" novalidate>
                             @csrf
                             @if(isset($company))
                                 @method('PUT')
@@ -172,8 +172,8 @@
                             <div class="form-section">
                                 <h4 class="section-title"><i class="bi bi-gear icon-title"></i>Content Configuration</h4>
                                 <div class="row g-3">
-                                    <input type="hidden" class="form-control" id="company_id" name="company_id" value="{{ $company['company_id'] }}" required>
-                                     <div class="col-md-4">
+                                    <input type="hidden" class="form-control" id="id" name="id" value="{{ $company['id'] }}" required>
+                                     <!-- <div class="col-md-4">
                                         <label for="group_id" class="form-label">Select Group:</label>
                                         <select name="group_id" id="" class="form-control" required>
                                             <option value="">--Select a group--</option>
@@ -181,55 +181,45 @@
                                                 <option {{ ($item['group_id'] == $company['group_id'] ) ? 'selected' : '' }} value="{{ $item['group_id'] }}">{{ $item['group_name'] }}</option>
                                             @endforeach
                                         </select>
-                                    </div>
+                                    </div> -->
                                     <div class="col-md-4">
-                                        <label for="company_name" class="form-label">Department Name:</label>
+                                        <label for="company_name" class="form-label">Company Name:</label>
                                         <input type="text" class="form-control" id="company_name" name="company_name" 
                                             value="{{ $company['company_name'] }}" required>
-                                        <div class="invalid-feedback">Please provide a department name.</div>
+                                        <div class="invalid-feedback">Please provide a company name.</div>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="filler_words" class="form-label">Filler Words:</label>
                                         <input type="text" class="form-control" id="filler_words" name="filler_words" 
-                                            value="{{ isset($company) && !empty($company['filler_words']) ? implode(',', $company['filler_words']) : 'um,uh,basically,honestly,you know,actually' }}" 
+                                            value="{{ isset($company) && !empty($company['filler_words']) ? implode(',', $company['filler_words']) : '' }}" 
                                             placeholder="Type and press enter to add">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="main_topics" class="form-label">Main Topics:</label>
                                         <input type="text" class="form-control" id="main_topics" name="main_topics" 
-                                           value="billing,technical_issue,feature_request,refund,account_access,order_status,cancellation,shipping_query"
+                                           value="{{ isset($company) && !empty($company['main_topics']) ? (is_array($company['main_topics']) ? implode(',', $company['main_topics']) : $company['main_topics']) : '' }}"
                                             placeholder="Type and press enter to add">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="restricted_phrases" class="form-label">Restricted Phrases:</label>
                                         <input type="text" class="form-control" id="restricted_phrases" name="restricted_phrases" 
-                                            value="{{ isset($company) && !empty($company['restricted_phrases']) ? implode(',', $company['restricted_phrases']) : 'I dont know,not my job,shutup,idiot,wait forever' }}" 
+                                            value="{{ isset($company) && !empty($company['restricted_phrases']) ? implode(',', $company['restricted_phrases']) : '' }}" 
                                             placeholder="Phrases agents should avoid...">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="call_types" class="form-label">Call Types:</label>
                                         <input type="text" class="form-control" id="call_types" name="call_types" 
-                                            value="inbound_support,outbound_sales,complaint,general_inquiry,technical_assistance,callback_request"value="inbound_support,outbound_sales,complaint,general_inquiry,technical_assistance,callback_request" placeholder="Type and press enter to add">
+                                            value="{{ isset($company) && !empty($company['call_types']) ? (is_array($company['call_types']) ? implode(',', $company['call_types']) : $company['call_types']) : '' }}" placeholder="Type and press enter to add">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="source" class="form-label">Integration Sources:</label>
                                         @php
                                             $currentSources = is_array($company['source'] ?? []) ? ($company['source'] ?? []) : (isset($company['source']) ? [$company['source']] : []);
                                         @endphp
-                                        <select name="source[]" id="source" class="form-control select2" multiple>
-                                            <option value="api" {{ in_array('api', $currentSources) ? 'selected' : '' }}>API</option>
-                                            <option value="avaya" {{ in_array('avaya', $currentSources) ? 'selected' : '' }}>Avaya</option>
-                                            <option value="genesys" {{ in_array('genesys', $currentSources) ? 'selected' : '' }}>Genesys</option>
-                                            <option value="fb" {{ in_array('fb', $currentSources) ? 'selected' : '' }}>FB</option>
-                                            <option value="linkedin" {{ in_array('linkedin', $currentSources) ? 'selected' : '' }}>LinkedIn</option>
-                                            <option value="inta" {{ in_array('inta', $currentSources) ? 'selected' : '' }}>Instagram</option>
-                                            <option value="tiktok" {{ in_array('tiktok', $currentSources) ? 'selected' : '' }}>TikTok</option>
-                                            <option value="snap" {{ in_array('snap', $currentSources) ? 'selected' : '' }}>Snapchat</option>
-                                            <option value="x" {{ in_array('x', $currentSources) ? 'selected' : '' }}>X (Twitter)</option>
-                                            <option value="whatsapp" {{ in_array('whatsapp', $currentSources) ? 'selected' : '' }}>WhatsApp</option>
-                                            <option value="email" {{ in_array('email', $currentSources) ? 'selected' : '' }}>Email</option>
-                                        </select>
-                                        <small class="text-muted">You can select multiple sources.</small>
+                                        <input type="text" class="form-control" id="source" name="source" 
+                                            value="{{ implode(',', $currentSources) }}" 
+                                            placeholder="Select integration sources">
+                                        <small class="text-muted">Choose from available integration sources.</small>
                                     </div>
                                     <div class="col-12">
                                         <label for="company_overview" class="form-label">Company Overview:</label>
@@ -251,7 +241,7 @@
                                     
                                     <div class="row g-3">
                                         <div class="col-12">
-                                            <label for="company_policies" class="form-label">Department Policies :</label>
+                                            <label for="company_policies" class="form-label">Company Policies :</label>
                                             <textarea class="form-control prompt-field" id="company_policies" name="company_policies" placeholder="Enter policies, one per line..." rows="6" readonly>{{ isset($company) ? implode("\n", $company['company_policies'] ?? [
 "1. الالتزام بآداب الحديث واللباقة مع العملاء في جميع الأوقات.",
 "2. يمنع منعا باتا طلب أي معلومات سرية أو كلمات مرور من العميل.",
@@ -379,23 +369,23 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
                                 <div class="row g-3">
                                     <div class="col-md-3">
                                         <label for="delay_classes_medium" class="form-label">Delay Class - Medium (seconds):</label>
-                                        <input type="number" step="0.1" class="form-control" id="delay_classes_medium" name="delay_classes[medium]" 
-                                            value="{{ $company['delay_classes']['medium'] ?? 2.4 }}">
+                                        <input type="number" step="0.1" class="form-control" id="delay_classes_medium" name="delay_classes_medium" 
+                                            value="{{ $company->delay_classes_medium ?? 2.4 }}">
                                     </div>
                                     <div class="col-md-3">
                                         <label for="delay_classes_short" class="form-label">Delay Class - Short (seconds):</label>
-                                        <input type="number" step="0.1" class="form-control" id="delay_classes_short" name="delay_classes[short]" 
-                                            value="{{ $company['delay_classes']['short'] ?? 1.2 }}">
+                                        <input type="number" step="0.1" class="form-control" id="delay_classes_short" name="delay_classes_short" 
+                                            value="{{ $company->delay_classes_short ?? 1.2 }}">
                                     </div>
                                     <div class="col-md-3">
                                         <label for="pause_classes_medium" class="form-label">Pause Class - Medium (seconds):</label>
-                                        <input type="number" step="0.1" class="form-control" id="pause_classes_medium" name="pause_classes[medium]" 
-                                            value="{{ $company['pause_classes']['medium'] ?? 2.4 }}">
+                                        <input type="number" step="0.1" class="form-control" id="pause_classes_medium" name="pause_classes_medium" 
+                                            value="{{ $company->pause_classes_medium ?? 2.4 }}">
                                     </div>
                                     <div class="col-md-3">
                                         <label for="pause_classes_short" class="form-label">Pause Class - Short (seconds):</label>
-                                        <input type="number" step="0.1" class="form-control" id="pause_classes_short" name="pause_classes[short]" 
-                                            value="{{ $company['pause_classes']['short'] ?? 1.2 }}">
+                                        <input type="number" step="0.1" class="form-control" id="pause_classes_short" name="pause_classes_short" 
+                                            value="{{ $company->pause_classes_short ?? 1.2 }}">
                                     </div>
                                     <div class="col-md-3">
                                         <label for="common_words_threshold" class="form-label">Common Words Threshold:</label>
@@ -423,7 +413,7 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
                             <div class="d-grid gap-2 d-md-flex justify-content-between mt-4">
                                 <a class="btn btn-primary" href="{{ route('user.support') }}"> Need any help?</a>
                                 <button type="submit" class="btn btn-primary px-4 py-2">
-                                    <i class="bi bi-save me-2"></i>Update Department
+                                    <i class="bi bi-save me-2"></i>Update Company
                                 </button>
                             </div>
                         </form>
@@ -444,16 +434,31 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
             'filler_words', 'main_topics', 'call_types',
             'call_outcomes', 'agent_assessments_configs', 
             'agent_cooperation_configs', 'agent_performance_configs',
-            'restricted_phrases'
+            'restricted_phrases', 'source'
         ];
         
         tagInputs.forEach(id => {
             const input = document.getElementById(id);
             if (input) {
-                window.tagifyInstances[id] = new Tagify(input, {
+                const config = {
                     duplicates: false,
-                    dropdown: { enabled: 0 }
-                });
+                    dropdown: { 
+                        enabled: 0,
+                        closeOnSelect: true
+                    }
+                };
+
+                // Add whitelist for source field
+                if (id === 'source') {
+                    config.whitelist = [
+                        'API', 'Avaya', 'Genesys', 'FB', 'LinkedIn', 
+                        'Instagram', 'TikTok', 'Snapchat', 
+                        'X (Twitter)', 'WhatsApp', 'Email'
+                    ];
+                    config.enforceWhitelist = false; // Allow custom inputs
+                }
+
+                window.tagifyInstances[id] = new Tagify(input, config);
             }
         });
 
@@ -511,17 +516,7 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
             event.preventDefault();
             event.stopPropagation();
             
-            // Demo account check - show popup and stop here
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Demo Account',
-                    text: 'This is a Demo account. Please contact the administrator for a live testing account.',
-                    confirmButtonColor: '#0a66c2',
-                    confirmButtonText: 'I Understand'
-                });
-                return; // Stop execution here for demo account
-            }
+
             
             if (!form.checkValidity()) {
                 form.classList.add('was-validated');
@@ -560,14 +555,14 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
                 setTimeout(() => {
                     window.location.href = "{{ route('user.company.list') }}";
                 }, 1000);
-                showAlert('Department Updated successfully!', 'success');
+                showAlert('Company Updated successfully!', 'success');
                 
             } catch (error) {
                 console.error('Submission error:', error);
                 showAlert(`Error: ${error.message}`, 'danger');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Update Department';
+                submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Update Company';
             }
         });
 

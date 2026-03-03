@@ -125,7 +125,6 @@
             const isSupervisor = "{{ session('user.role.name') }}" === 'Supervisor';
             return {
                 totalCompanies: isSupervisor ? 2 : 5,
-                totalDepartments: isSupervisor ? 2 : 5, // Renamed for clarity
                 avgQualityScore: 86.4, // Realistic average from bell curve distribution
                 callsEvaluated: callsEvaluated, // Use the calculated value
                 avgResponseTime: 5.4
@@ -207,7 +206,7 @@
             ];
 
             if (isSupervisor) {
-                // Return only 2 assigned departments
+                // Return only 2 assigned companies
                 companies = companies.slice(0, 2);
             }
             
@@ -235,7 +234,7 @@
                 { 
                     id: "agent-1",
                     name: "Nadi Budiri", 
-                    department: "Social Security", 
+                    company: "Social Security", 
                     score: 92.3, 
                     trend: 2.2, 
                     calls: agentCalls[0],
@@ -244,7 +243,7 @@
                 { 
                     id: "agent-2",
                     name: "Sara Khateeb", 
-                    department: "Social Security", 
+                    company: "Social Security", 
                     score: 89.1, 
                     trend: 1.8, 
                     calls: agentCalls[1],
@@ -253,7 +252,7 @@
                 { 
                     id: "agent-3",
                     name: "Mahmoud Masri", 
-                    department: "Arab Bank", 
+                    company: "Arab Bank", 
                     score: 87.5, 
                     trend: 1.2, 
                     calls: agentCalls[2],
@@ -262,7 +261,7 @@
                 { 
                     id: "agent-6",
                     name: "Farah Zoubi", 
-                    department: "Arab Bank", 
+                    company: "Arab Bank", 
                     score: 91.2, 
                     trend: 3.1, 
                     calls: agentCalls[5],
@@ -271,7 +270,7 @@
                 { 
                     id: "agent-4",
                     name: "Layla Hassan", 
-                    department: "Orange Jordan", 
+                    company: "Orange Jordan", 
                     score: 84.2, 
                     trend: -1.4, 
                     calls: agentCalls[3],
@@ -280,7 +279,7 @@
                 { 
                     id: "agent-5",
                     name: "Ahmed Manaseer", 
-                    department: "Manaseer Group", 
+                    company: "Manaseer Group", 
                     score: 86.8, 
                     trend: 0.5, 
                     calls: agentCalls[4],
@@ -289,7 +288,7 @@
                 { 
                     id: "agent-7",
                     name: "Yazan Tell", 
-                    department: "Royal Jordanian", 
+                    company: "Royal Jordanian", 
                     score: 78.9, 
                     trend: -2.3, 
                     calls: agentCalls[6],
@@ -298,8 +297,8 @@
             ];
 
             if (isSupervisor) {
-                // Return only 2 agents from assigned departments (SSC and Arab Bank)
-                agents = agents.filter(a => a.department === "Social Security" || a.department === "Arab Bank").slice(0, 2);
+                // Return only 2 agents from assigned companies (SSC and Arab Bank)
+                agents = agents.filter(a => a.company === "Social Security" || a.company === "Arab Bank").slice(0, 2);
             }
 
             // Sort based on selection
@@ -416,8 +415,8 @@
                         <div class="card-body p-3">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <p class="text-muted mb-1 small">Total Departments</p>
-                                    <h3 class="metric-value mb-1 fw-bold">${kpiData.totalDepartments}</h3>
+                                    <p class="text-muted mb-1 small">Total Companies</p>
+                                    <h3 class="metric-value mb-1 fw-bold">${kpiData.totalCompanies}</h3>
                                     <small class="text-primary fw-500">${trendText}</small>
                                 </div>
                                 <div class="icon-circle bg-soft-primary">
@@ -694,17 +693,17 @@
         companies.forEach(company => {
             const trendClass = company.trend > 0 ? 'trend-up' : (company.trend < 0 ? 'trend-down' : 'trend-neutral');
             const trendIcon = company.trend > 0 ? 'fa-arrow-up' : (company.trend < 0 ? 'fa-arrow-down' : 'fa-minus');
-            let departmentViewBaseUrl = "{{ route('user.company.view', ':id') }}".replace(':id', company.id);
+            let companyViewBaseUrl = "{{ route('user.company.view', ':id') }}".replace(':id', company.id);
 
             let badgeHtml = '';
             if (company.score >= 90) {
-                badgeHtml = `<a href="${departmentViewBaseUrl}" class="top-performer-badge ms-2"><i class="fas fa-trophy me-1"></i> Top</a>`;
+                badgeHtml = `<a href="${companyViewBaseUrl}" class="top-performer-badge ms-2"><i class="fas fa-trophy me-1"></i> Top</a>`;
             } else if (company.score >= 80) {
-                badgeHtml = `<a href="${departmentViewBaseUrl}" class="high-achiever-badge ms-2"><i class="fas fa-medal me-1"></i> High</a>`;
+                badgeHtml = `<a href="${companyViewBaseUrl}" class="high-achiever-badge ms-2"><i class="fas fa-medal me-1"></i> High</a>`;
             } else if (company.score >= 70) {
-                badgeHtml = `<a href="${departmentViewBaseUrl}" class="consistent-badge ms-2"><i class="fas fa-star me-1"></i> Stable</a>`;
+                badgeHtml = `<a href="${companyViewBaseUrl}" class="consistent-badge ms-2"><i class="fas fa-star me-1"></i> Stable</a>`;
             } else {
-                badgeHtml = `<a href="${departmentViewBaseUrl}" class="needs-improvement-badge ms-2"><i class="fas fa-exclamation-circle me-1"></i> Alert</a>`;
+                badgeHtml = `<a href="${companyViewBaseUrl}" class="needs-improvement-badge ms-2"><i class="fas fa-exclamation-circle me-1"></i> Alert</a>`;
             }
 
            html += `
@@ -712,7 +711,7 @@
                     <td class="ps-4">
                         <div class="d-flex align-items-center">
                             <strong>
-                                <a style="color: #3f4254;" class="text-hover-primary" href="${departmentViewBaseUrl}">
+                                <a style="color: #3f4254;" class="text-hover-primary" href="${companyViewBaseUrl}">
                                     ${company.name}
                                 </a>
                             </strong>
@@ -749,7 +748,7 @@
             }
 
             const agentUrl = '{{ route('user.agents.show', ['agentId' => ':id']) }}'.replace(':id', agent.id);
-            const queryParams = `?name=${encodeURIComponent(agent.name)}&company=${encodeURIComponent(agent.department)}`;
+            const queryParams = `?name=${encodeURIComponent(agent.name)}&company=${encodeURIComponent(agent.company)}`;
 
             html += `
                 <div class="agent-card ${agent.score >= 90 ? 'top-agent' : ''} ${agent.score < 75 ? 'low-agent' : ''} shadow-sm border-0 mb-3">
@@ -760,7 +759,7 @@
                                 <a style="color: #000;" href="${agentUrl}${queryParams}"> ${agent.name}</a> 
                                 ${badgeHtml}
                             </h6>
-                            <small class="text-muted">${agent.department} • ${agent.calls} calls</small>
+                            <small class="text-muted">${agent.company} • ${agent.calls} calls</small>
                         </div>
                         <div class="text-end">
                             <h5 class="mb-0 ${agent.score >= 90 ? 'text-success' : (agent.score < 75 ? 'text-danger' : '')} fw-bold">${agent.score}%</h5>
@@ -805,21 +804,21 @@
         // Summary Sheet
         const summaryData = [
             ["Metric", "Value"],
-            ["Total Departments", kpiData.totalDepartments],
+            ["Total Companies", kpiData.totalCompanies],
             ["Avg. Quality Score", kpiData.avgQualityScore + "%"],
             ["Calls Evaluated", kpiData.callsEvaluated],
             ["Avg. Response Time", kpiData.avgResponseTime + "s"]
         ];
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), "Summary");
         
-        // Departments Sheet
-        const deptData = [["Department Name", "Quality Score", "Trend", "Call Volume"]];
-        companies.forEach(c => deptData.push([c.name, c.score + "%", c.trend + "%", c.calls]));
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(deptData), "Departments");
+        // Companies Sheet
+        const compData = [["Company Name", "Quality Score", "Trend", "Call Volume"]];
+        companies.forEach(c => compData.push([c.name, c.score + "%", c.trend + "%", c.calls]));
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(compData), "Companies");
         
         // Agents Sheet
-        const agntData = [["Agent Name", "Department", "Score", "Trend", "Calls"]];
-        agents.forEach(a => agntData.push([a.name, a.department, a.score + "%", a.trend + "%", a.calls]));
+        const agntData = [["Agent Name", "Company", "Score", "Trend", "Calls"]];
+        agents.forEach(a => agntData.push([a.name, a.company, a.score + "%", a.trend + "%", a.calls]));
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(agntData), "Agents");
         
         XLSX.writeFile(wb, `Evalia_Dashboard_Export_${new Date().toISOString().split('T')[0]}.xlsx`);

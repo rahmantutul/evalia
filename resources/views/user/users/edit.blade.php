@@ -141,13 +141,15 @@
                     <div class="mb-4">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <h2 class="mb-2 fw-semibold" style="color: #1f2937; font-size: 1.75rem;">Edit User Profile</h2>
+                                <h2 class="mb-2 fw-semibold" style="color: #1f2937; font-size: 1.75rem;">
+                                    {{ $type === 'agent' ? 'Edit Agent Profile' : 'Edit User Profile' }}
+                                </h2>
                                 <div class="user-badge">
-                                    <i class="fas fa-user"></i>
+                                    <i class="fas fa-{{ $type === 'agent' ? 'headset' : 'user' }}"></i>
                                     <span>{{ $user['full_name'] }}</span>
                                 </div>
                             </div>
-                            <a href="{{ route('users.index') }}" class="btn btn-outline-linkedin btn-sm">
+                            <a href="{{ $type === 'agent' ? route('user.agents.index') : route('users.index') }}" class="btn btn-outline-linkedin btn-sm">
                                 <i class="fas fa-arrow-left me-2"></i>Back to list
                             </a>
                         </div>
@@ -156,7 +158,7 @@
                     <!-- Info Banner -->
                     <div class="info-banner">
                         <i class="fas fa-info-circle me-2"></i>
-                        <strong>Note:</strong> Update user information carefully. Changes will be reflected immediately across the system.
+                        <strong>Note:</strong> Update {{ $type === 'agent' ? 'agent' : 'user' }} information carefully. Changes will be reflected immediately across the system.
                     </div>
 
                     @if(session('error'))
@@ -174,6 +176,7 @@
                     <form action="{{ route('users.update', $user['id']) }}" method="POST" id="editUserForm">
                         @csrf
                         @method('PUT')
+                        <input type="hidden" name="type" value="{{ $type }}">
 
                         <!-- Basic Information -->
                         <div class="section-divider">
@@ -181,19 +184,19 @@
                         </div>
 
                         <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label for="full_name" class="form-label">Full Name <span class="required-mark">*</span></label>
-                                <input type="text" 
-                                    class="form-control input-focus @error('full_name') is-invalid @enderror" 
-                                    id="full_name" 
-                                    name="full_name" 
-                                    value="{{ old('full_name', $user['full_name']) }}" 
-                                    placeholder="Enter full name"
-                                    required>
-                                @error('full_name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                                    <div class="col-md-6">
+                                        <label for="full_name" class="form-label">Full Name <span class="required-mark">*</span></label>
+                                        <input type="text" 
+                                            class="form-control input-focus @error('full_name') is-invalid @enderror" 
+                                            id="full_name" 
+                                            name="full_name" 
+                                            value="{{ old('full_name', $user['full_name']) }}" 
+                                            placeholder="Enter full name"
+                                            required>
+                                        @error('full_name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
 
                             <div class="col-md-6">
                                 <label for="email" class="form-label">Email Address <span class="required-mark">*</span></label>
@@ -217,33 +220,53 @@
 
                         <!-- Rest of your existing form fields -->
                         <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label for="role_id" class="form-label">Role <span class="required-mark">*</span></label>
-                                <select class="form-control input-focus @error('role_id') is-invalid @enderror" 
-                                        id="role_id" 
-                                        name="role_id" 
-                                        required>
-                                    <option value="">Select Role</option>
-                                    @foreach($roles as $role)
-                                        <option value="{{ $role['id'] }}" {{ (old('role_id', $user['role']['id'] ?? '') == $role['id']) ? 'selected' : '' }}>
-                                            {{ $role['name'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('role_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            @if($type === 'agent')
+                                <div class="col-md-6">
+                                    <label for="supervisor_id" class="form-label">Supervisor <span class="text-muted fw-normal">(Optional)</span></label>
+                                    <select class="form-control input-focus @error('supervisor_id') is-invalid @enderror" 
+                                            id="supervisor_id" 
+                                            name="supervisor_id">
+                                        <option value="">Self</option>
+                                        @foreach($supervisors as $supervisor)
+                                            <option value="{{ $supervisor['id'] }}" {{ (old('supervisor_id', $user['supervisor_id'] ?? '') == $supervisor['id']) ? 'selected' : '' }}>
+                                                {{ $supervisor['full_name'] }}   {{ $supervisor['id'] == $user['id'] ? '(Self)' : '' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('supervisor_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Only Agents can be assigned as supervisors.</small>
+                                </div>
+                            @else
+                                <div class="col-md-6">
+                                    <label for="role_id" class="form-label">Role <span class="required-mark">*</span></label>
+                                    <select class="form-control input-focus @error('role_id') is-invalid @enderror" 
+                                            id="role_id" 
+                                            name="role_id" 
+                                            required>
+                                        <option value="">Select Role</option>
+                                        @foreach($roles as $role)
+                                            <option value="{{ $role['id'] }}" {{ (old('role_id', $user['role']['id'] ?? '') == $role['id']) ? 'selected' : '' }}>
+                                                {{ $role['name'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('role_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @endif
 
                             <div class="col-md-6">
-                                <label for="company_id" class="form-label">Company</label>
+                                <label for="company_id" class="form-label">Company <span class="text-muted fw-normal">(Optional)</span></label>
                                 <select class="form-control input-focus @error('company_id') is-invalid @enderror" 
                                         id="company_id" 
                                         name="company_id">
                                     <option value="">Select Company</option>
                                     @foreach($companies as $company)
-                                        <option value="{{ $company['id'] }}" {{ (old('company_id', $user['company_id'] ?? '') == $company['id']) ? 'selected' : '' }}>
-                                            {{ $company['name'] ?? $company['id'] }}
+                                        <option value="{{ $company['id'] }}" {{ (old('company_id', $user['company']['id'] ?? '') == $company['id']) ? 'selected' : '' }}>
+                                            {{ $company['company_name'] ?? $company['id'] }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -255,7 +278,7 @@
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label for="position" class="form-label">Position</label>
+                                <label for="position" class="form-label">Position <span class="text-muted fw-normal">(Optional)</span></label>
                                 <input type="text" 
                                     class="form-control input-focus @error('position') is-invalid @enderror" 
                                     id="position" 
@@ -268,7 +291,7 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label for="phone" class="form-label">Phone Number</label>
+                                <label for="phone" class="form-label">Phone Number <span class="text-muted fw-normal">(Optional)</span></label>
                                 <input type="tel" 
                                     class="form-control input-focus @error('phone') is-invalid @enderror" 
                                     id="phone" 
@@ -280,26 +303,6 @@
                                 @enderror
                             </div>
                         </div>
-
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="supervisor_id" class="form-label">Supervisor</label>
-                                <select class="form-control input-focus @error('supervisor_id') is-invalid @enderror" 
-                                        id="supervisor_id" 
-                                        name="supervisor_id">
-                                    <option value="">Select Supervisor</option>
-                                    @foreach($supervisors as $supervisor)
-                                        <option value="{{ $supervisor['id'] }}" {{ (old('supervisor_id', $user['supervisor_id'] ?? '') == $supervisor['id']) ? 'selected' : '' }}>
-                                            {{ $supervisor['full_name'] }} ({{ $supervisor['email'] }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('supervisor_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
                         
                         <!-- Password Change Section -->
                         <div class="section-divider">
@@ -361,37 +364,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 errorElement.style.display = 'none';
             }
         });
-    });
-
-    // Confirm before navigation if form has changes
-    const form = document.getElementById('editUserForm');
-    const initialFormData = new FormData(form);
-    const initialValues = {};
-    
-    for (let [key, value] of initialFormData.entries()) {
-        initialValues[key] = value;
-    }
-
-    window.addEventListener('beforeunload', function(e) {
-        const currentFormData = new FormData(form);
-        let hasChanges = false;
-
-        for (let [key, value] of currentFormData.entries()) {
-            if (initialValues[key] !== value) {
-                hasChanges = true;
-                break;
-            }
-        }
-
-        if (hasChanges) {
-            e.preventDefault();
-            e.returnValue = '';
-        }
-    });
-
-    // Remove warning when form is submitted
-    form.addEventListener('submit', function() {
-        window.removeEventListener('beforeunload', null);
     });
 });
 </script>

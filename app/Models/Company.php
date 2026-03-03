@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    protected $guarded =['id'];
+    protected $guarded = [];
 
     protected $casts = [
         'filler_words' => 'array',
@@ -18,6 +18,9 @@ class Company extends Model
         'agent_cooperation_configs' => 'array',
         'agent_performance_configs' => 'array',
         'llm_total_usage' => 'array',
+        'restricted_phrases' => 'array',
+        'source' => 'array',
+        'faq' => 'array',
     ];
 
 }

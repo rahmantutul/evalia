@@ -5,24 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
-use App\Services\ExternalApiService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use App\Models\User;
 
 class TaskController extends Controller
 {
-    protected $apiService;
-
-    public function __construct(ExternalApiService $apiService)
+    public function __construct()
     {
         $this->middleware('auth.api');
-        $this->apiService = $apiService;
     }
 
-
-    /**
-     * Helper to find a specific task by ID.
-     */
     private function findTaskById($taskId)
     {
         $allTasks = app(CompanyController::class)->getAllTasks();
@@ -34,24 +27,33 @@ class TaskController extends Controller
 
     public function TaskList($companyId, Request $request)
     {
-        // 1. Fetch real agents for this company first
-        $result = $this->apiService->listUsers(0, 100);
-        $allUsers = $result['users'] ?? [];
-        $companyAgents = array_filter($allUsers, function($user) {
-            return ($user['role']['name'] ?? '') === 'Agent';
-        });
+        $companyAgents = User::where('user_type', User::TYPE_AGENT)
+            ->where('company_id', $companyId)
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'full_name' => $user->name,
+                    'email' => $user->email,
+                ];
+            });
 
-        // 2. Use common tasks from CompanyController and filter by companyId
         $allTasksPool = app(CompanyController::class)->getAllTasks();
-        $allTasks = array_filter($allTasksPool, function($t) use ($companyId) {
-            return $t['company_id'] === $companyId;
+        $allTasks = array_filter($allTasksPool, function ($t) use ($companyId) {
+            return (string)$t['company_id'] === (string)$companyId;
         });
 
-        // 3. Apply search filters
         $filteredTasks = $this->applyFilters($allTasks, $request);
 
-        // 4. Pagination
-        $page = Paginator::resolveCurrentPage(); 
+        $tasksCollection = collect($filteredTasks);
+        $summary = [
+            'total' => $tasksCollection->count(),
+            'good_score' => $tasksCollection->where('score', '>=', 90)->count(),
+            'needs_coaching' => $tasksCollection->where('coaching_required', 'Yes')->count(),
+            'high_risk' => $tasksCollection->where('risk_flag', 'High')->count(),
+        ];
+
+        $page = Paginator::resolveCurrentPage();
         $perPage = 10;
         $offset = ($page - 1) * $perPage;
         $pagedTasks = array_slice($filteredTasks, $offset, $perPage);
@@ -69,26 +71,22 @@ class TaskController extends Controller
             'taskList' => $paginatedTasks,
             'hasRunningTasks' => false,
             'companyAgents' => $companyAgents,
+            'summary' => $summary,
         ]);
     }
 
     public function taskDetails($workId)
     {
-        // 1. Try to find the task in our lists
         $task = $this->findTaskById($workId);
-        
-        // 2. Determine which data to load
         $templateId = $task['work_id'] ?? $workId;
 
         if ($templateId === 'real-arabic') {
             $data = $this->getRealArabicData();
         } else {
-            // Try to load from JSON file in storage
             $filePath = storage_path("app/analyses/{$templateId}.json");
             if (File::exists($filePath)) {
                 $data = json_decode(File::get($filePath), true);
             } else {
-                // Fallback to demo data instead of 404
                 $data = $this->getRealArabicData();
             }
         }

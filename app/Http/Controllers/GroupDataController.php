@@ -29,7 +29,7 @@ class GroupDataController extends Controller
             ],
             [
                 'group_id' => 'group-2', 
-                'group_name' => 'Sales Department', 
+                'group_name' => 'Sales Company', 
                 'description' => 'Sales and lead generation keywords', 
                 'created_at' => now()->toDateTimeString(),
                 'keyword_sets' => [

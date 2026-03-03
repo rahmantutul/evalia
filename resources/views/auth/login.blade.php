@@ -110,31 +110,7 @@
                             class="w-full linkedin-blue-bg hover:linkedin-blue-dark text-white font-medium py-2 px-4 rounded-md transition">
                         Sign in
                     </button>
-                    
-                    <div class="grid grid-cols-3 gap-2 mt-4">
-                        <button type="button" onclick="fillCredentials('admin', 'password')" 
-                                class="py-2 px-1 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition">
-                            Admin
-                        </button>
-                        <button type="button" onclick="fillCredentials('supervisor', 'password')" 
-                                class="py-2 px-1 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition">
-                            Supervisor
-                        </button>
-                        <button type="button" onclick="fillCredentials('agent', 'password')" 
-                                class="py-2 px-1 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition">
-                            Agent
-                        </button>
-                    </div>
                 </form>
-
-                <script>
-                    function fillCredentials(username, password) {
-                        document.getElementById('username').value = username;
-                        document.getElementById('password').value = password;
-                        // Optional: automatically submit the form
-                        // document.getElementById('loginForm').submit();
-                    }
-                </script>
                 {{-- <div class="mt-6 text-center text-sm">
                     <p class="text-gray-600">New to Evalia ? 
                         <a href="{{ route('register') }}" class="linkedin-blue font-medium">Join now</a>

@@ -57,7 +57,6 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Role Name</th>
-                                    <th>Description</th>
                                     <th>Permissions</th>
                                     <th>Actions</th>
                                 </tr>
@@ -76,18 +75,20 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ $role['description'] ?? 'No description' }}</td>
                                         <td>
-                                            @if(isset($role['permissions']) && count($role['permissions']) > 0)
+                                            @php
+                                                $permissions = isset($role['permissions']) ? (is_array($role['permissions']) ? $role['permissions'] : $role['permissions']->toArray()) : [];
+                                            @endphp
+                                            @if(count($permissions) > 0)
                                                 <div class="permission-tags">
-                                                    @foreach(array_slice($role['permissions'], 0, 3) as $permission)
+                                                    @foreach(array_slice($permissions, 0, 3) as $permission)
                                                         <span class="badge bg-light text-dark border me-1 mb-1">
                                                             {{ $permission['name'] ?? $permission }}
                                                         </span>
                                                     @endforeach
-                                                    @if(count($role['permissions']) > 3)
+                                                    @if(count($permissions) > 3)
                                                         <span class="badge bg-secondary">
-                                                            +{{ count($role['permissions']) - 3 }} more
+                                                            +{{ count($permissions) - 3 }} more
                                                         </span>
                                                     @endif
                                                 </div>
@@ -102,7 +103,6 @@
                                                         data-bs-toggle="modal" data-bs-target="#editRoleModal"
                                                         data-role-id="{{ $role['id'] }}"
                                                         data-role-name="{{ $role['name'] }}"
-                                                        data-role-description="{{ $role['description'] ?? '' }}"
                                                         onclick="editRole(this)">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
@@ -143,7 +143,7 @@
 
 <!-- Create Role Modal -->
 <div class="modal fade" id="createRoleModal" tabindex="-1" aria-labelledby="createRoleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="createRoleModalLabel">Create New Role</h5>
@@ -162,26 +162,31 @@
                         </div>
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label for="roleDescription" class="form-label">Description</label>
-                                <textarea class="form-control" id="roleDescription" name="description" 
-                                          rows="3" placeholder="Enter role description"></textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label">Permissions</label>
-                                <div class="permissions-container border rounded p-3" style="max-height: 400px; overflow-y: auto;">
-                                    <div class="text-center loading-permissions">
-                                        <div class="spinner-border spinner-border-sm" role="status">
-                                            <span class="visually-hidden">Loading permissions...</span>
+                                <label class="form-label d-flex justify-content-between align-items-center">
+                                    <span>Permissions <span class="text-danger">*</span></span>
+                                    <div class="d-flex align-items-center">
+                                        <div class="input-group input-group-sm me-2" style="width: 200px;">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input type="text" class="form-control" placeholder="Search..." onkeyup="filterPermissions('create', this.value)">
                                         </div>
-                                        <span class="ms-2">Loading permissions...</span>
+                                        <div class="form-check form-check-inline mb-0">
+                                            <input class="form-check-input" type="checkbox" id="selectAllCreate" onclick="toggleAllPermissions('create')">
+                                            <label class="form-check-label" for="selectAllCreate">Select All</label>
+                                        </div>
                                     </div>
-                                    <div class="permissions-list d-none">
+                                </label>
+                                <div class="permissions-container border rounded p-3 bg-light" style="max-height: 400px; overflow-y: auto;">
+                                    <div class="text-center loading-permissions py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <div class="mt-2 text-muted">Loading permissions...</div>
+                                    </div>
+                                    <div class="permissions-list d-none row g-2">
                                         <!-- Permissions will be loaded here via JavaScript -->
                                     </div>
                                 </div>
-                                <small class="text-muted">Select permissions to assign to this role</small>
+                                <small class="text-muted mt-1 d-block">Select individual permissions to assign to this role</small>
                             </div>
                         </div>
                     </div>
@@ -199,7 +204,7 @@
 
 <!-- Edit Role Modal -->
 <div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editRoleModalLabel">Edit Role Permissions</h5>
@@ -216,29 +221,30 @@
                                 <input type="text" class="form-control" id="editRoleName" name="name" required>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Role ID</label>
-                                <p class="form-control-static" id="editRoleId"></p>
-                            </div>
-                        </div>
+                                <p class="form-control-static d-none" id="editRoleId"></p>
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label for="editRoleDescription" class="form-label">Role Description</label>
-                                <textarea class="form-control" id="editRoleDescription" name="description" rows="3" placeholder="Enter role description"></textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label">Permissions</label>
-                                <div class="permissions-container border rounded p-3" style="max-height: 400px; overflow-y: auto;">
-                                    <div class="text-center loading-permissions">
-                                        <div class="spinner-border spinner-border-sm" role="status">
-                                            <span class="visually-hidden">Loading permissions...</span>
+                                <label class="form-label d-flex justify-content-between align-items-center">
+                                    <span>Permissions <span class="text-danger">*</span></span>
+                                    <div class="d-flex align-items-center">
+                                        <div class="input-group input-group-sm me-2" style="width: 200px;">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input type="text" class="form-control" placeholder="Search..." onkeyup="filterPermissions('edit', this.value)">
                                         </div>
-                                        <span class="ms-2">Loading permissions...</span>
+                                        <div class="form-check form-check-inline mb-0">
+                                            <input class="form-check-input" type="checkbox" id="selectAllEdit" onclick="toggleAllPermissions('edit')">
+                                            <label class="form-check-label" for="selectAllEdit">Select All</label>
+                                        </div>
                                     </div>
-                                    <div class="permissions-list d-none">
+                                </label>
+                                <div class="permissions-container border rounded p-3 bg-light" style="max-height: 400px; overflow-y: auto;">
+                                    <div class="text-center loading-permissions py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <div class="mt-2 text-muted">Loading permissions...</div>
+                                    </div>
+                                    <div class="permissions-list d-none row g-2">
                                         <!-- Permissions will be loaded here via JavaScript -->
                                     </div>
                                 </div>
@@ -332,27 +338,84 @@ function loadPermissionsForEdit(roleId, currentPermissions = []) {
 }
 
 // Render permissions checkboxes
-function renderPermissions(container, permissions, selectedPermissionIds) {
+function renderPermissions(container, permissions, selectedPermissionNames) {
     if (permissions.length === 0) {
-        container.innerHTML = '<div class="text-center text-muted">No permissions available</div>';
+        container.innerHTML = '<div class="col-12 text-center text-muted py-3">No permissions available</div>';
         return;
     }
 
     let html = '';
-    permissions.forEach(permission => {
-        const isChecked = selectedPermissionIds.includes(permission.id);
+    
+    const modalType = container.closest('.modal').id.includes('create') ? 'Create' : 'Edit';
+    const allNames = permissions.map(p => p.name);
+    const selectAllCheckbox = document.getElementById(`selectAll${modalType}`);
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = allNames.length > 0 && allNames.every(name => selectedPermissionNames.includes(name));
+    }
+
+    // Sort permissions alphabetically for the list
+    const sortedPermissions = [...permissions].sort((a, b) => a.name.localeCompare(b.name));
+
+    sortedPermissions.forEach(permission => {
+        const isChecked = selectedPermissionNames.includes(permission.name);
         html += `
-            <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" name="permission_ids[]" 
-                       value="${permission.id}" id="perm_${permission.id}" ${isChecked ? 'checked' : ''}>
-                <label class="form-check-label" for="perm_${permission.id}">
-                    <strong>${permission.name}</strong>
-                    ${permission.description ? `<br><small class="text-muted">${permission.description}</small>` : ''}
-                </label>
+            <div class="col-md-6 permission-item border-bottom py-1">
+                <div class="form-check d-flex align-items-center mb-0 px-3 py-1">
+                    <input class="form-check-input mt-0" type="checkbox" name="permissions[]" 
+                           value="${permission.name}" id="perm_${modalType}_${permission.id}" ${isChecked ? 'checked' : ''}
+                           onclick="updateSelectAllState('${modalType.toLowerCase()}')">
+                    <label class="form-check-label ms-3 cursor-pointer w-100 mb-0" for="perm_${modalType}_${permission.id}">
+                        <span class="fs-13 fw-medium">${permission.name}</span>
+                    </label>
+                </div>
             </div>
         `;
     });
+    
     container.innerHTML = html;
+}
+
+// Toggle all permissions
+function toggleAllPermissions(type) {
+    const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
+    const selectAll = document.getElementById(`selectAll${capitalizedType}`);
+    const checkboxes = document.querySelectorAll(`#${type}RoleModal .form-check-input[name="permissions[]"]`);
+    
+    checkboxes.forEach(cb => {
+        if (!cb.closest('.permission-item').classList.contains('d-none')) {
+            cb.checked = selectAll.checked;
+        }
+    });
+}
+
+// Update "Select All" checkbox state when individual checkboxes are clicked
+function updateSelectAllState(type) {
+    const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
+    const selectAll = document.getElementById(`selectAll${capitalizedType}`);
+    const checkboxes = Array.from(document.querySelectorAll(`#${type}RoleModal .form-check-input[name="permissions[]"]`))
+        .filter(cb => !cb.closest('.permission-item').classList.contains('d-none'));
+    
+    if (checkboxes.length === 0) return;
+    
+    const allChecked = checkboxes.every(cb => cb.checked);
+    if (selectAll) selectAll.checked = allChecked;
+}
+
+// Filter permissions by search input
+function filterPermissions(type, query) {
+    const q = query.toLowerCase();
+    const items = document.querySelectorAll(`#${type}RoleModal .permission-item`);
+    
+    items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(q)) {
+            item.classList.remove('d-none');
+        } else {
+            item.classList.add('d-none');
+        }
+    });
+    
+    updateSelectAllState(type);
 }
 
 // Edit role
@@ -364,7 +427,6 @@ function editRole(button) {
     // Set form values
     document.getElementById('editRoleName').value = roleName;
     document.getElementById('editRoleId').textContent = roleId;
-    document.getElementById('editRoleDescription').value = roleDescription;
     
     // Set form action using route
     const updateUrl = '{{ route("roles.update", ":id") }}'.replace(':id', roleId);
@@ -386,8 +448,8 @@ function editRole(button) {
             return response.json();
         })
         .then(data => {
-            const currentPermissions = data.role?.permissions ? 
-                data.role.permissions.map(p => p.id || p) : [];
+            const currentPermissions = data.role && data.role.permissions ? 
+                data.role.permissions.map(p => p.name) : [];
             loadPermissionsForEdit(roleId, currentPermissions);
         })
         .catch(error => {
@@ -466,9 +528,26 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 .permissions-container {
     background-color: #f8f9fa;
+    border: 1px solid #e9ebec !important;
 }
 .form-check-label {
     cursor: pointer;
+}
+.fs-11 { font-size: 11px; }
+.fs-13 { font-size: 13px; }
+.cursor-pointer { cursor: pointer; }
+.hover-shadow-sm:hover {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+    background-color: #fff !important;
+}
+.permission-item .card-radio {
+    transition: all 0.2s ease;
+}
+.permission-item .form-check-input:checked + label {
+    color: #405189;
+}
+.permission-group-header h6 {
+    letter-spacing: 1px;
 }
 </style>
 @endpush

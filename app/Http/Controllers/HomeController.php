@@ -13,6 +13,16 @@ class HomeController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
+
+        if ($user->isAgent()) {
+            return redirect()->route('agent.dashboard');
+        }
+
+        if ($user->isSupervisor()) {
+            return redirect()->route('supervisor.dashboard');
+        }
+
         // Get common task stats for the dashboard
         $allTasks = app(CompanyController::class)->getAllTasks();
         

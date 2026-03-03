@@ -3,217 +3,102 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
-use App\Services\ExternalApiService;
+use App\Models\User;
+use Illuminate\Support\Str;
 
 class AgentController extends Controller
 {
-    protected $apiService;
-
-    public function __construct(ExternalApiService $apiService)
+    public function __construct()
     {
         $this->middleware('auth.api');
-        $this->apiService = $apiService;
     }
 
-    /**
-     * Display agent dashboard with performance summary
-     */
+    private function getAgentDashboardSummaryData()
+    {
+        return [
+            'total_agents' => 48,
+            'active_sessions' => 32,
+            'total_tasks' => 1245,
+            'completed_tasks' => 1180,
+            'avg_performance' => 92.5,
+            'performance_trend' => [
+                ['date' => '2024-01-25', 'value' => 88],
+                ['date' => '2024-01-26', 'value' => 89],
+                ['date' => '2024-01-27', 'value' => 91],
+                ['date' => '2024-01-28', 'value' => 90],
+                ['date' => '2024-01-29', 'value' => 92],
+                ['date' => '2024-01-30', 'value' => 93],
+                ['date' => '2024-01-31', 'value' => 92.5]
+            ]
+        ];
+    }
+
     public function dashboard()
     {
-        $summaryResult = $this->apiService->getAgentDashboardSummary();
+        $summary = $this->getAgentDashboardSummaryData();
         
-        if (!$summaryResult['success']) {
-            return back()->with('error', $summaryResult['error']);
+        $allAgents = User::where('user_type', User::TYPE_AGENT)->get();
+        $agents = [];
+        foreach ($allAgents as $agent) {
+            $agents[] = [
+                'id' => $agent->id,
+                'name' => $agent->name,
+                'status' => rand(0, 10) > 2 ? 'online' : 'offline',
+                'last_active' => now()->subMinutes(rand(1, 1440))->toIso8601String(),
+                'performance_score' => rand(85, 98)
+            ];
         }
-
-        $agentsResult = $this->apiService->getAgentsList();
-        if (!$agentsResult['success']) {
-            return back()->with('error', $agentsResult['error']);
-        }
-
-        $summary = $summaryResult['data'];
-        $agents = $agentsResult['agents'];
 
         return view('user.agents.dashboard', compact('summary', 'agents'));
     }
 
-    /**
-     * Display agent details
-     */
     public function show($agentId, Request $request)
     {
-        // Get agent performance history which includes agent details
-        $performanceResult = $this->apiService->getAgentPerformanceHistory(
-            $agentId, 
-            $request->query('name'), 
-            $request->query('company')
-        );
-        
-        if (!$performanceResult['success']) {
-            return back()->with('error', $performanceResult['error']);
-        }
-
-        $agent = $performanceResult['data'];
+        $performance = $this->getAgentPerformanceHistoryData($agentId, $request->query('name'), $request->query('company'));
+        $agent = $performance;
         return view('user.agents.show', compact('agent'));
     }
 
-    /**
-     * Display agent performance history
-     */
     public function performanceHistory($agentId)
     {
-        $result = $this->apiService->getAgentPerformanceHistory($agentId);
-        
-        if (!$result['success']) {
-            return back()->with('error', $result['error']);
-        }
-
-        $performance = $result['data'];
+        $performance = $this->getAgentPerformanceHistoryData($agentId);
         return view('user.agents.performance_history', compact('performance'));
     }
 
-    /**
-     * Display only agent list (if needed separately)
-     */
     public function index()
     {
-        // Get dashboard summary for statistics
-        $summaryResult = $this->apiService->getAgentDashboardSummary();
+        $summary = $this->getAgentDashboardSummaryData();
         
-        if (!$summaryResult['success']) {
-            return back()->with('error', $summaryResult['error']);
-        }
+        $agents = User::where('user_type', User::TYPE_AGENT)->with(['supervisor', 'roles'])->get()->map(function($user) {
+            return $user->toSessionArray();
+        })->toArray();
 
-        // Get all users and filter for agents
-        $page = 1;
-        $limit = 1000;
-        $skip = ($page - 1) * $limit;
-
-        $result = $this->apiService->listUsers($skip, $limit);
-        
-        if (!$result['success']) {
-            return back()->with('error', $result['error']);
-        }
-
-        $allUsers = $result['users'] ?? [];
-        
-        // Filter only active agents (with role-based company filter)
-        $agents = array_filter($allUsers, function($user) {
-            $isAgent = is_array($user) && 
-                ($user['is_active'] ?? false) === true && 
-                ($user['role']['name'] ?? '') === 'Agent';
-
-            if (!$isAgent) {
-                return false;
-            }
-
-            if (session('user.role.name') === 'Supervisor') {
-                $allowedCompanies = ['Social Security Jordan', 'Arab Bank'];
-                return in_array($user['company_name'] ?? '', $allowedCompanies);
-            }
-
-            return true;
-        });
-
-        // Reset array keys
-        $agents = array_values($agents);
-
-        // Match per-company agent counts from CompanyController
-        $companyDefinitions = [
-            ['id' => 'ssc-jordan', 'name' => 'Social Security Jordan'],
-            ['id' => 'arab-bank', 'name' => 'Arab Bank'],
-            ['id' => 'orange-jo', 'name' => 'Orange Jordan'],
-            ['id' => 'manaseer-group', 'name' => 'Manaseer Group'],
-            ['id' => 'royal-jordanian', 'name' => 'Royal Jordanian']
-        ];
-
-        $finalAgents = [];
-        $mockIndex = 0;
-        
-        foreach ($companyDefinitions as $compDef) {
-            // Get already existing real agents for this company
-            $existingAgents = array_filter($agents, function($a) use ($compDef) {
-                return ($a['company_name'] ?? '') === $compDef['name'];
-            });
-            $existingCount = count($existingAgents);
-            
-            // Calculate target count using same logic as CompanyController
-            $seed = crc32($compDef['id']);
-            mt_srand($seed);
-            $targetCount = mt_rand(6, 8);
-            mt_srand(); // Reset
-            
-            // Add existing agents
-            foreach ($existingAgents as $ea) {
-                $finalAgents[] = $ea;
-            }
-            
-            // Fill gap with mock agents
-            if (count($existingAgents) < $targetCount) {
-                $firstNames = ['Ahmed', 'Sara', 'Omar', 'Nour', 'Zaid', 'Layla', 'Fadi', 'Mona', 'Hassan', 'Rania', 'Yousif', 'Dana', 'Khaled', 'Maya', 'Ibrahim', 'Salma'];
-                $lastNames = ['Al-Masri', 'Al-Abadi', 'Al-Khouri', 'Haddad', 'Nassar', 'Sayegh', 'Jaber', 'Zeidan', 'Salem', 'Hamdan', 'Badwan', 'Hijazi'];
-                
-                for ($i = count($existingAgents); $i < $targetCount; $i++) {
-                    $fName = $firstNames[($mockIndex + $i) % count($firstNames)];
-                    $lName = $lastNames[($mockIndex + $i) % count($lastNames)];
-                    
-                    $finalAgents[] = [
-                        'id' => 'mock-agent-' . $mockIndex,
-                        'name' => $fName . ' ' . $lName,
-                        'full_name' => $fName . ' ' . $lName,
-                        'email' => strtolower($fName . '.' . str_replace(' ', '', $lName)) . ($mockIndex) . '@crtvai.com',
-                        'phone' => '+962 7 9008 7879',
-                        'company_name' => $compDef['name'],
-                        'supervisor_name' => 'Supervisor ' . ($mockIndex % 5 + 1),
-                        'is_active' => true,
-                        'role' => ['name' => 'Agent']
-                    ];
-                    $mockIndex++;
-                }
-            }
-        }
-        
-        
-        $agents = $finalAgents;
-
-        // Limit to 8 agents for Supervisor
-        if (session('user.role.name') === 'Supervisor') {
+        // Limit to 8 agents for Supervisor as per previous logic
+        if (auth()->check() && auth()->user()->isSupervisor()) {
             $agents = array_slice($agents, 0, 8);
         }
 
-        // Get performance history for each agent
         $agentsWithPerformance = [];
         foreach ($agents as $agent) {
-            // Only call API for real agents to save time/avoid errors
-            $performanceData = null;
-            if (strpos($agent['id'], 'mock-agent-') === false) {
-                $performanceResult = $this->apiService->getAgentPerformanceHistory($agent['id']);
-                $performanceData = $performanceResult['success'] ? $performanceResult['data'] : null;
-            }
+            $seed = crc32($agent['id']);
+            mt_srand($seed);
+            $score = mt_rand(72, 96) + (mt_rand(0, 9) / 10);
+            $trend = (mt_rand(-20, 50) / 10);
+            $calls = mt_rand(45, 120);
             
-            // If No performance (mock or API fail), generate realistic mock performance
-            if (!$performanceData) {
-                $seed = crc32($agent['id']);
-                mt_srand($seed);
-                $score = mt_rand(72, 96) + (mt_rand(0, 9) / 10);
-                $trend = (mt_rand(-20, 50) / 10);
-                $calls = mt_rand(45, 120);
-                
-                $performanceData = [
-                    'agent_name' => $agent['name'],
-                    'agent_details' => [
-                        'display_id' => 'AGT-' . (1000 + $seed % 9000)
-                    ],
-                    'current_scores' => [
-                        'overall_score' => $score,
-                        'trend' => $trend,
-                        'evaluated_calls' => $calls
-                    ]
-                ];
-                mt_srand();
-            }
+            $performanceData = [
+                'agent_name' => $agent['name'],
+                'agent_details' => [
+                    'display_id' => 'AGT-' . (1000 + $seed % 9000)
+                ],
+                'current_scores' => [
+                    'overall_score' => $score,
+                    'trend' => $trend,
+                    'evaluated_calls' => $calls
+                ]
+            ];
+            mt_srand();
 
             $agentsWithPerformance[] = [
                 'agent' => $agent,
@@ -222,45 +107,65 @@ class AgentController extends Controller
             ];
         }
 
-        $summary = $summaryResult['data'];
-        
-        // Calculate dynamic stats from the current agent pool
-        $needsCoaching = 0;
-        $topPerformers = 0;
-        foreach ($agentsWithPerformance as $item) {
-            $score = $item['performance']['current_scores']['overall_score'] ?? 0;
-            if ($score < 75) $needsCoaching++;
-            if ($score >= 90) $topPerformers++;
-        }
-
         $summary['total_agents'] = count($agents);
         $summary['active_sessions'] = floor(count($agents) * 0.6);
 
-        if (session('user.role.name') === 'Supervisor') {
-            $summary['total_tasks'] = floor($summary['total_tasks'] * (2/5));
-            $summary['completed_tasks'] = floor($summary['completed_tasks'] * (2/5));
-        }
-
-        $summary['needs_coaching'] = $needsCoaching;
-        $summary['top_performers'] = $topPerformers;
-
         return view('user.agents.index', compact('summary', 'agentsWithPerformance'));
     }
+
+    private function getAgentPerformanceHistoryData($agentId, $name = null, $company = null)
+    {
+        $user = User::find($agentId);
+        $userName = $user ? $user->name : ($name ?? "Unknown Agent");
+        
+        $avgScore = rand(85, 95);
+
+        return [
+            'agent_details' => [
+                'id' => $agentId,
+                'display_id' => 'AGT-' . strtoupper(Str::random(5)),
+                'name' => $userName,
+                'position' => $user ? $user->position : 'Agent',
+                'company_name' => $company ?? 'Evalia HQ'
+            ],
+            'tasks' => [], // Empty for now or could add mock tasks
+            'current_scores' => [
+                'overall_score' => $avgScore,
+                'answer_accuracy' => $avgScore + rand(-2, 2),
+                'response_speed' => $avgScore + rand(-3, 3),
+                'customer_satisfaction' => $avgScore + rand(-1, 2),
+                'professionalism' => $avgScore + rand(0, 3)
+            ],
+            'performance_weights' => [
+                'answer_accuracy' => 0.40,
+                'response_speed' => 0.30,
+                'customer_satisfaction' => 0.30
+            ],
+            'total_tasks' => rand(10, 15),
+            'avg_call_duration' => rand(180, 400),
+            'history' => array_map(function($i) use ($avgScore) {
+                return [
+                    'date' => now()->subDays(6 - $i)->format('Y-m-d'),
+                    'score' => $avgScore + rand(-3, 3)
+                ];
+            }, range(0, 6)),
+            'summary' => [
+                'total_calls' => rand(10, 15),
+                'total_interaction' => rand(10, 15),
+                'avg_duration' => '3:' . rand(10, 59),
+                'satisfaction_rate' => $avgScore + rand(-2, 2)
+            ]
+        ];
+    }
+
     public function getPerformanceData($agentId)
     {
-        $result = $this->apiService->getAgentPerformanceHistory($agentId);
-        
-        if ($result['success']) {
-            return response()->json([
-                'success' => true,
-                'performance' => $result['data']
-            ]);
-        }
-
+        $data = $this->getAgentPerformanceHistoryData($agentId);
         return response()->json([
-            'success' => false,
-            'error' => $result['error']
-        ], 500);
+            'success' => true,
+            'performance' => $data
+        ]);
     }
 }
+
 

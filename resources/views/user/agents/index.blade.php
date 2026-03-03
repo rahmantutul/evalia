@@ -370,7 +370,7 @@
                 <i class="fas fa-file-excel"></i>
                 <span>Upload Excel</span>
             </button>
-            <a href="{{ route('users.create') }}" class="btn-add-item">
+            <a href="{{ route('users.create', ['type' => 'agent']) }}" class="btn-add-item">
                 <i class="fas fa-plus-circle"></i>
                 <span>Add New Agent</span>
             </a>
@@ -426,11 +426,6 @@
                 <input type="text" id="agentSearch" class="search-input" placeholder="Search by name, ID, or supervisor...">
             </div>
             <div class="filter-group">
-                <select class="filter-select js-filter" data-filter="role">
-                    <option value="all">Role: All</option>
-                    <option value="Agent">Agent</option>
-                    <option value="Supervisor">Supervisor</option>
-                </select>
                 <select class="filter-select js-filter" data-filter="status">
                     <option value="all">Status: All</option>
                     <option value="active">Active</option>
@@ -572,6 +567,9 @@
                             <div class="d-flex justify-content-end gap-2">
                                 <a href="{{ route('user.agents.show', ['agentId' => $agent['id'] ?? 1]) }}?name={{ urlencode($agent['full_name'] ?? 'N/A') }}&company={{ urlencode($agent['company_name'] ?? 'الضمان الاجتماعي - الأردن') }}" class="action-btn btn-view" title="View Details">
                                     <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ route('users.edit', $agent['id'] ?? 1) }}" class="action-btn btn-view" style="color: #6366f1;" title="Edit Agent">
+                                    <i class="fas fa-pen"></i>
                                 </a>
                             </div>
                         </td>

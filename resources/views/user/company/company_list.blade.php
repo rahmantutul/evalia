@@ -132,13 +132,13 @@
             <div class="card shadow-sm sticky-top-bar">
                 <div class="card-body py-3">
                     <div class="row g-3">
-                        <!-- Total Departments -->
+                        <!-- Total Companies -->
                         <div class="col-md-2 col-sm-4 col-6 stat-item">
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-building text-primary me-2"></i>
                                 <div>
-                                    <h6 class="mb-0 fw-bold" id="totalDepartments">0</h6>
-                                    <p class="text-muted small mb-0" style="font-size: 10px;">Departments</p>
+                                    <h6 class="mb-0 fw-bold" id="totalCompanies">0</h6>
+                                    <p class="text-muted small mb-0" style="font-size: 10px;">Companies</p>
                                 </div>
                             </div>
                         </div>
@@ -209,7 +209,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="col d-flex justify-content-between align-items-center">                      
-                        <h4 class="card-title mb-0">Department List</h4>
+                        <h4 class="card-title mb-0">Company List</h4>
                          @if(session('user.role.name') !== 'Supervisor')
                         <a href="{{ route('user.company.create') }}" class="btn btn-sm btn-primary d-block float-end">+ Create New</a>                  
                         @endif
@@ -242,7 +242,7 @@
                         <table class="table datatable mb-0" id="datatable_1">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Department Name</th>
+                                    <th>Company Name</th>
                                     <th>Industry Sector</th>
                                     <th>Sources</th>
                                     <th>Agents</th>
@@ -310,7 +310,10 @@
                                         <td>{{ $company['group_name'] ?? 'Private Sector' }}</td>
                                         <td>
                                             <div class="d-flex flex-wrap gap-1">
-                                                @foreach($randSources as $rs)
+                                                @php
+                                                    $displayedSources = $company['source'] ?? $randSources;
+                                                @endphp
+                                                @foreach($displayedSources as $rs)
                                                     {!! getSourceBadge($rs) !!}
                                                 @endforeach
                                             </div>
@@ -488,7 +491,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Use actual statistics from controller
         const stats = {
-            totalDepartments: @json(count($companies)),
+            totalCompanies: @json(count($companies)),
             activeTasks: @json($totalActiveTasks ?? 0),
             completedTasks: @json($totalCompletedTasks ?? 0),
             pendingAnalysis: @json($totalPendingAnalysis ?? 0),
@@ -520,7 +523,7 @@
         }
 
         // Start animations
-        animateCounter('totalDepartments', stats.totalDepartments);
+        animateCounter('totalCompanies', stats.totalCompanies);
         animateCounter('activeTasks', stats.activeTasks);
         animateCounter('completedTasks', stats.completedTasks);
         animateCounter('pendingAnalysis', stats.pendingAnalysis);

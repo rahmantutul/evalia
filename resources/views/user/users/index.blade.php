@@ -52,6 +52,21 @@
         border-radius: 4px;
         font-size: 12px;
     }
+    .bg-success-soft {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+    .bg-danger-soft {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+    .text-success {
+        color: #28a745 !important;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    .rounded-pill {
+        border-radius: 50rem !important;
+    }
 </style>
 @endpush
 
@@ -104,22 +119,16 @@
                                     <th>Email</th>
                                     <th>Username</th>
                                     <th>Role</th>
-                                    <th>Department</th>
+                                    <th>Company</th>
                                     <th>Status</th>
                                     <th width="150" class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @php
-                                    // Filter only active users
-                                    $activeUsers = array_filter($users, function($user) {
-                                        return ($user['is_active'] ?? false) === true;
-                                    });
-                                @endphp
-
-                                @forelse($activeUsers as $user)
+                                @forelse($users as $user)
                                 @php
                                     $roleName = $user['role']['name'] ?? 'user';
+                                    $isActive = $user['is_active'] ?? false;
                                 @endphp
                                 <tr>
                                     <td>
@@ -130,7 +139,7 @@
                                                 </div>
                                             </div>
                                             <div>
-                                                <span class="fw-semibold">{{ $user['full_name'] ?? 'N/A' }}</span>
+                                                <span class="fw-semibold text-dark">{{ $user['full_name'] ?? 'N/A' }}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -143,37 +152,52 @@
                                     </td>
                                     <td>
                                         <span class="text-muted">
-                                            <i class="fas fa-building me-1"></i>{{ $user['company_name'] ?? 'N/A' }}
+                                            <i class="fas fa-building me-1"></i>{{ $user['company']['name'] ?? 'N/A' }}
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-success px-2 py-1">
-                                            <i class="fas fa-check-circle me-1"></i>Active
-                                        </span>
+                                        @if($isActive)
+                                            <span class="badge bg-success-soft text-success px-2 py-1 border border-success-subtle rounded-pill">
+                                                <i class="fas fa-check-circle me-1"></i>Active
+                                            </span>
+                                        @else
+                                            <span class="badge bg-danger-soft text-danger px-2 py-1 border border-danger-subtle rounded-pill">
+                                                <i class="fas fa-times-circle me-1"></i>Inactive
+                                            </span>
+                                        @endif
                                     </td>
                                     <td>
-                                        <div class="d-flex justify-content-center action-buttons">
+                                        <div class="d-flex justify-content-center gap-2">
                                             <a href="{{ route('users.edit', $user['id']) }}" 
-                                               class="btn btn-action btn-edit"
+                                               class="btn btn-sm btn-outline-primary"
                                                data-bs-toggle="tooltip" 
-                                               data-bs-placement="top" 
                                                title="Edit User">
                                                 <i class="fas fa-edit"></i>
                                             </a>
 
-                                            <!-- Deactivate Button -->
-                                            <form action="{{ route('users.destroy', $user['id']) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" 
-                                                        class="btn btn-action btn-deactivate"
-                                                        data-bs-toggle="tooltip" 
-                                                        data-bs-placement="top" 
-                                                        title="Deactivate User"
-                                                        onclick="return confirmDeactivation('{{ $user['full_name'] ?? 'User' }}')">
-                                                    <i class="fas fa-user-slash"></i>
-                                                </button>
-                                            </form>
+                                            @if($isActive)
+                                                <form action="{{ route('users.destroy', $user['id']) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" 
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            data-bs-toggle="tooltip" 
+                                                            title="Deactivate User"
+                                                            onclick="return confirm('Deactivate {{ $user['full_name'] }}?')">
+                                                        <i class="fas fa-user-slash"></i>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <form action="{{ route('users.activate', $user['id']) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" 
+                                                            class="btn btn-sm btn-outline-success"
+                                                            data-bs-toggle="tooltip" 
+                                                            title="Activate User">
+                                                        <i class="fas fa-user-check"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

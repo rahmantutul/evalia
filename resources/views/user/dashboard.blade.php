@@ -122,7 +122,7 @@
             
             return {
                 totalCompanies: 5,
-                totalDepartments: 5,
+                totalCompanies: 5,
                 avgQualityScore: baseQuality,
                 callsEvaluated: callsEvaluated,
                 avgResponseTime: 8.4
@@ -224,7 +224,7 @@
                 { 
                     id: "nadi-al-budairi",
                     name: "Nadi Al-Budairi", 
-                    department: "Social Security Corporation - Jordan", 
+                    company: "Social Security Corporation - Jordan", 
                     score: 92.3, 
                     trend: 2.2, 
                     calls: agentCalls[0],
@@ -233,7 +233,7 @@
                 { 
                     id: "sara-al-khateeb",
                     name: "Sara Al-Khateeb", 
-                    department: "Social Security Corporation - Jordan", 
+                    company: "Social Security Corporation - Jordan", 
                     score: 89.1, 
                     trend: 1.8, 
                     calls: agentCalls[1],
@@ -242,7 +242,7 @@
                 { 
                     id: "mahmoud-al-masri",
                     name: "Mahmoud Al-Masri", 
-                    department: "Arab Bank", 
+                    company: "Arab Bank", 
                     score: 87.5, 
                     trend: 1.2, 
                     calls: agentCalls[2],
@@ -251,7 +251,7 @@
                 { 
                     id: "layla-hassan",
                     name: "Layla Hassan", 
-                    department: "Orange Jordan", 
+                    company: "Orange Jordan", 
                     score: 84.2, 
                     trend: -1.4, 
                     calls: agentCalls[3],
@@ -260,7 +260,7 @@
                 { 
                     id: "ahmed-al-manaseer",
                     name: "Ahmed Al-Manaseer", 
-                    department: "Manaseer Group", 
+                    company: "Manaseer Group", 
                     score: 86.8, 
                     trend: 0.5, 
                     calls: agentCalls[4],
@@ -269,7 +269,7 @@
                 { 
                     id: "farah-al-zoubi",
                     name: "Farah Al-Zoubi", 
-                    department: "Arab Bank", 
+                    company: "Arab Bank", 
                     score: 91.2, 
                     trend: 3.1, 
                     calls: agentCalls[5],
@@ -278,7 +278,7 @@
                 { 
                     id: "yazan-al-tall",
                     name: "Yazan Al-Tall", 
-                    department: "Royal Jordanian", 
+                    company: "Royal Jordanian", 
                     score: 78.9, 
                     trend: -2.3, 
                     calls: agentCalls[6],
@@ -418,8 +418,8 @@
                         <div class="card-body p-3">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <p class="text-muted mb-1 small">Total Departments</p>
-                                    <h3 class="metric-value mb-1 fw-bold">${kpiData.totalDepartments}</h3>
+                                    <p class="text-muted mb-1 small">Total Companies</p>
+                                    <h3 class="metric-value mb-1 fw-bold">${kpiData.totalCompanies}</h3>
                                     <small class="text-primary fw-500">${trendText}</small>
                                 </div>
                                 <div class="icon-circle bg-soft-primary">
@@ -696,7 +696,7 @@
         companies.forEach(company => {
             const trendClass = company.trend > 0 ? 'trend-up' : (company.trend < 0 ? 'trend-down' : 'trend-neutral');
             const trendIcon = company.trend > 0 ? 'fa-arrow-up' : (company.trend < 0 ? 'fa-arrow-down' : 'fa-minus');
-            let departmentViewBaseUrl = "{{ route('user.company.view', ':id') }}"; 
+            let companyViewBaseUrl = "{{ route('user.company.view', ':id') }}"; 
 
             let badgeHtml = '';
             if (company.score >= 90) {
@@ -714,7 +714,7 @@
                     <td class="ps-4">
                         <div class="d-flex align-items-center">
                             <strong>
-                                <a style="color: #3f4254;" class="text-hover-primary" href="${departmentViewBaseUrl.replace(':id', company.id)}">
+                                <a style="color: #3f4254;" class="text-hover-primary" href="${companyViewBaseUrl.replace(':id', company.id)}">
                                     ${company.name}
                                 </a>
                             </strong>
@@ -759,10 +759,10 @@
                         <div class="flex-grow-1">
                             <h6 class="mb-0 fw-bold d-flex align-items-center">
                                 @php $agentShowUrl = route('user.agents.show', ':id'); @endphp
-                                <a style="color: #000;" href="${'{{ $agentShowUrl }}'.replace(':id', agent.id)}?name=${encodeURIComponent(agent.name)}&company=${encodeURIComponent(agent.department)}"> ${agent.name}</a> 
+                                <a style="color: #000;" href="${'{{ $agentShowUrl }}'.replace(':id', agent.id)}?name=${encodeURIComponent(agent.name)}&company=${encodeURIComponent(agent.company)}"> ${agent.name}</a> 
                                 ${badgeHtml}
                             </h6>
-                            <small class="text-muted">${agent.department} • ${agent.calls} calls</small>
+                            <small class="text-muted">${agent.company} • ${agent.calls} calls</small>
                         </div>
                         <div class="text-end">
                             <h5 class="mb-0 ${scoreClass} fw-bold">${agent.score}%</h5>
@@ -813,7 +813,7 @@
         // Add KPIs sheet
         const kpiSheetData = [
             ['Metric', 'Value', 'Trend'],
-            ['Total Departments', kpiData.totalDepartments, `+2 from last period`],
+            ['Total Companies', kpiData.totalCompanies, `+2 from last period`],
             ['Average Quality Score', `${kpiData.avgQualityScore.toFixed(1)}%`, `2.1% improvement`],
             ['Calls Evaluated', kpiData.callsEvaluated, `${Math.floor(kpiData.callsEvaluated * 0.3)} this period`],
             ['Average Response Time', `${kpiData.avgResponseTime.toFixed(1)}s`, `1.2s faster`]
@@ -839,18 +839,18 @@
         const sentimentSheet = XLSX.utils.aoa_to_sheet(sentimentSheetData);
         XLSX.utils.book_append_sheet(wb, sentimentSheet, 'Sentiment Analysis');
         
-        // Add department performance sheet
-        const departmentSheetData = [['Department', 'Score', 'Trend', 'Calls']];
+        // Add company performance sheet
+        const companySheetData = [['Company', 'Score', 'Trend', 'Calls']];
         companies.forEach(company => {
-            departmentSheetData.push([company.name, `${company.score}%`, `${company.trend > 0 ? '+' : ''}${company.trend}%`, company.calls]);
+            companySheetData.push([company.name, `${company.score}%`, `${company.trend > 0 ? '+' : ''}${company.trend}%`, company.calls]);
         });
-        const departmentSheet = XLSX.utils.aoa_to_sheet(departmentSheetData);
-        XLSX.utils.book_append_sheet(wb, departmentSheet, 'Department Performance');
+        const companySheet = XLSX.utils.aoa_to_sheet(companySheetData);
+        XLSX.utils.book_append_sheet(wb, companySheet, 'Company Performance');
         
         // Add agent performance sheet
-        const agentSheetData = [['Agent', 'Department', 'Score', 'Trend', 'Calls']];
+        const agentSheetData = [['Agent', 'Company', 'Score', 'Trend', 'Calls']];
         agents.forEach(agent => {
-            agentSheetData.push([agent.name, agent.department, `${agent.score}%`, `${agent.trend > 0 ? '+' : ''}${agent.trend}%`, agent.calls]);
+            agentSheetData.push([agent.name, agent.company, `${agent.score}%`, `${agent.trend > 0 ? '+' : ''}${agent.trend}%`, agent.calls]);
         });
         const agentSheet = XLSX.utils.aoa_to_sheet(agentSheetData);
         XLSX.utils.book_append_sheet(wb, agentSheet, 'Agent Performance');

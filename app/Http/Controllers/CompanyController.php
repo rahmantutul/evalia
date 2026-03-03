@@ -6,16 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Str;
-use App\Services\ExternalApiService;
+use App\Models\User;
+use App\Models\Company;
+use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
-    protected $apiService;
-
-    public function __construct(ExternalApiService $apiService)
+    public function __construct()
     {
         $this->middleware('auth.api');
-        $this->apiService = $apiService;
     }
 
     private function groupList()
@@ -28,32 +27,35 @@ class CompanyController extends Controller
 
     public function companyList()
     {
-        $companies = [
-            ['id' => 'ssc-jordan', 'name' => 'Social Security Jordan', 'group_name' => 'Government Sector'],
-            ['id' => 'arab-bank', 'name' => 'Arab Bank', 'group_name' => 'Private Sector'],
-            ['id' => 'orange-jo', 'name' => 'Orange Jordan', 'group_name' => 'Private Sector'],
-            ['id' => 'manaseer-group', 'name' => 'Manaseer Group', 'group_name' => 'Private Sector'],
-            ['id' => 'royal-jordanian', 'name' => 'Royal Jordanian', 'group_name' => 'Private Sector']
-        ];
+        $companies = Company::all()->map(function($company) {
+            $groups = $this->groupList();
+            $groupName = 'Staff';
+            foreach($groups as $g) {
+                if($g['group_id'] == $company->group_id) {
+                    $groupName = $g['group_name'];
+                }
+            }
+            return [
+                'id' => $company->id,
+                'name' => $company->company_name,
+                'group_name' => $groupName,
+                'source' => $company->source
+            ];
+        })->toArray();
 
-        // Stable Agent Calculation for Total - Aiming for 30-40 Total
+        if (Auth::check() && Auth::user()->isSupervisor()) {
+            $companies = array_slice($companies, 0, 2);
+        }
+
+        // Total Agent Count calculation (simulated logic for list)
         $totalAgentsCount = 0;
         foreach ($companies as $c) {
             $seed = crc32($c['id']);
             mt_srand($seed);
-            $totalAgentsCount += mt_rand(6, 8); // ~7 per company * 5 = ~35 total
+            $totalAgentsCount += mt_rand(6, 8);
         }
-        mt_srand(); // Reset
+        mt_srand();
 
-        if (session('user.role.name') === 'Supervisor') {
-            $companies = array_slice($companies, 0, 2);
-            // Re-calculate total for supervisor if needed
-        }
-
-        $agentsResult = $this->apiService->getAgentsList();
-        $companyAgents = $agentsResult['success'] ? $agentsResult['agents'] : [];
-
-        // Calculate real statistics from actual task data
         $allTasks = $this->getAllTasks();
         
         $totalActiveTasks = 0;
@@ -75,6 +77,7 @@ class CompanyController extends Controller
         }
         
         $avgQaScore = $scoreCount > 0 ? round($totalScore / $scoreCount, 1) : 0;
+        $companyAgents = User::where('user_type', User::TYPE_AGENT)->get();
 
         return view('user.company.company_list', compact(
             'companies', 
@@ -87,12 +90,60 @@ class CompanyController extends Controller
         ));
     }
 
-    /**
-     * Get all tasks across all companies
-     */
     public function getAllTasks()
     {
-        return $this->apiService->getGlobalTaskPool();
+        // Fetch real agents from DB and group by company
+        $realAgents = User::where('user_type', User::TYPE_AGENT)->get()->groupBy('company_id');
+        $realSupervisors = User::where('user_type', User::TYPE_SUPERVISOR)->get()->groupBy('company_id');
+
+        $companies    = [1, 2, 3, 4, 5];
+        $customersPool = ['Kais Al-Nimri', "Dua'a Al-Saleh", 'Samer Botros'];
+        $sources     = ['api', 'avaya', 'genesys', 'fb', 'linkedin'];
+        $outcomes    = ['Resolved', 'Follow-up Needed'];
+        $languages   = ['Arabic', 'English'];
+        $sentiments  = ['Positive', 'Neutral', 'Negative'];
+        $scoreBase   = [65, 72, 85, 91, 98];
+
+        $allTasks = [];
+        for ($i = 0; $i < 75; $i++) {
+            $score  = $scoreBase[$i % count($scoreBase)];
+            $source = $sources[$i % count($sources)];
+            $cId = $companies[$i % count($companies)];
+
+            // Try to get a real agent and supervisor for this company
+            $agentName = 'Unassigned';
+            if (isset($realAgents[$cId]) && $realAgents[$cId]->isNotEmpty()) {
+                $agent = $realAgents[$cId][$i % $realAgents[$cId]->count()];
+                $agentName = $agent->name;
+            }
+
+            $supervisorName = 'N/A';
+            if (isset($realSupervisors[$cId]) && $realSupervisors[$cId]->isNotEmpty()) {
+                $supervisor = $realSupervisors[$cId][$i % $realSupervisors[$cId]->count()];
+                $supervisorName = $supervisor->name;
+            }
+
+            $allTasks[] = [
+                'id'               => 'task-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT),
+                'company_id'       => $cId,
+                'score'            => $score,
+                'status'           => 'completed',
+                'agent_name'       => $agentName,
+                'customer_name'    => $customersPool[$i % count($customersPool)],
+                'supervisor_name'  => $supervisorName,
+                'duration'         => '5m',
+                'source'           => $source,
+                'channel'          => 'Call',
+                'outcome'          => $outcomes[$i % count($outcomes)],
+                'coaching_required' => $score < 80 ? 'Yes' : 'No',
+                'sentiment'        => $sentiments[$i % count($sentiments)],
+                'call_type'        => 'Inbound',
+                'lang'             => $languages[$i % count($languages)],
+                'risk_flag'        => $score < 75 ? 'High' : 'No',
+                'created_at'       => now()->subDays(rand(0, 5))->toDateTimeString(),
+            ];
+        }
+        return $allTasks;
     }
 
     public function companyCreate()
@@ -103,86 +154,47 @@ class CompanyController extends Controller
 
     public function companyDetails($id, Request $request)
     {
-        if (session('user.role.name') === 'Supervisor') {
-            $allowedIds = ['ssc-jordan', 'arab-bank'];
+        $dbCompany = Company::findOrFail($id);
+
+        if (Auth::check() && Auth::user()->isSupervisor()) {
+            $allowedIds = [1, 2];
             if (!in_array($id, $allowedIds)) {
-                return redirect()->route('user.company.list')->with('error', 'Unauthorized access to this department.');
+                return redirect()->route('user.company.list')->with('error', 'Unauthorized access to this company.');
             }
         }
-
-        $allCompanies = [
-            'ssc-jordan' => ['id' => 'ssc-jordan', 'name' => 'Social Security Jordan', 'group_id' => 'govt-sector', 'filler_words' => ['Umm', 'Well', 'Okay'], 'main_topics' => ['Subscriptions', 'Retirement', 'Installments'], 'policies' => ['Identity Verification Required', 'Response within 24h']],
-            'arab-bank' => ['id' => 'arab-bank', 'name' => 'Arab Bank', 'group_id' => 'private-sector', 'filler_words' => ['Hello', 'Please'], 'main_topics' => ['Loans', 'Cards'], 'policies' => ['Banking Secrecy']],
-            'orange-jo' => ['id' => 'orange-jo', 'name' => 'Orange Jordan', 'group_id' => 'private-sector', 'filler_words' => ['Hi', 'Yes'], 'main_topics' => ['Bills', 'Internet'], 'policies' => ['First Call Resolution']],
-        ];
-
-        $companyData = $allCompanies[$id] ?? [
-            'id' => $id,
-            'company_id' => $id,
-            'name' => 'General Company',
-            'company_name' => 'General Company',
-            'group_id' => 'private-sector',
-            'filler_words' => ['umm', 'so'],
-            'main_topics' => ['support'],
-            'call_types' => ['inbound'],
-            'company_policies' => ['Professional conduct required']
-        ];
 
         $company = [
-            'id' => $companyData['id'],
-            'company_id' => $companyData['id'],
-            'name' => $companyData['name'],
-            'company_name' => $companyData['name'],
-            'group_id' => $companyData['group_id'],
-            'filler_words' => $companyData['filler_words'] ?? [],
-            'main_topics' => $companyData['main_topics'] ?? [],
-            'call_types' => ['inbound', 'outbound'],
-            'company_policies' => $companyData['policies'] ?? []
+            'id' => $dbCompany->id,
+            'company_id' => $dbCompany->id,
+            'name' => $dbCompany->company_name,
+            'company_name' => $dbCompany->company_name,
+            'group_id' => $dbCompany->group_id,
+            'filler_words' => $dbCompany->filler_words ?? [],
+            'main_topics' => $dbCompany->main_topics ?? [],
+            'call_types' => $dbCompany->call_types ?? ['inbound', 'outbound'],
+            'company_policies' => $dbCompany->company_policies ?? []
         ];
         
-        // Task List logic (using real tasks if available)
-        $agentsResult = $this->apiService->listUsers(0, 100);
-        $allUsers = $agentsResult['users'] ?? [];
-        $companyAgents = array_filter($allUsers, function($user) use ($company) {
-            return ($user['role']['name'] ?? '') === 'Agent' && ($user['company_name'] ?? '') === $company['name'];
-        });
+        $companyAgents = User::where('user_type', User::TYPE_AGENT)->where('company_id', $id)->get()->map(function($user) use ($company) {
+            return [
+                'id' => $user->id,
+                'full_name' => $user->name,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'company_name' => $company['name'],
+                'position' => 'Customer Agent'
+            ];
+        })->toArray();
 
-        // Ensure we show the same mock agents if needed
-        if (count($companyAgents) == 0) {
-            $seed = crc32($id);
-            mt_srand($seed);
-            $targetCount = mt_rand(6, 8);
-            
-            $firstNames = ['Ahmed', 'Sara', 'Omar', 'Nour', 'Zaid', 'Layla', 'Fadi', 'Mona', 'Hassan', 'Rania', 'Yousif', 'Dana', 'Khaled', 'Maya', 'Ibrahim', 'Salma'];
-            $lastNames = ['Al-Masri', 'Al-Abadi', 'Al-Khouri', 'Haddad', 'Nassar', 'Sayegh', 'Jaber', 'Zeidan', 'Salem', 'Hamdan', 'Badwan', 'Hijazi'];
-            
-            for ($i = 0; $i < $targetCount; $i++) {
-                $fName = $firstNames[($i) % count($firstNames)];
-                $lName = $lastNames[($i) % count($lastNames)];
-                $fullName = $fName . ' ' . $lName;
-                $companyAgents[] = [
-                    'id' => 'mock-' . $id . '-' . $i,
-                    'full_name' => $fullName,
-                    'name' => $fullName,
-                    'email' => 'agent' . ($i+1) . '@crtvai.com',
-                    'phone' => '+962 7 9008 7879',
-                    'company_name' => $company['name'],
-                    'position' => 'Customer Agent'
-                ];
-            }
-            mt_srand();
-        }
-
-        // Get real tasks for this company
         $allRealTasks = $this->getAllTasks();
         $companyTasks = array_filter($allRealTasks, function($task) use ($id) {
             return $task['company_id'] === $id;
         });
         
-        // Sort by most recent first (assuming we have created_at or use task ID)
         $taskList = array_values($companyTasks);
         usort($taskList, function($a, $b) {
-            return strcmp($b['id'], $a['id']); // Sort by ID descending
+            return strcmp($b['id'], $a['id']);
         });
 
         $page = Paginator::resolveCurrentPage(); 
@@ -201,16 +213,14 @@ class CompanyController extends Controller
             ]
         );
 
-        // Calculate company counts
         $callsEvaluated = count($companyTasks);
         $totalScore = array_sum(array_column($companyTasks, 'score'));
         $avgQualityScore = $callsEvaluated > 0 ? round($totalScore / $callsEvaluated, 1) : 0;
         
-        // Stable Agent count for this company (same logic as company list)
         $seed = crc32($id);
         mt_srand($seed);
         $activeAgents = mt_rand(6, 8);
-        mt_srand(); // Reset
+        mt_srand();
 
         return view('user.company.company_details', [
             'company' => $company,
@@ -225,38 +235,90 @@ class CompanyController extends Controller
 
     public function companyDelete($id)
     {
-        return redirect()->back()->with('success', 'Company deleted successfully (official).');
+        $company = Company::findOrFail($id);
+        $company->delete();
+        return redirect()->route('user.company.list')->with('success', 'Company deleted successfully.');
     }
 
     public function companyStore(Request $request)
     {
+        $data = $request->all();
+
+        // Convert Tagify JSON/CSV strings to arrays for JSON casting
+        $tagifyFields = [
+            'filler_words', 'main_topics', 'call_types', 'call_outcomes',
+            'restricted_phrases', 'source', 'agent_assessments_configs',
+            'agent_cooperation_configs', 'agent_performance_configs'
+        ];
+
+        foreach ($tagifyFields as $field) {
+            if (isset($data[$field])) {
+                $decoded = json_decode($data[$field], true);
+                if (is_array($decoded)) {
+                    $data[$field] = array_column($decoded, 'value');
+                } elseif (is_string($data[$field])) {
+                    $data[$field] = array_map('trim', explode(',', $data[$field]));
+                }
+            }
+        }
+
+        if (isset($data['company_policies']) && is_string($data['company_policies'])) {
+            $data['company_policies'] = array_map('trim', explode("\n", $data['company_policies']));
+        }
+
+        if (isset($data['faq']) && is_array($data['faq'])) {
+            $data['faq'] = array_values($data['faq']);
+        }
+
+        $company = Company::create($data);
+
         return response()->json([
             'success' => true,
             'message' => 'Company registered successfully',
-            'data' => ['company_id' => Str::uuid()->toString()],
+            'data' => ['id' => $company->id],
         ]);
     }
 
     public function companyEdit($id)
     {
-        $company = [
-            'id' => $id,
-            'company_id' => $id,
-            'name' => 'Social Security Jordan',
-            'company_name' => 'Social Security Jordan',
-            'group_id' => 'govt-sector',
-            'filler_words' => ['Umm', 'Amm'],
-            'main_topics' => ['Retirement'],
-            'call_types' => ['inbound'],
-            'company_policies' => ['Policy 1']
-        ];
+        $company = Company::findOrFail($id);
         $groups = $this->groupList();
         
         return view('user.company.company_edit', compact('company', 'groups'));
     }
 
-    public function companyUpdate(Request $request)
+    public function companyUpdate(Request $request, $id)
     {
+        $company = Company::findOrFail($id);
+        $data = $request->all();
+
+        $tagifyFields = [
+            'filler_words', 'main_topics', 'call_types', 'call_outcomes',
+            'restricted_phrases', 'source', 'agent_assessments_configs',
+            'agent_cooperation_configs', 'agent_performance_configs'
+        ];
+
+        foreach ($tagifyFields as $field) {
+            if (isset($data[$field])) {
+                $decoded = json_decode($data[$field], true);
+                if (is_array($decoded)) {
+                    $data[$field] = array_column($decoded, 'value');
+                } elseif (is_string($data[$field])) {
+                    $data[$field] = array_map('trim', explode(',', $data[$field]));
+                }
+            }
+        }
+
+        if (isset($data['company_policies']) && is_string($data['company_policies'])) {
+            $data['company_policies'] = array_map('trim', explode("\n", $data['company_policies']));
+        }
+        
+        if (isset($data['faq']) && is_array($data['faq'])) {
+            $data['faq'] = array_values($data['faq']);
+        }
+
+        $company->update($data);
+
         return response()->json([
             'success' => true,
             'message' => 'Company data updated successfully',

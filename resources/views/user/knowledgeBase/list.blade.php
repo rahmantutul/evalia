@@ -48,7 +48,7 @@
                                                 </div>
                                                 <div>
                                                     <div class="fw-semibold">{{ $entry['notebook_name'] ?? '-' }}</div>
-                                                    <small class="text-muted">Department ID: {{ $entry['company_id'] ?? '-' }}</small>
+                                                    <small class="text-muted">Company ID: {{ $entry['company_id'] ?? '-' }}</small>
                                                 </div>
                                             </div>
                                         </td>

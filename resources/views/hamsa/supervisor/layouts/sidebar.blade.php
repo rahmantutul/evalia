@@ -38,7 +38,7 @@
                         <li class="nav-item {{ Request::routeIs('user.company.list') ? 'active' : '' }}">
                             <a class="nav-link {{ Request::routeIs('user.company.list') ? 'active' : '' }}" href="{{ route('user.company.list') }}">
                                 <i class="icofont-bank-alt menu-icon"></i>
-                                <span>Departments</span>
+                                <span>Companies</span>
                             </a>
                         </li>
                         <li class="nav-item {{ Request::routeIs('user.agents.index') ? 'active' : '' }}">
