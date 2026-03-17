@@ -43,4 +43,12 @@ return [
         'api_key' => env('HAMSA_API_KEY'),
         'base_url' => env('HAMSA_BASE_URL', 'https://api.tryhamsa.com'),
     ],
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
+    ],
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+    ],
 ];

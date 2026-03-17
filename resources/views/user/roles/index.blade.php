@@ -1,288 +1,300 @@
 @extends('user.layouts.app')
-@section('title', 'Role Management')
+@section('title', 'Roles & Permissions')
 
 @section('content')
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box">
-                <div class="row">
-                    <div class="col">
-                        <h4 class="page-title">Role Management</h4>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{{ route('user.home') }}">Dashboard</a></li>
-                            <li class="breadcrumb-item active">Roles</li>
-                        </ol>
-                    </div>
-                    <div class="col-auto">
-                          @if(session('user.role.name') !== 'Supervisor')
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createRoleModal">
-                            <i class="fas fa-plus me-1"></i> Create Role
-                        </button>
-                        @endif
-                    </div>
-                </div>
-            </div>
+
+    {{-- Page Header --}}
+    <div class="row mb-4">
+        <div class="col">
+            <h4 class="page-title mb-0">
+                <i class="fas fa-lock text-primary me-2"></i> Roles &amp; Permissions
+            </h4>
+            <ol class="breadcrumb mt-1">
+                <li class="breadcrumb-item"><a href="{{ route('user.home') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Roles</li>
+            </ol>
+        </div>
+        <div class="col-auto d-flex align-items-center">
+            @can('roles.create')
+            <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createRoleModal">
+                <i class="fas fa-plus me-1"></i> New Role
+            </button>
+            @endcan
         </div>
     </div>
 
-    <!-- Alerts -->
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{-- Alerts --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm">
             <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
-
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm">
             <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
-    @if (session('warning'))
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i> {{ session('warning') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover table-centered mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Role Name</th>
-                                    <th>Permissions</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($roles as $role)
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="flex-shrink-0">
-                                                    <i class="fas fa-shield-alt text-primary fs-4"></i>
-                                                </div>
-                                                <div class="flex-grow-1 ms-3">
-                                                    <h6 class="mb-0">{{ $role['name'] }}</h6>
-                                                    <small class="text-muted">ID: {{ $role['id'] }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            @php
-                                                $permissions = isset($role['permissions']) ? (is_array($role['permissions']) ? $role['permissions'] : $role['permissions']->toArray()) : [];
-                                            @endphp
-                                            @if(count($permissions) > 0)
-                                                <div class="permission-tags">
-                                                    @foreach(array_slice($permissions, 0, 3) as $permission)
-                                                        <span class="badge bg-light text-dark border me-1 mb-1">
-                                                            {{ $permission['name'] ?? $permission }}
-                                                        </span>
-                                                    @endforeach
-                                                    @if(count($permissions) > 3)
-                                                        <span class="badge bg-secondary">
-                                                            +{{ count($permissions) - 3 }} more
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            @else
-                                                <span class="text-muted">No permissions</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                             <div class="btn-group">
-                                                   @if(session('user.role.name') !== 'Supervisor')
-                                                <button type="button" class="btn btn-sm btn-outline-primary"
-                                                        data-bs-toggle="modal" data-bs-target="#editRoleModal"
-                                                        data-role-id="{{ $role['id'] }}"
-                                                        data-role-name="{{ $role['name'] }}"
-                                                        onclick="editRole(this)">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-outline-danger"
-                                                        onclick="confirmDelete('{{ $role['id'] }}', '{{ $role['name'] }}')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                                @else
-                                                <span class="badge bg-light text-dark">View Only</span>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">
-                                            <div class="text-muted">
-                                                <i class="fas fa-shield-alt fa-3x mb-3"></i>
-                                                <h5>No Roles Found</h5>
-                                                <p>Get started by creating your first role.</p>
-                                                 @if(session('user.role.name') !== 'Supervisor')
-                                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createRoleModal">
-                                                    Create Role
-                                                </button>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+    {{-- Role Cards Grid --}}
+    <div class="row g-4">
+        @forelse($roles as $role)
+        @php
+            $badgeColors = ['Admin'=>'danger','Accounts'=>'primary','HR'=>'success'];
+            $badgeColor  = $badgeColors[$role->name] ?? 'secondary';
+            $perms       = $role->permissions;
+            $permGroups  = [];
+            foreach ($perms as $p) {
+                $cat = explode('.', $p->name)[0];
+                $permGroups[$cat][] = $p->name;
+            }
+        @endphp
+        <div class="col-xl-4 col-lg-6">
+            <div class="card border-0 shadow-sm h-100 role-card">
+                <div class="card-header bg-white border-0 pt-4 pb-2 px-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="role-avatar bg-{{ $badgeColor }} bg-opacity-10 rounded-3 p-3">
+                                <i class="fas fa-shield-alt text-{{ $badgeColor }} fs-4"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold text-dark">{{ $role->name }}</h5>
+                                <small class="text-muted">{{ $perms->count() }} permission{{ $perms->count() !== 1 ? 's' : '' }}</small>
+                            </div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm rounded-circle" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                @can('roles.edit')
+                                <li>
+                                    <a class="dropdown-item" href="#"
+                                       data-bs-toggle="modal" data-bs-target="#editRoleModal"
+                                       data-role-id="{{ $role->id }}"
+                                       data-role-name="{{ $role->name }}"
+                                       data-role-permissions="{{ $perms->pluck('name')->toJson() }}"
+                                       onclick="openEditModal(this)">
+                                        <i class="fas fa-edit me-2 text-primary"></i> Edit Permissions
+                                    </a>
+                                </li>
+                                @endcan
+                                @can('roles.delete')
+                                @if($role->name !== 'Admin')
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="#"
+                                       onclick="confirmDelete('{{ $role->id }}', '{{ $role->name }}')">
+                                        <i class="fas fa-trash me-2"></i> Delete Role
+                                    </a>
+                                </li>
+                                @endif
+                                @endcan
+                            </ul>
+                        </div>
                     </div>
+                </div>
+                <div class="card-body pt-1 px-4 pb-4">
+                    {{-- Permission groups summary --}}
+                    @if(count($permGroups) > 0)
+                        <div class="mt-3">
+                            @foreach($permGroups as $cat => $catPerms)
+                            @php
+                                $catIcons = [
+                                    'dashboard'=>'tachometer-alt','roles'=>'lock','users'=>'users',
+                                    'companies'=>'building','agents'=>'headset',
+                                    'knowledgebase'=>'brain','tasks'=>'phone-alt','reports'=>'chart-bar'
+                                ];
+                                $catColors = [
+                                    'dashboard'=>'primary','roles'=>'danger','users'=>'info',
+                                    'companies'=>'warning','agents'=>'success',
+                                    'knowledgebase'=>'purple','tasks'=>'secondary','reports'=>'dark'
+                                ];
+                                $icon  = $catIcons[$cat]  ?? 'key';
+                                $color = $catColors[$cat] ?? 'secondary';
+                            @endphp
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-{{ $color }} bg-opacity-10 text-{{ $color }} p-2 rounded-2">
+                                        <i class="fas fa-{{ $icon }}" style="font-size:11px;"></i>
+                                    </span>
+                                    <span class="fw-semibold text-dark" style="font-size:0.85rem;">{{ ucfirst($cat) }}</span>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1 justify-content-end" style="max-width: 55%;">
+                                    @foreach($catPerms as $p)
+                                    @php $action = explode('.', $p)[1] ?? $p; @endphp
+                                    <span class="badge bg-light text-dark border" style="font-size:10px;">{{ $action }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-3 text-muted">
+                            <i class="fas fa-ban d-block mb-1 opacity-25 fs-4"></i>
+                            <small>No permissions assigned</small>
+                        </div>
+                    @endif
+                </div>
+                @can('roles.edit')
+                <div class="card-footer bg-transparent border-0 px-4 pb-3 pt-0">
+                    <button class="btn btn-outline-primary btn-sm w-100 rounded-pill"
+                        data-bs-toggle="modal" data-bs-target="#editRoleModal"
+                        data-role-id="{{ $role->id }}"
+                        data-role-name="{{ $role->name }}"
+                        data-role-permissions="{{ $perms->pluck('name')->toJson() }}"
+                        onclick="openEditModal(this)">
+                        <i class="fas fa-sliders-h me-1"></i> Manage Permissions
+                    </button>
+                </div>
+                @endcan
+            </div>
+        </div>
+        @empty
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-shield-alt fa-3x text-muted opacity-25 mb-3"></i>
+                    <h5 class="text-muted">No Roles Found</h5>
+                    <p class="text-muted mb-3">Get started by creating your first role.</p>
+                    @can('roles.create')
+                    <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createRoleModal">
+                        <i class="fas fa-plus me-1"></i> Create First Role
+                    </button>
+                    @endcan
                 </div>
             </div>
         </div>
+        @endforelse
     </div>
+
 </div>
 
-<!-- Create Role Modal -->
-<div class="modal fade" id="createRoleModal" tabindex="-1" aria-labelledby="createRoleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createRoleModalLabel">Create New Role</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="createRoleForm" action="{{ route('roles.store') }}" method="POST">
+{{-- ══════════════════════════════════════════════════════════════ --}}
+{{-- CREATE MODAL --}}
+{{-- ══════════════════════════════════════════════════════════════ --}}
+<div class="modal fade" id="createRoleModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ route('roles.store') }}" method="POST" id="createRoleForm" class="m-0">
                 @csrf
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label for="roleName" class="form-label">Role Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="roleName" name="name" required 
-                                       placeholder="Enter role name (e.g., Content Manager)">
-                            </div>
+                <div class="modal-header bg-white border-0 pb-0 px-4 pt-4">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-plus-circle text-primary me-2"></i> Create New Role
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Role Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name"
+                               placeholder="e.g. Content Manager, QA Lead…" required>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">Permissions</h6>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill"
+                                    onclick="toggleAll('create', true)">Select All</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill"
+                                    onclick="toggleAll('create', false)">Clear All</button>
                         </div>
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label d-flex justify-content-between align-items-center">
-                                    <span>Permissions <span class="text-danger">*</span></span>
-                                    <div class="d-flex align-items-center">
-                                        <div class="input-group input-group-sm me-2" style="width: 200px;">
-                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                            <input type="text" class="form-control" placeholder="Search..." onkeyup="filterPermissions('create', this.value)">
-                                        </div>
-                                        <div class="form-check form-check-inline mb-0">
-                                            <input class="form-check-input" type="checkbox" id="selectAllCreate" onclick="toggleAllPermissions('create')">
-                                            <label class="form-check-label" for="selectAllCreate">Select All</label>
-                                        </div>
-                                    </div>
-                                </label>
-                                <div class="permissions-container border rounded p-3 bg-light" style="max-height: 400px; overflow-y: auto;">
-                                    <div class="text-center loading-permissions py-4">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
-                                        <div class="mt-2 text-muted">Loading permissions...</div>
-                                    </div>
-                                    <div class="permissions-list d-none row g-2">
-                                        <!-- Permissions will be loaded here via JavaScript -->
-                                    </div>
-                                </div>
-                                <small class="text-muted mt-1 d-block">Select individual permissions to assign to this role</small>
-                            </div>
+                    </div>
+
+                    <div id="createPermissionsContainer" class="row g-3 pb-5">
+                        <div class="col-12 text-center py-4">
+                            <div class="spinner-border text-primary"></div>
+                            <p class="text-muted mt-2">Loading permissions…</p>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create Role</button>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                        <i class="fas fa-save me-1"></i> Create Role
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-
-
-<!-- Edit Role Modal -->
-<div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editRoleModalLabel">Edit Role Permissions</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="editRoleForm" method="POST">
+{{-- ══════════════════════════════════════════════════════════════ --}}
+{{-- EDIT MODAL --}}
+{{-- ══════════════════════════════════════════════════════════════ --}}
+<div class="modal fade" id="editRoleModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <form id="editRoleForm" method="POST" class="m-0">
                 @csrf
                 @method('PUT')
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="editRoleName" class="form-label">Role Name</label>
-                                <input type="text" class="form-control" id="editRoleName" name="name" required>
-                            </div>
+                <div class="modal-header bg-white border-0 pb-0 px-4 pt-4">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-sliders-h text-primary me-2"></i>
+                        Edit Role: <span id="editRoleDisplayName" class="text-primary"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Role Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editRoleName" name="name" required>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">Permissions</h6>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill"
+                                    onclick="toggleAll('edit', true)">Select All</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill"
+                                    onclick="toggleAll('edit', false)">Clear All</button>
                         </div>
-                                <p class="form-control-static d-none" id="editRoleId"></p>
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label d-flex justify-content-between align-items-center">
-                                    <span>Permissions <span class="text-danger">*</span></span>
-                                    <div class="d-flex align-items-center">
-                                        <div class="input-group input-group-sm me-2" style="width: 200px;">
-                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                            <input type="text" class="form-control" placeholder="Search..." onkeyup="filterPermissions('edit', this.value)">
-                                        </div>
-                                        <div class="form-check form-check-inline mb-0">
-                                            <input class="form-check-input" type="checkbox" id="selectAllEdit" onclick="toggleAllPermissions('edit')">
-                                            <label class="form-check-label" for="selectAllEdit">Select All</label>
-                                        </div>
-                                    </div>
-                                </label>
-                                <div class="permissions-container border rounded p-3 bg-light" style="max-height: 400px; overflow-y: auto;">
-                                    <div class="text-center loading-permissions py-4">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
-                                        <div class="mt-2 text-muted">Loading permissions...</div>
-                                    </div>
-                                    <div class="permissions-list d-none row g-2">
-                                        <!-- Permissions will be loaded here via JavaScript -->
-                                    </div>
-                                </div>
-                            </div>
+                    </div>
+
+                    <div id="editPermissionsContainer" class="row g-3 pb-5">
+                        <div class="col-12 text-center py-4">
+                            <div class="spinner-border text-primary"></div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Role</button>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                        <i class="fas fa-save me-1"></i> Save Changes
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteRoleModal" tabindex="-1" aria-labelledby="deleteRoleModalLabel" aria-hidden="true">
+{{-- ══════════════════════════════════════════════════════════════ --}}
+{{-- DELETE MODAL --}}
+{{-- ══════════════════════════════════════════════════════════════ --}}
+<div class="modal fade" id="deleteRoleModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteRoleModalLabel">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Delete Role
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="text-center">
-                    <i class="fas fa-exclamation-triangle text-warning fa-3x mb-3"></i>
-                    <h5>Are you sure?</h5>
-                    <p>You are about to delete the role: <strong id="deleteRoleName"></strong></p>
-                    <p class="text-danger">This action cannot be undone.</p>
-                </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-trash-alt fa-3x text-danger opacity-50 mb-3"></i>
+                <p class="mb-1">You are about to permanently delete the role:</p>
+                <h5 class="fw-bold" id="deleteRoleName"></h5>
+                <p class="text-danger small">This action cannot be undone and will remove this role from all users.</p>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
                 <form id="deleteRoleForm" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Delete Role</button>
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">
+                        <i class="fas fa-trash me-1"></i> Delete Role
+                    </button>
                 </form>
             </div>
         </div>
@@ -292,262 +304,144 @@
 
 @push('scripts')
 <script>
-// Global variables
-let allPermissions = [];
+// ── Config ─────────────────────────────────────────────────────────────────
+const PERMISSIONS_URL = '{{ route("roles.permissions") }}';
+const ROLES_SHOW_URL  = '{{ route("roles.show", ":id") }}';
+const ROLES_UPDATE_URL= '{{ route("roles.update", ":id") }}';
+const ROLES_DELETE_URL= '{{ route("roles.destroy", ":id") }}';
 
-// Load permissions for create modal
-function loadPermissionsForCreate() {
-    fetch('{{ route("roles.permissions") }}')
-        .then(response => response.json())
-        .then(data => {
-            const container = document.querySelector('#createRoleModal .permissions-list');
-            const loading = document.querySelector('#createRoleModal .loading-permissions');
-            
-            loading.classList.add('d-none');
-            container.classList.remove('d-none');
-            
-            allPermissions = data.permissions || [];
-            renderPermissions(container, allPermissions, []);
-        })
-        .catch(error => {
-            console.error('Error loading permissions:', error);
-            document.querySelector('#createRoleModal .loading-permissions').innerHTML = 
-                '<span class="text-danger">Failed to load permissions</span>';
-        });
+const CAT_META = {
+    dashboard:     { label: 'Dashboard',          icon: 'tachometer-alt', color: 'primary'   },
+    roles:         { label: 'Roles & Permissions', icon: 'lock',           color: 'danger'    },
+    users:         { label: 'Users',              icon: 'users',           color: 'info'      },
+    companies:     { label: 'Companies',          icon: 'building',        color: 'warning'   },
+    agents:        { label: 'Agents',             icon: 'headset',         color: 'success'   },
+    knowledgebase: { label: 'Knowledge Base',     icon: 'brain',           color: 'purple'    },
+    tasks:         { label: 'Tasks / Calls',      icon: 'phone-alt',       color: 'secondary' },
+    reports:       { label: 'Reports',            icon: 'chart-bar',       color: 'dark'      },
+};
+
+let cachedGrouped = null;
+
+// ── Fetch grouped permissions (cached) ─────────────────────────────────────
+async function fetchGrouped() {
+    if (cachedGrouped) return cachedGrouped;
+    const res  = await fetch(PERMISSIONS_URL);
+    const data = await res.json();
+    cachedGrouped = data.grouped;
+    return cachedGrouped;
 }
 
-// Load permissions for edit modal
-function loadPermissionsForEdit(roleId, currentPermissions = []) {
-    fetch('{{ route("roles.permissions") }}')
-        .then(response => response.json())
-        .then(data => {
-            const container = document.querySelector('#editRoleModal .permissions-list');
-            const loading = document.querySelector('#editRoleModal .loading-permissions');
-            
-            loading.classList.add('d-none');
-            container.classList.remove('d-none');
-            
-            allPermissions = data.permissions || [];
-            renderPermissions(container, allPermissions, currentPermissions);
-        })
-        .catch(error => {
-            console.error('Error loading permissions:', error);
-            document.querySelector('#editRoleModal .loading-permissions').innerHTML = 
-                '<span class="text-danger">Failed to load permissions</span>';
-        });
-}
-
-// Render permissions checkboxes
-function renderPermissions(container, permissions, selectedPermissionNames) {
-    if (permissions.length === 0) {
-        container.innerHTML = '<div class="col-12 text-center text-muted py-3">No permissions available</div>';
-        return;
-    }
-
+// ── Render grouped permission checkboxes ───────────────────────────────────
+function renderGrouped(containerId, grouped, selected = []) {
+    const container = document.getElementById(containerId);
     let html = '';
-    
-    const modalType = container.closest('.modal').id.includes('create') ? 'Create' : 'Edit';
-    const allNames = permissions.map(p => p.name);
-    const selectAllCheckbox = document.getElementById(`selectAll${modalType}`);
-    if (selectAllCheckbox) {
-        selectAllCheckbox.checked = allNames.length > 0 && allNames.every(name => selectedPermissionNames.includes(name));
-    }
 
-    // Sort permissions alphabetically for the list
-    const sortedPermissions = [...permissions].sort((a, b) => a.name.localeCompare(b.name));
+    for (const [cat, group] of Object.entries(grouped)) {
+        const meta   = CAT_META[cat] || { label: cat, icon: 'key', color: 'secondary' };
+        const perms  = group.permissions || [];
+        const allIn  = perms.every(p => selected.includes(p.name));
 
-    sortedPermissions.forEach(permission => {
-        const isChecked = selectedPermissionNames.includes(permission.name);
         html += `
-            <div class="col-md-6 permission-item border-bottom py-1">
-                <div class="form-check d-flex align-items-center mb-0 px-3 py-1">
-                    <input class="form-check-input mt-0" type="checkbox" name="permissions[]" 
-                           value="${permission.name}" id="perm_${modalType}_${permission.id}" ${isChecked ? 'checked' : ''}
-                           onclick="updateSelectAllState('${modalType.toLowerCase()}')">
-                    <label class="form-check-label ms-3 cursor-pointer w-100 mb-0" for="perm_${modalType}_${permission.id}">
-                        <span class="fs-13 fw-medium">${permission.name}</span>
-                    </label>
+        <div class="col-md-6 col-xl-4">
+            <div class="card border rounded-3 h-100">
+                <div class="card-header bg-${meta.color} bg-opacity-10 border-0 py-2 px-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-${meta.icon} text-${meta.color}"></i>
+                        <span class="fw-bold text-dark" style="font-size:0.85rem;">${meta.label}</span>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="cat_${containerId}_${cat}"
+                               ${allIn ? 'checked' : ''}
+                               onchange="toggleCategory('${containerId}', '${cat}', this.checked)">
+                        <label class="form-check-label small text-muted" for="cat_${containerId}_${cat}">All</label>
+                    </div>
+                </div>
+                <div class="card-body py-2 px-3">
+                    ${perms.map(p => {
+                        const action  = p.name.split('.')[1] ?? p.name;
+                        const checked = selected.includes(p.name) ? 'checked' : '';
+                        return `
+                        <div class="form-check py-1 border-bottom last-no-border perm-item" data-category="${cat}">
+                            <input class="form-check-input perm-cb" type="checkbox" name="permissions[]"
+                                   value="${p.name}" id="p_${containerId}_${p.id}" ${checked}
+                                   onchange="syncCatToggle('${containerId}', '${cat}')">
+                            <label class="form-check-label w-100 cursor-pointer" for="p_${containerId}_${p.id}">
+                                <span class="fw-medium text-dark" style="font-size:0.82rem;">${action}</span>
+                                <span class="d-block text-muted" style="font-size:0.72rem;">${p.name}</span>
+                            </label>
+                        </div>`;
+                    }).join('')}
                 </div>
             </div>
-        `;
-    });
-    
+        </div>`;
+    }
+
     container.innerHTML = html;
 }
 
-// Toggle all permissions
-function toggleAllPermissions(type) {
-    const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
-    const selectAll = document.getElementById(`selectAll${capitalizedType}`);
-    const checkboxes = document.querySelectorAll(`#${type}RoleModal .form-check-input[name="permissions[]"]`);
-    
-    checkboxes.forEach(cb => {
-        if (!cb.closest('.permission-item').classList.contains('d-none')) {
-            cb.checked = selectAll.checked;
-        }
-    });
+// ── Toggle entire category ─────────────────────────────────────────────────
+function toggleCategory(containerId, cat, state) {
+    document.querySelectorAll(`#${containerId} .perm-item[data-category="${cat}"] .perm-cb`)
+        .forEach(cb => cb.checked = state);
 }
 
-// Update "Select All" checkbox state when individual checkboxes are clicked
-function updateSelectAllState(type) {
-    const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
-    const selectAll = document.getElementById(`selectAll${capitalizedType}`);
-    const checkboxes = Array.from(document.querySelectorAll(`#${type}RoleModal .form-check-input[name="permissions[]"]`))
-        .filter(cb => !cb.closest('.permission-item').classList.contains('d-none'));
-    
-    if (checkboxes.length === 0) return;
-    
-    const allChecked = checkboxes.every(cb => cb.checked);
-    if (selectAll) selectAll.checked = allChecked;
+// ── Sync the "All" toggle when individual checkboxes change ───────────────
+function syncCatToggle(containerId, cat) {
+    const boxes  = [...document.querySelectorAll(`#${containerId} .perm-item[data-category="${cat}"] .perm-cb`)];
+    const allChk = document.getElementById(`cat_${containerId}_${cat}`);
+    if (allChk) allChk.checked = boxes.length > 0 && boxes.every(b => b.checked);
 }
 
-// Filter permissions by search input
-function filterPermissions(type, query) {
-    const q = query.toLowerCase();
-    const items = document.querySelectorAll(`#${type}RoleModal .permission-item`);
-    
-    items.forEach(item => {
-        const text = item.textContent.toLowerCase();
-        if (text.includes(q)) {
-            item.classList.remove('d-none');
-        } else {
-            item.classList.add('d-none');
-        }
-    });
-    
-    updateSelectAllState(type);
+// ── Select / Clear All ────────────────────────────────────────────────────
+function toggleAll(type, state) {
+    const id = type === 'create' ? 'createPermissionsContainer' : 'editPermissionsContainer';
+    document.querySelectorAll(`#${id} .perm-cb`).forEach(cb => cb.checked = state);
+    document.querySelectorAll(`#${id} [id^="cat_"]`).forEach(cb => cb.checked = state);
 }
 
-// Edit role
-function editRole(button) {
-    const roleId = button.getAttribute('data-role-id');
-    const roleName = button.getAttribute('data-role-name');
-    const roleDescription = button.getAttribute('data-role-description') || '';
+// ── Open CREATE modal ─────────────────────────────────────────────────────
+document.getElementById('createRoleModal').addEventListener('show.bs.modal', async () => {
+    const container = document.getElementById('createPermissionsContainer');
+    container.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>';
+    const grouped = await fetchGrouped();
+    renderGrouped('createPermissionsContainer', grouped, []);
+    document.getElementById('createRoleForm').reset();
+});
 
-    // Set form values
+// ── Open EDIT modal ───────────────────────────────────────────────────────
+function openEditModal(btn) {
+    const roleId   = btn.getAttribute('data-role-id');
+    const roleName = btn.getAttribute('data-role-name');
+    const selected = JSON.parse(btn.getAttribute('data-role-permissions') || '[]');
+
+    document.getElementById('editRoleDisplayName').textContent = roleName;
     document.getElementById('editRoleName').value = roleName;
-    document.getElementById('editRoleId').textContent = roleId;
-    
-    // Set form action using route
-    const updateUrl = '{{ route("roles.update", ":id") }}'.replace(':id', roleId);
-    document.getElementById('editRoleForm').action = updateUrl;
+    document.getElementById('editRoleForm').action = ROLES_UPDATE_URL.replace(':id', roleId);
 
-    // Reset and show loading
-    const container = document.querySelector('#editRoleModal .permissions-list');
-    const loading = document.querySelector('#editRoleModal .loading-permissions');
-    container.classList.add('d-none');
-    loading.classList.remove('d-none');
+    const container = document.getElementById('editPermissionsContainer');
+    container.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>';
 
-    // Load current role permissions first - Use route with parameter
-    const showUrl = '{{ route("roles.show", ":id") }}'.replace(':id', roleId);
-    fetch(showUrl + '?ajax=1') // Add ajax parameter to trigger JSON response
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to fetch role details');
-            }
-            return response.json();
-        })
-        .then(data => {
-            const currentPermissions = data.role && data.role.permissions ? 
-                data.role.permissions.map(p => p.name) : [];
-            loadPermissionsForEdit(roleId, currentPermissions);
-        })
-        .catch(error => {
-            console.error('Error loading role:', error);
-            loading.innerHTML = '<span class="text-danger">Failed to load role data</span>';
-        });
+    fetchGrouped().then(grouped => {
+        renderGrouped('editPermissionsContainer', grouped, selected);
+    });
 }
 
-// Confirm delete
+// ── Confirm DELETE ────────────────────────────────────────────────────────
 function confirmDelete(roleId, roleName) {
     document.getElementById('deleteRoleName').textContent = roleName;
-    
-    // Set form action using route
-    const deleteUrl = '{{ route("roles.destroy", ":id") }}'.replace(':id', roleId);
-    document.getElementById('deleteRoleForm').action = deleteUrl;
-    
+    document.getElementById('deleteRoleForm').action = ROLES_DELETE_URL.replace(':id', roleId);
     new bootstrap.Modal(document.getElementById('deleteRoleModal')).show();
 }
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Load permissions when create modal is shown
-    const createModal = document.getElementById('createRoleModal');
-    createModal.addEventListener('show.bs.modal', loadPermissionsForCreate);
-
-    // Reset create modal when hidden
-    createModal.addEventListener('hidden.bs.modal', function() {
-        document.getElementById('createRoleForm').reset();
-        const container = document.querySelector('#createRoleModal .permissions-list');
-        const loading = document.querySelector('#createRoleModal .loading-permissions');
-        container.classList.add('d-none');
-        loading.classList.remove('d-none');
-        loading.innerHTML = `
-            <div class="spinner-border spinner-border-sm" role="status">
-                <span class="visually-hidden">Loading permissions...</span>
-            </div>
-            <span class="ms-2">Loading permissions...</span>
-        `;
-    });
-
-    // Reset edit modal when hidden
-    const editModal = document.getElementById('editRoleModal');
-    editModal.addEventListener('hidden.bs.modal', function() {
-        const container = document.querySelector('#editRoleModal .permissions-list');
-        const loading = document.querySelector('#editRoleModal .loading-permissions');
-        container.classList.add('d-none');
-        loading.classList.remove('d-none');
-        loading.innerHTML = `
-            <div class="spinner-border spinner-border-sm" role="status">
-                <span class="visually-hidden">Loading permissions...</span>
-            </div>
-            <span class="ms-2">Loading permissions...</span>
-        `;
-    });
-
-    // Auto-open modals on page load if needed
-    @if(session('open_create_modal'))
-        new bootstrap.Modal(document.getElementById('createRoleModal')).show();
-    @endif
-
-    @if(session('open_edit_modal'))
-        const roleId = '{{ session("open_edit_modal") }}';
-        setTimeout(() => {
-            const editButton = document.querySelector(`button[data-role-id="${roleId}"]`);
-            if (editButton) {
-                editButton.click();
-            }
-        }, 500);
-    @endif
-});
 </script>
 
 <style>
-.permission-tags .badge {
-    font-size: 0.75em;
-}
-.permissions-container {
-    background-color: #f8f9fa;
-    border: 1px solid #e9ebec !important;
-}
-.form-check-label {
-    cursor: pointer;
-}
-.fs-11 { font-size: 11px; }
-.fs-13 { font-size: 13px; }
+.role-card { transition: box-shadow 0.2s; }
+.role-card:hover { box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08) !important; }
+.role-avatar { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; }
 .cursor-pointer { cursor: pointer; }
-.hover-shadow-sm:hover {
-    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
-    background-color: #fff !important;
-}
-.permission-item .card-radio {
-    transition: all 0.2s ease;
-}
-.permission-item .form-check-input:checked + label {
-    color: #405189;
-}
-.permission-group-header h6 {
-    letter-spacing: 1px;
-}
+.last-no-border:last-child { border-bottom: none !important; }
+.text-purple { color: #000 !important; }
+.bg-purple   { background-color: #eee7f8ff !important; }
 </style>
 @endpush

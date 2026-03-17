@@ -71,6 +71,11 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, 'supervisor_id');
     }
 
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id');
+    }
+
     /**
      * Return the user as the session array the app expects.
      * This keeps all views working without changes.

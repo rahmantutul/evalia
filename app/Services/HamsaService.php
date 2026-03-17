@@ -7,140 +7,197 @@ use Exception;
 
 class HamsaService
 {
-    protected string $baseUrl;
-    protected string $apiKey;
-    protected int $timeout = 60;
-    protected int $fileTimeout = 180;
+    protected string $baseUrl = 'https://api.tryhamsa.com';
+    protected string $v1Url  = 'https://api.tryhamsa.com';
+    protected string $apiKey = 'f8f7b582-ecb6-43fb-8921-0542f5169378';
 
-    public function __construct()
+    public function createTranscriptionJob(string $mediaUrl, string $title = 'Untitled', string $language = 'ar'): array
     {
-        $this->baseUrl = 'https://api.hamsa.ai/v1';
-        $this->apiKey = 'dummy-key';
+        try {
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL            => $this->baseUrl . '/v2/jobs',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT        => 60,
+                CURLOPT_CUSTOMREQUEST  => 'POST',
+                CURLOPT_HTTPHEADER     => [
+                    'Authorization: Token ' . $this->apiKey,
+                    'Content-Type: application/json',
+                ],
+                CURLOPT_POSTFIELDS => json_encode([
+                    'type'           => 'TRANSCRIPTION',
+                    'apiKey'         => $this->apiKey,
+                    'mediaUrl'       => $mediaUrl,
+                    'title'          => $title,
+                    'language'       => $language,
+                    'processingType' => 'async',
+                    'sentiment'      => true,
+                    'diarization'    => true,
+                ]),
+            ]);
+
+            $body  = curl_exec($ch);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            if ($error) {
+                Log::error('Hamsa Create Job cURL error: ' . $error);
+                return ['success' => false, 'error' => $error];
+            }
+
+            $data = json_decode($body, true);
+            Log::info('Hamsa Create Job response', ['body' => $data]);
+
+            $jobId = $data['data']['jobId'] ?? null;
+
+            if ($jobId) {
+                return ['success' => true, 'jobId' => $jobId, 'data' => $data];
+            }
+
+            return ['success' => false, 'error' => $body];
+
+        } catch (Exception $e) {
+            Log::error('Hamsa Create Job Exception: ' . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
     }
 
-    public function makeRequest(string $method, string $endpoint, array $data = [], array $headers = []): array
+    public function getJobDetails(string $jobId): array
     {
-        // Mocked response for Hamsa API
-        $responses = [
-            '/usage/numbers' => [
-                'success' => true,
-                'data' => [
-                    'transcriptions' => 1245,
-                    'tts_jobs' => 432,
-                    'ai_generations' => 2840,
-                    'voice_agents' => 8,
-                    'remaining' => 8755,
-                    'used' => 6245,
-                    'total' => 15000
-                ]
-            ],
-            '/jobs' => [
-                'success' => true,
-                'data' => [
-                    'results' => [
-                        ['id' => 'job-882', 'type' => 'transcription', 'status' => 'completed', 'created_at' => now()->subMinutes(15)->toIso8601String()],
-                        ['id' => 'job-881', 'type' => 'tts', 'status' => 'completed', 'created_at' => now()->subHours(1)->toIso8601String()],
-                        ['id' => 'job-880', 'type' => 'transcription', 'status' => 'processing', 'created_at' => now()->subHours(2)->toIso8601String()],
-                        ['id' => 'job-879', 'type' => 'ai_content', 'status' => 'completed', 'created_at' => now()->subDays(1)->toIso8601String()],
-                    ]
-                ]
-            ],
-            '/voice-agents' => [
-                'success' => true,
-                'data' => [
-                    'data' => [
-                        'voiceAgents' => [
-                            ['id' => 'agent-ar-1', 'agentName' => 'حمزة - صوت ذكوري', 'voiceId' => 'arabic-male-1', 'lang' => 'ar'],
-                            ['id' => 'agent-ar-2', 'agentName' => 'سلمى - صوت أنثوي', 'voiceId' => 'arabic-female-1', 'lang' => 'ar'],
-                            ['id' => 'agent-jo-1', 'agentName' => 'زيد - لهجة أردنية', 'voiceId' => 'jordan-male-1', 'lang' => 'ar-JO'],
-                        ]
-                    ]
-                ]
-            ],
-            '/project' => [
-                'success' => true,
-                'data' => [
-                    'id' => 'proj-ssc-2024',
-                    'name' => 'مشروع تحليل المكالمات - الضمان الاجتماعي',
-                    'status' => 'ACTIVE'
-                ]
-            ],
-            '/jobs/all' => [
-                 'success' => true,
-                 'data' => [
-                     'data' => [
-                         'jobs' => [
-                             ['id' => 'j101', 'type' => 'transcription', 'status' => 'completed', 'created_at' => now()->subHours(1)->toIso8601String()],
-                             ['id' => 'j102', 'type' => 'tts', 'status' => 'completed', 'created_at' => now()->subHours(2)->toIso8601String()],
-                             ['id' => 'j103', 'type' => 'transcription', 'status' => 'completed', 'created_at' => now()->subHours(3)->toIso8601String()]
-                         ],
-                         'total' => 3
-                     ]
-                 ]
-            ]
-        ];
+        try {
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL            => $this->v1Url . '/v1/jobs?jobId=' . urlencode($jobId),
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING       => '',
+                CURLOPT_MAXREDIRS      => 10,
+                CURLOPT_TIMEOUT        => 30,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST  => 'GET',
+                CURLOPT_HTTPHEADER     => [
+                    'Authorization: Token ' . $this->apiKey,
+                ],
+            ]);
 
-        // Check if we have a mocked response for this endpoint
-        foreach ($responses as $path => $response) {
-            if (str_contains($endpoint, $path)) {
-                return $response;
+            $body  = curl_exec($ch);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            if ($error) {
+                Log::error('Hamsa Get Job cURL error: ' . $error);
+                return ['success' => false, 'error' => $error];
+            }
+
+            $responseData = json_decode($body, true);
+
+            $outer = $responseData['data'] ?? $responseData;
+            $inner = isset($outer['data']) && is_array($outer['data']) ? $outer['data'] : $outer;
+
+            $status = $inner['status'] ?? 'UNKNOWN';
+            $result = $inner['jobResponse'] ?? $inner;
+
+            return [
+                'success'       => true,
+                'status'        => $status,
+                'result'        => $result,
+                'data'          => $inner,
+                'full_response' => $responseData,
+            ];
+
+        } catch (Exception $e) {
+            Log::error('Hamsa Get Job Exception: ' . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    public function waitForCompletion(string $jobId, int $maxWaitSeconds = 300, int $intervalSeconds = 5): array
+    {
+        $waited = 0;
+
+        while ($waited < $maxWaitSeconds) {
+            sleep($intervalSeconds);
+            $waited += $intervalSeconds;
+
+            $details = $this->getJobDetails($jobId);
+
+            if (!$details['success']) {
+                Log::warning('Could not poll job ' . $jobId . ', retrying...', $details);
+                continue;
+            }
+
+            $status = strtoupper($details['status']);
+            Log::info("Hamsa job {$jobId} status after {$waited}s: {$status}");
+
+            if ($status === 'COMPLETED' || $status === 'SUCCESSFUL') {
+                return $details;
+            }
+
+            if (in_array($status, ['FAILED', 'ERROR', 'REJECTED'])) {
+                throw new Exception("Hamsa job failed with status: {$status}");
+            }
+
+        }
+
+        throw new Exception("Hamsa job {$jobId} did not complete within {$maxWaitSeconds} seconds.");
+    }
+
+    public function extractConversation(array $data): array
+    {
+        $segments = [];
+        // Check for common keys where Hamsa stores conversation turns/segments
+        foreach (['conversation', 'diarization', 'fragments', 'segments', 'results'] as $key) {
+            if (!empty($data[$key]) && is_array($data[$key])) {
+                $segments = $data[$key];
+                break;
             }
         }
 
-        // Default success for other endpoints (like POST requests)
-        return [
-            'success' => true,
-            'data' => ['id' => 'job-' . rand(100, 999), 'status' => 'COMPLETED', 'message' => 'Success (Mock)'],
-            'status' => 200
-        ];
+        if (empty($segments) && (!empty($data['words']) || !empty($data['tokens']))) {
+            $segments = $this->buildConversationFromWords($data['words'] ?? $data['tokens']);
+        }
+
+        // Normalize segments to a standard format for the application
+        return array_map(function($s) {
+            $start = $s['start'] ?? ($s['start_time'] ?? 0);
+            $end = $s['end'] ?? ($s['end_time'] ?? 0);
+            
+            // Auto-detect milliseconds (Hamsa fragments often use ms)
+            if ($start > 10000) $start /= 1000;
+            if ($end > 10000) $end /= 1000;
+
+            return [
+                'speaker'    => $s['speaker'] ?? ($s['speakerId'] ?? 'Unknown'),
+                'text'       => $s['text'] ?? ($s['transcript'] ?? ''),
+                'start_time' => (float)$start,
+                'end_time'   => (float)$end,
+                'sentiment'  => $s['sentiment'] ?? 'Neutral'
+            ];
+        }, $segments);
     }
 
-    public function makeFileRequest(string $method, string $endpoint, array $multipartData = []): array
+    private function buildConversationFromWords(array $words): array
     {
-        return [
-            'success' => true,
-            'data' => ['job_id' => 'file-job-' . rand(1000, 9999), 'status' => 'PROCESSING'],
-            'status' => 200
-        ];
-    }
+        $conversation    = [];
+        $currentSpeaker  = null;
+        $currentText     = [];
 
-    protected function parseErrorResponse($response): string
-    {
-        return 'Mocked error response';
-    }
+        foreach ($words as $word) {
+            $speaker = $word['speaker'] ?? ($word['speaker_tag'] ?? 'Unknown');
 
-    protected function logRequest(string $method, string $endpoint, float $duration, int $status, array $data = []): void
-    {
-    }
+            if ($speaker !== $currentSpeaker && $currentSpeaker !== null) {
+                $conversation[] = ['speaker' => $currentSpeaker, 'text' => implode(' ', $currentText)];
+                $currentText    = [];
+            }
 
-    protected function logError(string $method, string $endpoint, string $error): void
-    {
-    }
+            $currentSpeaker  = $speaker;
+            $currentText[]   = $word['text'] ?? ($word['word'] ?? '');
+        }
 
-    public function testConnection(): array
-    {
-        return ['success' => true];
-    }
+        if (!empty($currentText)) {
+            $conversation[] = ['speaker' => $currentSpeaker, 'text' => implode(' ', $currentText)];
+        }
 
-    public function setTimeout(int $seconds): self
-    {
-        $this->timeout = $seconds;
-        return $this;
-    }
-
-    public function setFileTimeout(int $seconds): self
-    {
-        $this->fileTimeout = $seconds;
-        return $this;
-    }
-
-    public function getBaseUrl(): string
-    {
-        return $this->baseUrl;
-    }
-
-    public function isConfigured(): bool
-    {
-        return true;
+        return $conversation;
     }
 }

@@ -126,6 +126,7 @@ Route::group(['middleware' => 'auth.api'], function () {
 
 
     Route::get('/user-dashboard', [HomeController::class, 'index'])->name('user.home');
+    Route::get('/task-detailshamsa/{id}', [TaskController::class, 'checkTaskStatus'])->name('task.detailshamsa');
     Route::get('/agent-dashboard', function () {
         return view('agent.dashboard');
     })->name('agent.dashboard');
@@ -188,7 +189,14 @@ Route::group(['middleware' => 'auth.api'], function () {
     Route::get('/user/task/details/{workId}', [TaskController::class, 'taskDetails'])->name('user.task.details');
     Route::get('/user/task/delete/{workId}', [TaskController::class, 'deleteTask'])->name('user.task.delete');
     Route::get('/user/task/list/{companyId}', [TaskController::class, 'TaskList'])->name('user.task.list');
+    Route::get('/user/task/check-status/{taskId}', [TaskController::class, 'checkTaskStatus'])->name('user.task.checkStatus');
     Route::get('/user/company/evaluate/{id}', [TaskController::class, 'reEvaluateTask'])->name('user.company.evaluate');
+
+    // ─── Hamsa Job Lookup (JSON API) ───────────────────────────────
+    // Pull raw Hamsa job by Hamsa job ID   → /api/hamsa/job/{jobId}
+    Route::get('/api/hamsa/job/{jobId}', [TaskController::class, 'fetchHamsaJob'])->name('api.hamsa.job');
+    // Pull Hamsa job by local Task DB ID   → /api/task/{taskId}/hamsa-job
+    Route::get('/api/task/{taskId}/hamsa-job', [TaskController::class, 'fetchTaskHamsaJob'])->name('api.task.hamsaJob');
     // Support route start
     Route::get('/user/support', [HomeController::class, 'support'])->name('user.support');
 
@@ -207,12 +215,16 @@ Route::group(['middleware' => 'auth.api'], function () {
     Route::get('/agents/{agentId}/performance-data', [AgentController::class, 'getPerformanceData'])->name('agents.performance.data');
 
     // Knowledge Base routes start
-    Route::post('/user/knowledgeBase/store', [KnowledgeBaseController::class, 'knowledgeBaseStore'])->name('user.knowledgeBase.store');
-    Route::get('/user/knowledgeBase/details', [KnowledgeBaseController::class, 'knowledgeBaseDetails'])->name('user.knowledgeBase.details');
-    Route::get('/user/knowledgeBase/delete/{id}/{company_id}', [KnowledgeBaseController::class, 'knowledgeBaseDelete'])->name('user.knowledgeBase.delete');
     Route::get('/user/knowledgeBase/list', [KnowledgeBaseController::class, 'knowledgeBaseList'])->name('user.knowledgeBase.list');
+    Route::post('/user/knowledgeBase/search-test', [KnowledgeBaseController::class, 'knowledgeBaseSearch'])->name('user.knowledgeBase.searchTest');
     Route::get('/user/knowledgeBase/create', [KnowledgeBaseController::class, 'knowledgeBaseCreate'])->name('user.knowledgeBase.create');
-    Route::get('/user/knowledgeBase/edit', [KnowledgeBaseController::class, 'knowledgeBaseEdit'])->name('user.knowledgeBase.edit');
+    Route::post('/user/knowledgeBase/store', [KnowledgeBaseController::class, 'knowledgeBaseStore'])->name('user.knowledgeBase.store');
+    Route::get('/user/knowledgeBase/details/{id}', [KnowledgeBaseController::class, 'knowledgeBaseDetails'])->name('user.knowledgeBase.details');
+    Route::get('/user/knowledgeBase/edit/{id}', [KnowledgeBaseController::class, 'knowledgeBaseEdit'])->name('user.knowledgeBase.edit');
+    Route::post('/user/knowledgeBase/update/{id}', [KnowledgeBaseController::class, 'knowledgeBaseUpdate'])->name('user.knowledgeBase.update');
+    Route::get('/user/knowledgeBase/delete/{id}', [KnowledgeBaseController::class, 'knowledgeBaseDelete'])->name('user.knowledgeBase.delete');
+    Route::get('/user/knowledgeBase/simulator', [KnowledgeBaseController::class, 'kbSimulator'])->name('user.knowledgeBase.simulator');
+    Route::post('/user/knowledgeBase/simulator', [KnowledgeBaseController::class, 'kbSimulatorRun'])->name('user.knowledgeBase.simulator.run');
 
     Route::prefix('telephony-accounts')->name('user.telephonyAccounts.')->group(function () {
         Route::get('/', [TelephonyAccountController::class, 'index'])->name('index');
@@ -301,36 +313,6 @@ Route::group(['middleware' => 'auth.api'], function () {
 // Auth::routes();
 
 // =================User routes ======================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

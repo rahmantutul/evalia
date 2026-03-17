@@ -200,18 +200,18 @@
                                            value="{{ isset($company) && !empty($company['main_topics']) ? (is_array($company['main_topics']) ? implode(',', $company['main_topics']) : $company['main_topics']) : '' }}"
                                             placeholder="Type and press enter to add">
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <label for="restricted_phrases" class="form-label">Restricted Phrases:</label>
                                         <input type="text" class="form-control" id="restricted_phrases" name="restricted_phrases" 
                                             value="{{ isset($company) && !empty($company['restricted_phrases']) ? implode(',', $company['restricted_phrases']) : '' }}" 
                                             placeholder="Phrases agents should avoid...">
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <label for="call_types" class="form-label">Call Types:</label>
                                         <input type="text" class="form-control" id="call_types" name="call_types" 
                                             value="{{ isset($company) && !empty($company['call_types']) ? (is_array($company['call_types']) ? implode(',', $company['call_types']) : $company['call_types']) : '' }}" placeholder="Type and press enter to add">
                                     </div>
-                                    <div class="col-md-4">
+                                    {{-- <div class="col-md-4">
                                         <label for="source" class="form-label">Integration Sources:</label>
                                         @php
                                             $currentSources = is_array($company['source'] ?? []) ? ($company['source'] ?? []) : (isset($company['source']) ? [$company['source']] : []);
@@ -220,7 +220,7 @@
                                             value="{{ implode(',', $currentSources) }}" 
                                             placeholder="Select integration sources">
                                         <small class="text-muted">Choose from available integration sources.</small>
-                                    </div>
+                                    </div> --}}
                                     <div class="col-12">
                                         <label for="company_overview" class="form-label">Company Overview:</label>
                                         <textarea class="form-control prompt-field" id="company_overview" name="company_overview" placeholder="Provide a brief overview of the company for AI context..." rows="3" readonly>{{ !empty($company['company_overview']) ? $company['company_overview'] : 'A leading provider of cloud-based enterprise solutions, specializing in AI-driven customer support and technical infrastructure management worldwide.' }}</textarea>
@@ -434,7 +434,7 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
             'filler_words', 'main_topics', 'call_types',
             'call_outcomes', 'agent_assessments_configs', 
             'agent_cooperation_configs', 'agent_performance_configs',
-            'restricted_phrases', 'source'
+            'restricted_phrases'/*, 'source'*/
         ];
         
         tagInputs.forEach(id => {

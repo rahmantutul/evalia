@@ -244,9 +244,7 @@
                                 <tr>
                                     <th>Company Name</th>
                                     <th>Industry Sector</th>
-                                    <th>Sources</th>
                                     <th>Agents</th>
-                                    <th>Location</th>
                                     <th style="text-align: center">Action</th>
                                 </tr>
                             </thead>
@@ -254,52 +252,17 @@
                                 @php
                                     $totalCompanies = count($companies);
                                     
-                                    function getSourceBadge($source) {
-                                        $map = [
-                                            'api' => ['name' => 'API', 'color' => '#0a66c2', 'icon' => 'fas fa-code'],
-                                            'avaya' => ['name' => 'Avaya', 'color' => '#d32f2f', 'icon' => 'fas fa-phone'],
-                                            'genesys' => ['name' => 'Genesys', 'color' => '#2e7d32', 'icon' => 'fas fa-headset'],
-                                            'fb' => ['name' => 'Facebook', 'color' => '#1877f2', 'icon' => 'fab fa-facebook-f'],
-                                            'linkedin' => ['name' => 'LinkedIn', 'color' => '#0077b5', 'icon' => 'fab fa-linkedin-in'],
-                                            'inta' => ['name' => 'Instagram', 'color' => '#e4405f', 'icon' => 'fab fa-instagram'],
-                                            'tiktok' => ['name' => 'TikTok', 'color' => '#000000', 'icon' => 'fab fa-tiktok'],
-                                            'snap' => ['name' => 'Snapchat', 'color' => '#fffc00', 'text' => '#000', 'icon' => 'fab fa-snapchat-ghost'],
-                                            'x' => ['name' => 'X', 'color' => '#000000', 'icon' => 'fab fa-x-twitter'],
-                                            'whatsapp' => ['name' => 'WhatsApp', 'color' => '#25d366', 'icon' => 'fab fa-whatsapp'],
-                                            'email' => ['name' => 'Email', 'color' => '#757575', 'icon' => 'fas fa-envelope'],
-                                        ];
-                                        
-                                        $s = $map[strtolower($source)] ?? ['name' => $source, 'color' => '#6c757d', 'icon' => 'fas fa-link'];
-                                        $textColor = $s['text'] ?? '#fff';
-                                        
-                                        return "<span class='badge' style='background-color: {$s['color']}; color: {$textColor} ; font-size: 10px; padding: 5px 10px; margin-right: 4px; border-radius: 4px; display: inline-flex; align-items: center; gap: 5px;' title='{$s['name']}'><i class='{$s['icon']}'></i> {$s['name']}</span>";
-                                    }
                                 @endphp
                                 @foreach($companies as $company)
                                     @php
-                                        // Real Location Mapping
-                                        $locationMap = [
-                                            'ssc-jordan' => 'Amman, Jordan',
-                                            'arab-bank' => 'Amman, Jordan',
-                                            'orange-jo' => 'Amman, Jordan',
-                                            'manaseer-group' => 'Amman, Jordan',
-                                            'royal-jordanian' => 'Amman, Jordan'
-                                        ];
+                                        // Use real count from controller
+                                        $agentsCount = $company['agents_count'] ?? 0;
                                         
-                                        $location = $locationMap[$company['id']] ?? 'Amman, Jordan';
-                                        
-                                        // Stable random count of agents - Minimum 25
-                                        $seed = crc32($company['id']);
-                                        mt_srand($seed);
-                                        $agents = mt_rand(6, 8); 
-                                        
-                                        // Sources: Only API and Genesys
-                                        $randSources = ['api']; // All have API
-                                        if (mt_rand(0, 1) > 0 || $company['id'] == 'arab-bank') {
-                                            $randSources[] = 'genesys'; // Some also have Genesys
+                                        // Default sources fallback if not in DB
+                                        $defaultSources = ['api'];
+                                        if ($company['id'] == 'arab-bank') {
+                                            $defaultSources[] = 'genesys';
                                         }
-                                        
-                                        mt_srand(); // Reset
                                     @endphp
                                     <tr>
                                         <td>
@@ -308,18 +271,7 @@
                                             </a>
                                         </td>
                                         <td>{{ $company['group_name'] ?? 'Private Sector' }}</td>
-                                        <td>
-                                            <div class="d-flex flex-wrap gap-1">
-                                                @php
-                                                    $displayedSources = $company['source'] ?? $randSources;
-                                                @endphp
-                                                @foreach($displayedSources as $rs)
-                                                    {!! getSourceBadge($rs) !!}
-                                                @endforeach
-                                            </div>
-                                        </td>
-                                        <td>{{ $agents }}</td>
-                                        <td>{{ $location }}</td>
+                                        <td>{{ $agentsCount }}</td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <a href="{{ route('user.company.view',$company['id']) }}" class="btn btn-icon" title="View">

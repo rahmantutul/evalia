@@ -27,7 +27,7 @@ class CompanyController extends Controller
 
     public function companyList()
     {
-        $companies = Company::all()->map(function($company) {
+        $companies = Company::withCount('agents')->get()->map(function($company) {
             $groups = $this->groupList();
             $groupName = 'Staff';
             foreach($groups as $g) {
@@ -39,7 +39,8 @@ class CompanyController extends Controller
                 'id' => $company->id,
                 'name' => $company->company_name,
                 'group_name' => $groupName,
-                'source' => $company->source
+                'source' => $company->source,
+                'agents_count' => $company->agents_count
             ];
         })->toArray();
 
@@ -47,14 +48,8 @@ class CompanyController extends Controller
             $companies = array_slice($companies, 0, 2);
         }
 
-        // Total Agent Count calculation (simulated logic for list)
-        $totalAgentsCount = 0;
-        foreach ($companies as $c) {
-            $seed = crc32($c['id']);
-            mt_srand($seed);
-            $totalAgentsCount += mt_rand(6, 8);
-        }
-        mt_srand();
+        // Total Agent Count calculation
+        $totalAgentsCount = array_sum(array_column($companies, 'agents_count'));
 
         $allTasks = $this->getAllTasks();
         
@@ -217,10 +212,7 @@ class CompanyController extends Controller
         $totalScore = array_sum(array_column($companyTasks, 'score'));
         $avgQualityScore = $callsEvaluated > 0 ? round($totalScore / $callsEvaluated, 1) : 0;
         
-        $seed = crc32($id);
-        mt_srand($seed);
-        $activeAgents = mt_rand(6, 8);
-        mt_srand();
+        $activeAgents = $dbCompany->agents()->count();
 
         return view('user.company.company_details', [
             'company' => $company,

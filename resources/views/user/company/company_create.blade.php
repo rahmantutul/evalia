@@ -201,25 +201,25 @@
                                     </div>
                                     <div class="col-md-4">
                                         <label for="filler_words" class="form-label">Filler Words:</label>
-                                        <input type="text" class="form-control" id="filler_words" name="filler_words" value="um,uh,basically,honestly,you know,actually" placeholder="Type and press enter to add">
+                                        <input type="text" class="form-control" id="filler_words" name="filler_words" value="" placeholder="Type and press enter to add">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="main_topics" class="form-label">Main Topics:</label>
-                                        <input type="text" class="form-control" id="main_topics" name="main_topics" value="billing,technical_issue,feature_request,refund,account_access,order_status,cancellation,shipping_query"  placeholder="Type and press enter to add">
+                                        <input type="text" class="form-control" id="main_topics" name="main_topics" value=""  placeholder="Type and press enter to add">
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6    ">
                                         <label for="restricted_phrases" class="form-label">Restricted Phrases:</label>
-                                        <input type="text" class="form-control" id="restricted_phrases" name="restricted_phrases" value="I dont know,not my job,shutup,idiot,wait forever" placeholder="Phrases agents should avoid...">
+                                        <input type="text" class="form-control" id="restricted_phrases" name="restricted_phrases" value="" placeholder="Phrases agents should avoid...">
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <label for="call_types" class="form-label">Call Types:</label>
-                                        <input type="text" class="form-control" id="call_types" name="call_types" value="inbound_support,outbound_sales,complaint,general_inquiry,technical_assistance,callback_request"  placeholder="Type and press enter to add">
+                                        <input type="text" class="form-control" id="call_types" name="call_types" value=""  placeholder="Type and press enter to add">
                                     </div>
-                                    <div class="col-md-4">
+                                    {{-- <div class="col-md-4">
                                         <label for="source" class="form-label">Integration Sources:</label>
                                         <input type="text" class="form-control" id="source" name="source" placeholder="Select integration sources">
                                         <small class="text-muted">Choose from available integration sources.</small>
-                                    </div>
+                                    </div> --}}
                                     
                                     <div class="col-12">
                                         <label for="company_overview" class="form-label">Company Overview:</label>
@@ -500,7 +500,7 @@ TASK RULES:
             'filler_words', 'main_topics', 'call_types',
             'call_outcomes', 'agent_assessments_configs', 
             'agent_cooperation_configs', 'agent_performance_configs',
-            'restricted_phrases', 'source'
+            'restricted_phrases'/*, 'source'*/
         ];
         
         tagInputs.forEach(id => {

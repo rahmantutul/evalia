@@ -23,4 +23,18 @@ class Company extends Model
         'faq' => 'array',
     ];
 
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function agents()
+    {
+        return $this->hasMany(User::class)->where('user_type', User::TYPE_AGENT);
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
 }
