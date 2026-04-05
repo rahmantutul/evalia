@@ -223,7 +223,7 @@
                                     
                                     <div class="col-12">
                                         <label for="company_overview" class="form-label">Company Overview:</label>
-                                        <textarea class="form-control prompt-field" id="company_overview" name="company_overview" placeholder="Provide a brief overview of the company for AI context..." rows="3" readonly></textarea>
+                                        <textarea class="form-control prompt-field" id="company_overview" name="company_overview" placeholder="Provide a brief overview of the company" rows="3"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -248,6 +248,15 @@
 4. الالتزام بوقت الاستجابة المحدد (أقل من 30 ثانية لكل رد).
 5. في حال عدم معرفة الإجابة، يتم تصعيد التذكرة للقسم المختص بدلاً من تقديم معلومات مغلوطة.
 6. إنهاء المكالمة بجملة ترحيبية مهذبة والتأكد من رضا العميل.
+                                            </textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="company_risks" class="form-label">Company Risks :</label>
+                                            <textarea class="form-control prompt-field" id="company_risks" name="company_risks" placeholder="Enter risks to flag, one per line..." rows="6" readonly>
+1. العميل غاضب جداً ويهدد بتقديم شكوى رسمية.
+2. العميل يطلب استرداد مبلغ مالي غير مستحق.
+3. العميل يحاول الحصول على معلومات تخص عميل آخر.
+4. العميل يتحدث بلغة غير لائقة أو مسيئة.
                                             </textarea>
                                         </div>
                                         <div class="col-12">

@@ -85,6 +85,14 @@
                         </li>
                         @endcan
 
+                        {{-- Extracted Intelligence --}}
+                        <li class="nav-item {{ Route::is('user.extractions.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('user.extractions.agent-wise') ? 'active' : '' }}" href="{{ route('user.extractions.agent-wise') }}">
+                                <i class="fas fa-file-invoice menu-icon"></i>
+                                <span>Extracted Intelligence</span>
+                            </a>
+                        </li>
+
                         {{-- Agents --}}
                         @can('agents.view')
                         <li class="nav-item {{ Route::is('user.agents.*') ? 'active' : '' }}">
@@ -94,6 +102,14 @@
                             </a>
                         </li>
                         @endcan
+
+                        {{-- Voice Pint --}}
+                        <li class="nav-item {{ Route::is('user.voice-pint.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('user.voice-pint.*') ? 'active' : '' }}" href="{{ route('user.voice-pint.index') }}">
+                                <i class="fas fa-microphone-alt menu-icon"></i>
+                                <span>Voice Pint</span>
+                            </a>
+                        </li>
 
                     @endif
 

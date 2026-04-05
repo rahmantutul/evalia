@@ -21,6 +21,7 @@ use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TelephonyAccountController;
+use App\Http\Controllers\VoicePintController;
 use App\Http\Controllers\HamsaController;
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -191,6 +192,7 @@ Route::group(['middleware' => 'auth.api'], function () {
     Route::get('/user/task/list/{companyId}', [TaskController::class, 'TaskList'])->name('user.task.list');
     Route::get('/user/task/check-status/{taskId}', [TaskController::class, 'checkTaskStatus'])->name('user.task.checkStatus');
     Route::get('/user/company/evaluate/{id}', [TaskController::class, 'reEvaluateTask'])->name('user.company.evaluate');
+    Route::get('/user/extractions/agent-wise', [TaskController::class, 'agentWiseExtractions'])->name('user.extractions.agent-wise');
 
     // ─── Hamsa Job Lookup (JSON API) ───────────────────────────────
     // Pull raw Hamsa job by Hamsa job ID   → /api/hamsa/job/{jobId}
@@ -225,6 +227,14 @@ Route::group(['middleware' => 'auth.api'], function () {
     Route::get('/user/knowledgeBase/delete/{id}', [KnowledgeBaseController::class, 'knowledgeBaseDelete'])->name('user.knowledgeBase.delete');
     Route::get('/user/knowledgeBase/simulator', [KnowledgeBaseController::class, 'kbSimulator'])->name('user.knowledgeBase.simulator');
     Route::post('/user/knowledgeBase/simulator', [KnowledgeBaseController::class, 'kbSimulatorRun'])->name('user.knowledgeBase.simulator.run');
+
+    Route::prefix('voice-pint')->name('user.voice-pint.')->group(function () {
+        Route::get('/', [VoicePintController::class, 'index'])->name('index');
+        Route::post('/upload', [VoicePintController::class, 'upload'])->name('upload');
+        Route::get('/delete/{filename}', [VoicePintController::class, 'delete'])->name('delete');
+        Route::get('/clear-all', [VoicePintController::class, 'deleteAll'])->name('clear-all');
+        Route::get('/stream/{filename}', [VoicePintController::class, 'stream'])->name('stream');
+    });
 
     Route::prefix('telephony-accounts')->name('user.telephonyAccounts.')->group(function () {
         Route::get('/', [TelephonyAccountController::class, 'index'])->name('index');

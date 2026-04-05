@@ -97,6 +97,21 @@
         </script>
     @endif
 
+    @if($errors->any())
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: `<ul class="text-start small mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                       </ul>`,
+                confirmButtonText: 'Correct Errors'
+            });
+        </script>
+    @endif
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const switcher = document.querySelector('.bot-switcher');

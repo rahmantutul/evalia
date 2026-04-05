@@ -13,7 +13,7 @@
                         </div>
                         <div>
                             <h4 class="card-title mb-0 fw-bold text-dark">Stage 1: KB Identification Simulator</h4>
-                            <p class="text-muted mb-0 small">Test how GPT selects the right Knowledge Base entry from keywords</p>
+                            <p class="text-muted mb-0 small">Test how GPT selects Knowledge Base entries — one per Q/A pair</p>
                         </div>
                     </div>
                     <a href="{{ route('user.knowledgeBase.list') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
@@ -42,10 +42,10 @@
                                         @error('company_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
 
-                                    <div class="mb-4">
-                                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">2. Conversation Q/A or Transcription</label>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">2. Conversation Q/A or Transcription</label>     
                                         <textarea name="query_text" class="form-control border-0 bg-light shadow-sm rounded-3 @error('query_text') is-invalid @enderror" 
-                                            rows="10" placeholder="Paste a conversation snippet here... e.g. Customer: How do I return a faulty item? Agent: You can return it within 14 days if you have the receipt.">{{ $query_text ?? '' }}</textarea>
+                                            rows="12" placeholder="Customer: How do I return a faulty item?&#10;Agent: You can return it within 14 days with the receipt.&#10;&#10;Customer: What about store credit?&#10;Agent: We offer store credit for returns without a receipt.">{{ $query_text ?? '' }}</textarea>
                                         @error('query_text') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
 
@@ -70,13 +70,56 @@
                                                 <i class="fas fa-search-minus fa-3x text-warning"></i>
                                             </div>
                                             <h5 class="fw-bold">No Matches Found</h5>
-                                            <p class="text-muted">The AI could not confidently match this text to any defined Knowledge Base entries.</p>
+                                            <p class="text-muted">The AI could not confidently match any Q/A pair to a defined Knowledge Base entry.</p>
                                         </div>
                                     @else
-                                        <div class="alert alert-success border-0 rounded-3 mb-4 d-flex align-items-center">
+
+                                        {{-- ── Per-pair breakdown ── --}}
+                                        @if(!empty($pair_results))
+                                            <div class="mb-4">
+                                                <h6 class="fw-bold text-secondary mb-3">
+                                                    <i class="fas fa-list-ol me-2"></i>Pair-by-Pair Analysis
+                                                    <span class="badge bg-secondary ms-2">{{ count($pair_results) }} pair{{ count($pair_results) !== 1 ? 's' : '' }}</span>
+                                                </h6>
+
+                                                @foreach($pair_results as $pairIndex => $pair)
+                                                    <div class="card border-0 bg-light rounded-4 mb-2 overflow-hidden pair-card">
+                                                        <div class="card-header border-0 py-2 px-3 d-flex justify-content-between align-items-center
+                                                            {{ empty($pair['matched_kb_ids']) ? 'bg-soft-warning' : 'bg-soft-success' }}">
+                                                            <span class="fw-bold small">
+                                                                <i class="fas fa-comments me-1"></i> Pair #{{ $pairIndex + 1 }}
+                                                            </span>
+                                                            <div class="d-flex gap-1 flex-wrap">
+                                                                @if(empty($pair['matched_kb_ids']))
+                                                                    <span class="badge bg-warning text-dark small">No Match</span>
+                                                                @else
+                                                                    @foreach($pair['matched_kb_ids'] as $kbId)
+                                                                        @php
+                                                                            $matchedKb = collect($kb_mapping_sent)->firstWhere('id', $kbId);
+                                                                        @endphp
+                                                                        <span class="badge bg-success small">
+                                                                            <i class="fas fa-book me-1"></i>{{ $matchedKb['name'] ?? 'KB #'.$kbId }}
+                                                                        </span>
+                                                                    @endforeach
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-body py-2 px-3">
+                                                            <pre class="mb-0 small text-dark pair-text">{{ $pair['pair_text'] }}</pre>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+
+                                        {{-- ── Consolidated Selected KBs ── --}}
+                                        <div class="alert alert-success border-0 rounded-3 mb-3 d-flex align-items-center">
                                             <i class="fas fa-check-circle fa-2x me-3"></i>
                                             <div>
-                                                <div class="fw-bold">Match Successful!</div>
+                                                <div class="fw-bold">
+                                                    {{ count($results) }} Knowledge Base{{ count($results) !== 1 ? 's' : '' }} Selected for Evaluation
+                                                </div>
+                                                <div class="small">These KBs will be sent to the evaluation stage.</div>
                                             </div>
                                         </div>
 
@@ -87,11 +130,11 @@
                                                         <div class="fw-bold d-flex align-items-center">
                                                             <i class="fas fa-book me-2"></i> {{ $kb->title }}
                                                         </div>
-                                                        <span class="badge bg-primary rounded-pill px-3">NOTEBOOK SELECTED</span>
+                                                        <span class="badge bg-primary rounded-pill px-3">SELECTED FOR EVALUATION</span>
                                                     </div>
                                                     <div class="card-body">
                                                         <div class="mb-3">
-                                                            <div class="small fw-bold text-muted text-uppercase mb-1">Keywords Identified:</div>
+                                                            <div class="small fw-bold text-muted text-uppercase mb-1">Keywords:</div>
                                                             <div class="d-flex flex-wrap gap-1">
                                                                 @foreach(explode(',', $kb->keywords) as $kw)
                                                                     <span class="badge bg-white text-dark border small">{{ trim($kw) }}</span>
@@ -129,8 +172,11 @@
 <style>
     .bg-soft-primary { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
     .bg-soft-success { background-color: rgba(34, 197, 94, 0.1); color: #16a34a; }
-    .bg-soft-warning { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .bg-soft-warning { background-color: rgba(245, 158, 11, 0.1); color: #d97706; }
     .bg-soft-info    { background-color: rgba(6, 181, 212, 0.1); color: #0891b2; }
-    .shadow-inner   { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
+    .shadow-inner    { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
+    .pair-card       { transition: box-shadow .2s; }
+    .pair-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08) !important; }
+    .pair-text       { white-space: pre-wrap; word-break: break-word; font-family: inherit; font-size: .82rem; }
 </style>
 @endsection

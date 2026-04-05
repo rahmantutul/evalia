@@ -145,8 +145,28 @@
                     </div>
 
                     @if(session('error'))
-                        <div class="alert alert-danger border-0 rounded" role="alert">
-                            <i class="fas fa-exclamation-triangle me-2"></i>{{ session('error') }}
+                        <div class="alert alert-danger border-0 rounded-3 shadow-sm mb-4" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle me-3 fs-4 text-danger"></i>
+                                <div>
+                                    <h6 class="alert-heading fw-bold mb-1">System Error</h6>
+                                    <p class="mb-0 small">{{ session('error') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($errors->any())
+                        <div class="alert alert-danger border-0 rounded-3 shadow-sm mb-4" role="alert">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-hand-paper me-3 fs-4 text-danger"></i>
+                                <h6 class="alert-heading fw-bold mb-0">Please Correct the Following:</h6>
+                            </div>
+                            <ul class="mb-0 small ps-5">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
                         </div>
                     @endif
 

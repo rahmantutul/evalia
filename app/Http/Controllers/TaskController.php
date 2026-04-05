@@ -294,51 +294,35 @@ class TaskController extends Controller
             $audioFile = $request->file('audio_file');
             $filename  = time() . '_' . Str::slug(pathinfo($audioFile->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $audioFile->getClientOriginalExtension();
 
-            Log::info("[TaskStore] Uploading audio to S3: tasks/audios/{$filename}", [
-                'size'      => $audioFile->getSize(),
-                'mime'      => $audioFile->getMimeType(),
-                'original'  => $audioFile->getClientOriginalName(),
-            ]);
 
             // Upload to S3 — storeAs returns the path string on success, false on failure
             $uploadResult = $audioFile->storeAs('tasks/audios', $filename, 's3');
 
             if ($uploadResult === false || empty($uploadResult)) {
-                Log::error("[TaskStore] S3 upload failed for file: {$filename}");
                 return back()->with('error', 'Audio file upload to storage failed. Please check your AWS credentials and bucket settings, then try again.');
             }
 
             $path = $uploadResult; // e.g. "tasks/audios/1234567890_call.mp3"
-            Log::info("[TaskStore] S3 upload successful. audio_path: {$path}");
 
             // Generate a short-lived URL for Hamsa to process
             try {
                 $mediaUrl = Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(60));
             } catch (\Exception $e) {
-                Log::error("[TaskStore] Could not generate S3 temp URL: " . $e->getMessage());
                 return back()->with('error', 'Audio uploaded but could not generate processing URL. Please try again.');
             }
 
             // Start new Hamsa transcription job
             $jobResponse = $this->hamsa->createTranscriptionJob($mediaUrl, 'Task Audio: ' . $audioFile->getClientOriginalName(), 'ar');
             if (!$jobResponse['success']) {
-                Log::error("[TaskStore] Hamsa job creation failed.", ['response' => $jobResponse]);
                 return back()->with('error', 'Hamsa Job Creation failed: ' . ($jobResponse['error'] ?? 'Unknown error'));
             }
             $jobId = $jobResponse['jobId'];
-            Log::info("[TaskStore] Hamsa job created: {$jobId}");
         }
-
-        Log::info("[TaskStore] Waiting for Hamsa job completion: {$jobId}");
-
         try {
             $details = $this->hamsa->waitForCompletion($jobId, 300, 5);
         } catch (\Exception $e) {
-            Log::error('[TaskStore] Hamsa processing failed: ' . $e->getMessage());
             return back()->with('error', 'Processing failed: ' . $e->getMessage());
         }
-
-        // ── Step 3: Parse result and save to DB ───────────────────────
         $resultData   = $details['result'] ?? [];
         $text         = $resultData['transcription'] ?? ($resultData['text'] ?? '');
         $conversation = $this->hamsa->extractConversation($resultData);
@@ -346,7 +330,7 @@ class TaskController extends Controller
         $task = Task::create([
             'company_id'    => $companyId,
             'agent_id'      => $agentId,
-            'audio_path'    => $path,   // Dedicated column — always set if audio was uploaded
+            'audio_path'    => $path,
             'transcription' => $text,
             'analysis'      => [
                 'jobId'            => $jobId,
@@ -354,9 +338,6 @@ class TaskController extends Controller
                 'hamsa_full_data'  => $details['data'] ?? [],
                 'conversation'     => $conversation,
                 'processed_at'     => now()->toDateTimeString(),
-                // ── Redundant backup of audio path inside JSON ──────────
-                // This guarantees audio can always be found even if the
-                // dedicated column is somehow NULL in a future migration.
                 'audio_path'       => $path,
             ],
             'status'    => 'transcribed',
@@ -369,24 +350,17 @@ class TaskController extends Controller
             'duration'  => $this->calculateDuration($conversation),
         ]);
 
-        Log::info("[TaskStore] Task #{$task->id} created. audio_path='{$path}'");
-
-        // ── Step 4: Automate GPT Evaluation ─────────────────────────
         try {
-            Log::info("[TaskStore] Triggering automated GPT analysis for task: {$task->id}");
             $this->performEvaluation($task->id);
             return redirect()->route('user.task.details', $task->id)
                 ->with('success', 'Analysis completed automatically! Your report is ready.');
         } catch (\Exception $e) {
-            Log::error("[TaskStore] Automated GPT analysis failed: " . $e->getMessage());
             return redirect()->route('user.task.details', $task->id)
                 ->with('success', 'Audio transcribed! (AI Analysis failed, you can retry manually)');
         }
     }
 
-    /**
-     * AJAX endpoint to check task status
-     */
+
     public function checkTaskStatus($taskId)
     {
         $task = Task::find($taskId);
@@ -413,14 +387,11 @@ class TaskController extends Controller
 
             if ($details['success']) {
                 $hamsaStatus = strtoupper($details['status']);
-                Log::info('Hamsa Job ' . $jobId . ' status: ' . $hamsaStatus);
                 
                 if ($hamsaStatus === 'COMPLETED' || $hamsaStatus === 'SUCCESSFUL') {
                     $transcriptionData = $details['result'];
                     $text = $transcriptionData['transcription'] ?? ($transcriptionData['text'] ?? '');
                     $conversation = $this->hamsa->extractConversation($transcriptionData);
-
-                    Log::info('Updating task ' . $task->id . ' with transcription.');
 
                     // Update Task
                     $task->update([
@@ -469,6 +440,7 @@ class TaskController extends Controller
 
     public function reEvaluateTask($id)
     {
+        set_time_limit(0);
         try {
             $this->performEvaluation($id);
             return redirect()->route('user.task.details', $id)->with('success', 'Evaluation completed successfully!');
@@ -479,14 +451,20 @@ class TaskController extends Controller
     }
 
     /**
-     * Centralized method to run GPT evaluation on a task
+     * Centralized method to run GPT evaluation on a task.
+     *
+     * Stage 1 — splits the transcript into Q/A pairs and matches each pair
+     *            to a KB independently (so different pairs can reference
+     *            different KBs).
+     * Stage 2 — sends the full transcript + pair-aware KB context to GPT.
      */
     private function performEvaluation($taskId)
     {
+        set_time_limit(0);
         $task = \App\Models\Task::find($taskId);
         if (!$task) throw new Exception("Task not found");
 
-        // --- STAGE 1: Identify Matched Knowledge Bases ---
+        // ── Load KB entries for this company ─────────────────────────────
         $kbEntries = \App\Models\KnowledgeBase::where('company_id', $task->company_id)
             ->where('is_active', true)
             ->select(['id', 'title', 'keywords', 'content'])
@@ -501,46 +479,104 @@ class TaskController extends Controller
             ];
         }
 
+        // ── Build formatted transcript ────────────────────────────────────
         $conversation = $task->analysis['conversation'] ?? [];
-        $transcriptFormatted = "";
+        $transcriptFormatted = '';
         foreach ($conversation as $turn) {
             $speaker = $turn['speaker'] ?? 'Unknown';
-            $text    = $turn['text'] ?? '';
+            $text    = $turn['text']    ?? '';
             $transcriptFormatted .= "{$speaker}: {$text}\n";
         }
-        if (empty($transcriptFormatted)) $transcriptFormatted = $task->transcription;
+        if (empty($transcriptFormatted)) {
+            $transcriptFormatted = $task->transcription;
+        }
 
-        Log::info("Stage 1: Identifying matching KB entries for task {$task->id}");
-        $matchedIndices = $this->openai->identifyMatchedKnowledgeBase($transcriptFormatted, $kbMapping);
-        
-        // --- STAGE 2: Deep Evaluation with Full Details ---
-        $kbContext = "";
-        if (!empty($matchedIndices)) {
-            $matchedIds = [];
+        $pairs = $this->splitTranscriptIntoPairs($transcriptFormatted);
+
+        $collectedKbIds = []; 
+        $pairResults    = []; 
+
+        foreach ($pairs as $pairText) {
+            if (!empty($kbMapping)) {
+                $matchedIndices = $this->openai->identifyMatchedKnowledgeBase($pairText, $kbMapping);
+            } else {
+                $matchedIndices = [];
+            }
+
+            $pairKbIds = [];
             foreach ($matchedIndices as $index) {
                 if (isset($kbMapping[$index])) {
-                    $matchedIds[] = $kbMapping[$index]['id'];
+                    $id = $kbMapping[$index]['id'];
+                    $pairKbIds[] = $id;
+                    if (!in_array($id, $collectedKbIds)) {
+                        $collectedKbIds[] = $id;
+                    }
                 }
             }
-            
-            $fullMatchedKBs = $kbEntries->whereIn('id', $matchedIds);
-            foreach ($fullMatchedKBs as $kb) {
-                $kbContext .= "=== NOTEBOOK: {$kb->title} ===\n{$kb->content}\n\n";
+
+            $pairResults[] = [
+                'pair_text'      => $pairText,
+                'matched_kb_ids' => $pairKbIds,
+            ];
+        }
+
+        Log::info("[Stage 1] Matched KB IDs across all pairs: " . implode(', ', $collectedKbIds));
+
+        // ── STAGE 2: Build pair-aware KB context for the evaluator ────────
+        //
+        // Format fed to GPT:
+        //
+        //   === NOTEBOOK: Return Policy ===
+        //   <content>
+        //   Reference Pairs:
+        //     Pair 1: Customer: ... / Agent: ...
+        //
+        //   === NOTEBOOK: Pricing Plans ===
+        //   <content>
+        //   Reference Pairs:
+        //     Pair 2: Customer: ... / Agent: ...
+        //
+        // This lets GPT know exactly which part of the transcript to check
+        // against which KB entry.
+
+        $kbContext = '';
+
+        foreach ($collectedKbIds as $kbId) {
+            $kb = $kbEntries->firstWhere('id', $kbId);
+            if (!$kb) continue;
+
+            $kbContext .= "=== NOTEBOOK: {$kb->title} ===\n";
+            $kbContext .= $kb->content . "\n";
+            $kbContext .= "Reference Pairs:\n";
+
+            foreach ($pairResults as $pairIndex => $pair) {
+                if (in_array($kbId, $pair['matched_kb_ids'])) {
+                    $shortPair = mb_substr(trim($pair['pair_text']), 0, 300);
+                    $kbContext .= "  Pair " . ($pairIndex + 1) . ": " . $shortPair . "\n";
+                }
             }
+
+            $kbContext .= "\n";
         }
 
         if (empty($kbContext)) {
             $kbContext = "No specific knowledge base content matched this conversation.";
         }
 
-        // 2. Get Company Policies — filter out empty/placeholder lines
+        // 2. Get Company Policies & Risks — filter out empty/placeholder lines
         $company      = \App\Models\Company::find($task->company_id);
         $rawPolicies  = $company->company_policies ?? [];
+        $rawRisks     = $company->company_risks ?? [];
 
-        // Strip blank entries and obvious placeholders like "Policy 1", "Policy 2"
+        // Strip blank entries and obvious placeholders
         $policies = array_values(array_filter($rawPolicies, function ($p) {
             $p = trim((string) $p);
             return strlen($p) > 5 && !preg_match('/^policy\s*\d+$/i', $p);
+        }));
+
+        $risks = array_values(array_filter($rawRisks, function ($p) {
+            $p = trim((string) $p);
+            return strlen($p) > 5 && !preg_match('/^risk\s*\d+$/i', $p);
         }));
 
         // Build extra company context to help GPT understand evaluation scope
@@ -558,8 +594,20 @@ class TaskController extends Controller
             }
         }
 
-        Log::info("[performEvaluation] Task #{$task->id} — Policies count: " . count($policies), [
+        // 3. Get Extractions for this agent
+        $extractions = [];
+        $rawExtractionGroups = $company->data_extraction_config ?? [];
+        foreach ($rawExtractionGroups as $group) {
+            // Check if this task's agent is in the group of agents for these extractions
+            if (isset($group['agent_ids']) && is_array($group['agent_ids']) && in_array($task->agent_id, $group['agent_ids'])) {
+                $extractions = array_merge($extractions, $group['extractions'] ?? []);
+            }
+        }
+
+        Log::info("[performEvaluation] Task #{$task->id} — Policies count: " . count($policies) . ", Risks count: " . count($risks) . ", Extractions count: " . count($extractions), [
             'policies' => $policies,
+            'risks' => $risks,
+            'extractions' => $extractions,
             'company_context' => $companyContext,
         ]);
 
@@ -568,7 +616,9 @@ class TaskController extends Controller
             $transcriptFormatted,
             $kbContext,
             $policies,
-            $companyContext
+            $companyContext,
+            $risks,
+            $extractions
         );
 
         // 4. Update task analysis with GPT result
@@ -616,17 +666,94 @@ class TaskController extends Controller
             ];
         }
 
-        $analysis['kb_mapping_used'] = $kbContext;
-        $analysis['gpt_evaluation'] = $gptResponse;
+        $analysis['kb_mapping_used']  = $kbContext;
+        $analysis['kb_pair_results']   = $pairResults;  // pair-level KB breakdown
+        $analysis['gpt_evaluation']    = $gptResponse;
+
+        // Calculate average score from the 3 sections
+        $scores = [
+            $gptResponse['agent_professionalism']['total_score']['percentage'] ?? 0,
+            $gptResponse['agent_assessment']['total_score']['percentage'] ?? 0,
+            $gptResponse['agent_cooperation']['total_score']['percentage'] ?? 0,
+        ];
+        $overallScore = count($scores) > 0 ? (array_sum($scores) / count($scores)) : 0;
+
+        // Determine dominant sentiment for the overall task summary
+        $counts = ['Positive' => 0, 'Neutral' => 0, 'Negative' => 0];
+        foreach ($allTranscripts as $t) {
+            $s = ucfirst(strtolower(trim($t['sentiment'] ?? 'Neutral')));
+            if (isset($counts[$s])) $counts[$s]++;
+        }
+        arsort($counts);
+        $taskSentiment = key($counts);
 
         $task->update([
             'status'    => 'evaluated',
-            'score'     => $gptResponse['score'] ?? 0,
+            'score'     => round($overallScore),
+            'sentiment' => $taskSentiment,
             'risk_flag' => $gptResponse['risk_flag'] ?? 'No',
             'analysis'  => $analysis
         ]);
 
         return true;
+    }
+
+    /**
+     * Split a formatted transcript into Q/A pairs.
+     *
+     * Strategy (same as KnowledgeBaseController::splitIntoPairs):
+     *  1. Split on blank lines — each block is one pair.
+     *  2. Detect speaker-tagged lines (Customer/Agent/Speaker N) and group exchanges.
+     *  3. Fall back to treating the whole transcript as one pair.
+     */
+    private function splitTranscriptIntoPairs(string $text): array
+    {
+        // Method 1: blank-line delimited blocks
+        $blocks = preg_split('/\n[\s]*\n/', trim($text));
+        $blocks = array_values(array_filter(array_map('trim', $blocks)));
+
+        if (count($blocks) >= 2) {
+            return $blocks;
+        }
+
+        // Method 2: speaker-tagged lines
+        $lines  = explode("\n", trim($text));
+        $pairs  = [];
+        $buffer = [];
+        $seenCustomer = false;
+
+        foreach ($lines as $line) {
+            $isCustomerLine = preg_match('/^(?:Customer|User|Q|عميل|Speaker\s*0)\s*:/i', trim($line));
+            $isAgentLine    = preg_match('/^(?:Agent|Assistant|A|وكيل|Speaker\s*1)\s*:/i', trim($line));
+
+            // New customer turn → flush previous pair
+            if ($isCustomerLine && $seenCustomer && !empty($buffer)) {
+                $pairs[]      = implode("\n", $buffer);
+                $buffer       = [];
+                $seenCustomer = false;
+            }
+
+            if ($isCustomerLine) {
+                $seenCustomer = true;
+            }
+
+            $buffer[] = $line;
+
+            // After agent reply → close the pair
+            if ($isAgentLine && $seenCustomer) {
+                $pairs[]      = implode("\n", $buffer);
+                $buffer       = [];
+                $seenCustomer = false;
+            }
+        }
+
+        if (!empty($buffer)) {
+            $pairs[] = implode("\n", $buffer);
+        }
+
+        $pairs = array_values(array_filter(array_map('trim', $pairs)));
+
+        return !empty($pairs) ? $pairs : [trim($text)];
     }
 
     public function getTaskStatus($companyId)
@@ -1108,5 +1235,68 @@ class TaskController extends Controller
         }
         
         return $result;
+    }
+
+    public function agentWiseExtractions(Request $request)
+    {
+        $user = auth()->user();
+        
+        // Fetch all agents possible
+        $query = User::where('user_type', User::TYPE_AGENT);
+        if ($user->company_id && !$user->isAdmin()) {
+            $query->where('company_id', $user->company_id);
+        }
+        $agents = $query->get();
+
+        // Get selected agent ID - now defaults to 'all'
+        $selectedAgentId = $request->get('agent_id', 'all');
+
+        // Fetch tasks with evaluations 
+        $taskQuery = Task::where('status', 'evaluated')
+            ->whereNotNull('analysis')
+            ->where('analysis', 'like', '%extracted_data%')
+            ->with('agent')
+            ->orderByDesc('created_at');
+            
+        // Filter by specific agent if requested
+        if ($selectedAgentId !== 'all') {
+            $taskQuery->where('agent_id', $selectedAgentId);
+        }
+
+        // Filter by company ONLY IF the user is restricted
+        if ($user->company_id && !$user->isAdmin()) {
+            $taskQuery->where('company_id', $user->company_id);
+        }
+
+        $tasks = $taskQuery->get();
+
+        // Prepare data for the view
+        $extractions = [];
+        foreach ($tasks as $task) {
+            $extractedData = $task->analysis['gpt_evaluation']['extracted_data'] ?? [];
+            if (empty($extractedData)) {
+                $extractedData = $task->analysis['extracted_data'] ?? [];
+            }
+            
+            if (!empty($extractedData)) {
+                $extractions[] = [
+                    'task_id'    => $task->id,
+                    'agent_id'   => $task->agent_id,
+                    'agent_name' => $task->agent?->name ?? 'Unknown',
+                    'created_at' => $task->created_at->toDateTimeString(),
+                    'data'       => $extractedData,
+                    'duration'   => $task->duration,
+                    'sentiment'  => $task->sentiment,
+                    'score'      => $task->score,
+                ];
+            }
+        }
+
+        return view('user.extractions.agent_wise', [
+            'agents'          => $agents,
+            'selectedAgentId' => $selectedAgentId,
+            'extractions'     => $extractions,
+            'selectedAgent'   => $selectedAgentId !== 'all' ? User::find($selectedAgentId) : null
+        ]);
     }
 }

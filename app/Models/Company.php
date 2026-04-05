@@ -14,6 +14,7 @@ class Company extends Model
         'call_types' => 'array',
         'call_outcomes' => 'array',
         'company_policies' => 'array',
+        'company_risks' => 'array',
         'agent_assessments_configs' => 'array',
         'agent_cooperation_configs' => 'array',
         'agent_performance_configs' => 'array',
@@ -21,6 +22,7 @@ class Company extends Model
         'restricted_phrases' => 'array',
         'source' => 'array',
         'faq' => 'array',
+        'data_extraction_config' => 'array',
     ];
 
     public function users()

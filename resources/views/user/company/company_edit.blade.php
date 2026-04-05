@@ -134,6 +134,23 @@
         .form-section:nth-child(4) { animation-delay: 0.4s; }
         .form-section:nth-child(5) { animation-delay: 0.5s; }
         .form-section:nth-child(6) { animation-delay: 0.6s; }
+        
+        .animate-fade {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        .animate-highlight {
+            animation: highlightPulse 1.5s ease-out;
+        }
+        
+        @keyframes highlightPulse {
+            0% { background-color: rgba(10, 102, 194, 0.05); }
+            100% { background-color: transparent; }
+        }
+        
+        .fs-7 { font-size: 0.875rem; }
+        .fs-8 { font-size: 0.75rem; }
+        .italic { font-style: italic; }
     </style>
     <style>
     .icon-wrapper {
@@ -153,22 +170,30 @@
             <div class="col-lg-10">
                 <div class="card">
                     <div class="card-header border-0" style="background: linear-gradient(135deg, #efefef 0%, #eef2f6 100%)">
-                        <div class="d-flex align-items-center">
-                            <div class="icon-wrapper bg-white shadow-sm rounded-3 p-3 me-3">
-                                <i class="fas fa-building-circle-arrow-right text-primary fs-4"></i>
+                        <div class="d-flex align-items-center justify-content-between w-100">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-wrapper bg-white shadow-sm rounded-3 p-3 me-3">
+                                    <i class="fas fa-building-circle-arrow-right text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h3 class="mb-0 text-dark fw-semibold">Company Settings</h3>
+                                    <p class="text-muted mb-0 fs-7">Update your company settings with our premium service</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="mb-0 text-dark fw-semibold">Company Settings</h3>
-                                <p class="text-muted mb-0 fs-7">Update your company settings with our premium service</p>
-                            </div>
+                            <button type="button" class="btn btn-primary px-4 py-2 shadow-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#dataExtractionModal">
+                                <i class="bi bi-cpu me-2"></i>AI Extraction Intelligence 
+                                @php $totalRules = 0; if(!empty($company->data_extraction_config)) { foreach($company->data_extraction_config as $g) { $totalRules += count($g['extractions'] ?? []); } } @endphp
+                                @if($totalRules > 0)
+                                    <span class="badge bg-white text-dark ms-1" style="font-size: 0.65rem;">{{ $totalRules }} Rules</span>
+                                @endif
+                            </button>
                         </div>
                     </div>
                     <div class="card-body p-4">
-                        <form id="companyRegistrationForm" method="PUT" action="{{ route('user.company.update', $company['id'])}}" class="needs-validation" novalidate>
+                        <form id="companyRegistrationForm" method="POST" action="{{ route('user.company.update', $company['id'])}}" class="needs-validation" novalidate>
                             @csrf
-                            @if(isset($company))
-                                @method('PUT')
-                            @endif
+                            @method('PUT')
+                            <input type="hidden" name="data_extraction_config" id="data_extraction_config_input" value="{{ json_encode($company->data_extraction_config ?? []) }}">
                             <div class="form-section">
                                 <h4 class="section-title"><i class="bi bi-gear icon-title"></i>Content Configuration</h4>
                                 <div class="row g-3">
@@ -223,7 +248,7 @@
                                     </div> --}}
                                     <div class="col-12">
                                         <label for="company_overview" class="form-label">Company Overview:</label>
-                                        <textarea class="form-control prompt-field" id="company_overview" name="company_overview" placeholder="Provide a brief overview of the company for AI context..." rows="3" readonly>{{ !empty($company['company_overview']) ? $company['company_overview'] : 'A leading provider of cloud-based enterprise solutions, specializing in AI-driven customer support and technical infrastructure management worldwide.' }}</textarea>
+                                        <textarea class="form-control prompt-field" id="company_overview" name="company_overview" placeholder="Provide a brief overview of the company" rows="3" >{{ !empty($company['company_overview']) ? $company['company_overview'] : 'A leading provider of cloud-based enterprise solutions, specializing in AI-driven customer support and technical infrastructure management worldwide.' }}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -249,6 +274,15 @@
 "4. الالتزام بوقت الاستجابة المحدد (أقل من 30 ثانية لكل رد).",
 "5. في حال عدم معرفة الإجابة، يتم تصعيد التذكرة للقسم المختص بدلاً من تقديم معلومات مغلوطة.",
 "6. إنهاء المكالمة بجملة ترحيبية مهذبة والتأكد من رضا العميل."
+                                            ]) : '' }}</textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="company_risks" class="form-label">Company Risks :</label>
+                                            <textarea class="form-control prompt-field" id="company_risks" name="company_risks" placeholder="Enter risks to flag, one per line..." rows="6" readonly>{{ isset($company) ? implode("\n", $company['company_risks'] ?? [
+"1. العميل غاضب جداً ويهدد بتقديم شكوى رسمية.",
+"2. العميل يطلب استرداد مبلغ مالي غير مستحق.",
+"3. العميل يحاول الحصول على معلومات تخص عميل آخر.",
+"4. العميل يتحدث بلغة غير لائقة أو مسيئة."
                                             ]) : '' }}</textarea>
                                         </div>
                                         <div class="col-12">
@@ -412,12 +446,47 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
 
                             <div class="d-grid gap-2 d-md-flex justify-content-between mt-4">
                                 <a class="btn btn-primary" href="{{ route('user.support') }}"> Need any help?</a>
-                                <button type="submit" class="btn btn-primary px-4 py-2">
-                                    <i class="bi bi-save me-2"></i>Update Company
-                                </button>
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">
+                                        <i class="bi bi-save me-2"></i>Update Company
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Minimalist Data Extraction Modal -->
+<div class="modal fade" id="dataExtractionModal" tabindex="-1" aria-labelledby="dataExtractionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="bg-primary p-3 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center text-white">
+                    <i class="bi bi-cpu-fill me-2 fs-5"></i>
+                    <h6 class="modal-title mb-0 fw-bold text-black">AI Extraction Intelligence</h6>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-0 bg-light" style="max-height: 70vh; overflow-y: auto;">
+                <div class="p-4">
+                    <div id="extraction-configs-container" class="d-flex flex-column gap-4">
+                        <!-- Rule sets will appear as premium cards here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-3 border-top bg-white d-flex justify-content-between align-items-center">
+                <small class="text-muted italic">Changes are saved immediately to the database.</small>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-light px-3 rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-primary px-4 fw-bold rounded-pill shadow-sm" id="save-extraction-configs">
+                        Save Config
+                    </button>
                 </div>
             </div>
         </div>
@@ -429,6 +498,198 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
 <script>
     window.tagifyInstances = {};
     document.addEventListener('DOMContentLoaded', function() {
+        // Pass company agents to JS
+        const companyAgents = @json($companyAgents->map(fn($a) => ['id' => $a->id, 'value' => $a->name, 'email' => $a->email]));
+        let extractionConfigs = @json($company->data_extraction_config ?? []);
+
+        // Initial hidden input for the config
+        const configInput = document.getElementById('data_extraction_config_input');
+
+        const extractionContainer = document.getElementById('extraction-configs-container');
+        let groupCounter = 0;
+
+        function createExtractionRule(groupId, rule = {type: 'string', description: ''}) {
+            const ruleId = Math.random().toString(36).substr(2, 9);
+            const div = document.createElement('div');
+            div.className = 'extraction-rule d-flex gap-2 mb-2 animate-fade';
+            
+            div.innerHTML = `
+                <div class="bg-light rounded-3 p-2 flex-grow-1 border">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-3">
+                            <select class="form-select form-select-sm border-0 bg-transparent text-primary fw-bold rule-type">
+                                <option value="string" ${rule.type === 'string' ? 'selected' : ''}>Text</option>
+                                <option value="integer" ${rule.type === 'integer' ? 'selected' : ''}>Number</option>
+                                <option value="boolean" ${rule.type === 'boolean' ? 'selected' : ''}>Yes/No</option>
+                                <option value="date" ${rule.type === 'date' ? 'selected' : ''}>Date</option>
+                                <option value="json" ${rule.type === 'json' ? 'selected' : ''}>JSON</option>
+                            </select>
+                        </div>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control form-control-sm border-0 bg-transparent rule-description" placeholder="Description..." value="${rule.description}">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm text-danger remove-rule-btn px-2">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+            `;
+
+            div.querySelector('.remove-rule-btn').addEventListener('click', () => {
+                div.style.opacity = '0';
+                setTimeout(() => div.remove(), 200);
+            });
+            
+            return div;
+        }
+
+        function createExtractionGroup(groupData = {agent_ids: [], extractions: []}) {
+            const groupIdx = ++groupCounter;
+            const groupId = `group_${groupIdx}`;
+            const div = document.createElement('div');
+            div.className = 'extraction-group bg-white border-0 rounded-4 shadow-sm overflow-hidden animate-fade';
+            
+            div.innerHTML = `
+                <div class="p-3 border-bottom bg-white">
+                    <div class="w-100">
+                        <label class="form-label fs-8 text-uppercase fw-bold text-muted mb-1">Assign to Agents</label>
+                        <div class="w-100"><input class="agent-selector-input"></div>
+                    </div>
+                </div>
+                <div class="p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <label class="form-label fw-bold text-dark mb-0">Extraction Requirements</label>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-rule-btn">
+                            <i class="bi bi-plus-lg me-1"></i>Add Rule
+                        </button>
+                    </div>
+                    <div class="rules-container d-flex flex-column gap-2"></div>
+                </div>
+            `;
+
+            const rulesContainer = div.querySelector('.rules-container');
+            const addRuleBtn = div.querySelector('.add-rule-btn');
+            const agentInput = div.querySelector('.agent-selector-input');
+
+            const tagify = new Tagify(agentInput, {
+                whitelist: companyAgents,
+                enforceWhitelist: true,
+                dropdown: { enabled: 0, maxItems: 5, mapValueTo: 'value', searchKeys: ['value'] }
+            });
+
+            if (groupData.agent_ids && groupData.agent_ids.length > 0) {
+                const selectedAgents = companyAgents.filter(a => groupData.agent_ids.includes(a.id));
+                tagify.addTags(selectedAgents);
+            }
+
+            div.tagify = tagify;
+
+            addRuleBtn.addEventListener('click', () => rulesContainer.appendChild(createExtractionRule(groupId)));
+
+            if (groupData.extractions && groupData.extractions.length > 0) {
+                groupData.extractions.forEach(rule => rulesContainer.appendChild(createExtractionRule(groupId, rule)));
+            } else {
+                rulesContainer.appendChild(createExtractionRule(groupId));
+            }
+
+            extractionContainer.appendChild(div);
+        }
+
+        // Initialize from existing or create fresh
+        if (extractionConfigs && extractionConfigs.length > 0) {
+            extractionConfigs.forEach(group => createExtractionGroup(group));
+        } else {
+            createExtractionGroup();
+        }
+
+        document.getElementById('save-extraction-configs').addEventListener('click', async () => {
+            const groups = [];
+            document.querySelectorAll('.extraction-group').forEach(groupDiv => {
+                const agentIds = groupDiv.tagify.value.map(tag => tag.id);
+                const extractions = [];
+                groupDiv.querySelectorAll('.extraction-rule').forEach(ruleDiv => {
+                    const type = ruleDiv.querySelector('.rule-type').value;
+                    const description = ruleDiv.querySelector('.rule-description').value.trim();
+                    if (description) {
+                        extractions.push({ type, description });
+                    }
+                });
+
+                if (agentIds.length > 0 && extractions.length > 0) {
+                    groups.push({ agent_ids: agentIds, extractions });
+                }
+            });
+
+            // Update local hidden input for form persistence
+            configInput.value = JSON.stringify(groups);
+            
+            const saveBtn = document.getElementById('save-extraction-configs');
+            const originalHtml = saveBtn.innerHTML;
+            
+            try {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+
+                // Direct AJAX save to the database
+                const response = await fetch("{{ route('user.company.update', $company['id']) }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        _method: 'PUT',
+                        data_extraction_config: JSON.stringify(groups)
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) throw new Error(result.message || 'Failed to save configuration');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Configuration Saved!',
+                    text: 'AI Extraction rules have been updated successfully in the database.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+                // Update the badge on the main page
+                const badge = document.querySelector('.btn-primary .badge');
+                let totalRules = 0;
+                groups.forEach(g => totalRules += g.extractions.length);
+
+                if (totalRules > 0) {
+                    if (badge) {
+                        badge.textContent = `${totalRules} Rules`;
+                    } else {
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'badge bg-white text-primary ms-1';
+                        newBadge.style.fontSize = '0.65rem';
+                        newBadge.textContent = `${totalRules} Rules`;
+                        document.querySelector('[data-bs-target="#dataExtractionModal"]').appendChild(newBadge);
+                    }
+                } else if (badge) {
+                    badge.remove();
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('dataExtractionModal')).hide();
+
+            } catch (error) {
+                console.error('Save error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Save Failed',
+                    text: error.message
+                });
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalHtml;
+            }
+        });
+
         // Initialize Tagify for tag inputs
         const tagInputs = [
             'filler_words', 'main_topics', 'call_types',

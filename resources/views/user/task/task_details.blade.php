@@ -34,15 +34,17 @@
         }
 
         .card {
-            border: 1px solid rgba(0, 0, 0, .125);
-            border-radius: 0.5rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid #e8edf2;
+            border-radius: 14px;
+            box-shadow: 0 1px 6px rgba(99,102,241,0.07);
+            background: #fff;
         }
 
         .card-header {
-            background-color: rgba(0, 0, 0, 0.03);
-            border-bottom: 1px solid rgba(0, 0, 0, .125);
+            background: #fff;
+            border-bottom: 1px solid #e8edf2;
             padding: 0.75rem 1.25rem;
+            border-radius: 14px 14px 0 0 !important;
         }
 
         .info-icon {
@@ -104,8 +106,8 @@
                 </div>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <a href="{{ route('user.company.evaluate', $workId) }}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
-                    <i class="fas fa-robot me-2"></i> Run AI Analysis
+                <a href="{{ route('user.company.evaluate', $workId) }}" class="btn btn-outline-primary rounded-pill px-4 shadow-sm fw-bold">
+                    <i class="fas fa-sync-alt me-2"></i> {{ $status === 'evaluated' ? 'Re-evaluate ' : 'Run AI Analysis' }}
                 </a>
             </div>
         </div>
@@ -119,6 +121,15 @@
                 $policyCompliance = $data['gpt_evaluation']['policy_compliance']
                     ?? $data['policy_compliance']
                     ?? [];
+
+                // Resolve risk_assessment similarly
+                $riskAssessment = $data['gpt_evaluation']['risk_assessment']
+                    ?? $data['risk_assessment']
+                    ?? [];
+                
+                $riskFlag = $data['gpt_evaluation']['risk_flag']
+                    ?? $data['risk_flag']
+                    ?? 'No';
 
                 // If GPT evaluation has notebook results, use them
                 if (isset($data['gpt_evaluation']['notebook_analysis'])) {
@@ -164,14 +175,64 @@
                         ? round((($agentSentiments['Negative'] + $customerSentiments['Negative']) / $total) * 100)
                         : 0;
 
-                // Set default values if not present in data
-                $agentPace = round($data['pace']['agent_pace'] ?? 0);
-                $customerPace = round($data['pace']['customer_pace'] ?? 0);
-                $lowLoudness = $data['speaker_loudness']['agent']['lower_loudness_percentage'] ?? 0;
-                $optimalLoudness = $data['speaker_loudness']['agent']['optimal_loudness_percentage'] ?? 0;
-                $highLoudness = $data['speaker_loudness']['agent']['upper_loudness_percentage'] ?? 0;
+                // ─ Per-turn Speech Rate (most accurate WPM) ────────────────────────
+                // Uses each utterance's own start/end timestamps, not aggregate talking time
+                $agentWordCount = 0; $agentTurnMins = 0;
+                $customerWordCount = 0; $customerTurnMins = 0;
+                if (isset($data['speakers_transcriptions'])) {
+                    foreach ($data['speakers_transcriptions'] as $_t) {
+                        $wc     = preg_match_all('/\S+/u', $_t['transcript'] ?? '', $_m) ? count($_m[0]) : 0;
+                        $tStart = timeToSeconds($_t['start_time'] ?? null);
+                        $tEnd   = timeToSeconds($_t['end_time']   ?? null);
+                        $tMins  = ($tStart !== null && $tEnd !== null && $tEnd > $tStart) ? (($tEnd - $tStart) / 60) : 0;
+                        if (($_t['speaker'] ?? '') === 'agent') {
+                            $agentWordCount += $wc;
+                            $agentTurnMins  += $tMins;
+                        } else {
+                            $customerWordCount += $wc;
+                            $customerTurnMins  += $tMins;
+                        }
+                    }
+                }
+                // Also compute talking_duration for call composition
+                $fnDurToSecs = function($dur) {
+                    if (!$dur) return 0;
+                    $parts = array_reverse(explode(':', $dur));
+                    $s = 0;
+                    if (isset($parts[0])) $s += (int)$parts[0];
+                    if (isset($parts[1])) $s += (int)$parts[1] * 60;
+                    if (isset($parts[2])) $s += (int)$parts[2] * 3600;
+                    return $s;
+                };
+                $agentTalkSecs    = $fnDurToSecs($data['pause_delay_information']['talking_duration']['agent']    ?? '');
+                $customerTalkSecs = $fnDurToSecs($data['pause_delay_information']['talking_duration']['customer'] ?? '');
+
+                // WPM: per-turn calculation first; fall back to aggregate if no timestamps
+                $agentPace    = $agentTurnMins    > 0 ? round($agentWordCount    / $agentTurnMins)    : ($agentTalkSecs    > 0 ? round(($agentWordCount    / $agentTalkSecs)    * 60) : round($data['pace']['agent_pace']    ?? 0));
+                $customerPace = $customerTurnMins > 0 ? round($customerWordCount / $customerTurnMins) : ($customerTalkSecs > 0 ? round(($customerWordCount / $customerTalkSecs) * 60) : round($data['pace']['customer_pace'] ?? 0));
+
+                // ─ Accurate Agent Pause Count (gaps > 1.5 s between agent turns) ─────
+                $agentPauseCount = 0;
+                if (isset($data['speakers_transcriptions'])) {
+                    $_agTurns = array_values(array_filter($data['speakers_transcriptions'], fn($_t) => ($_t['speaker'] ?? '') === 'agent'));
+                    for ($_i = 1; $_i < count($_agTurns); $_i++) {
+                        $_prevEnd   = timeToSeconds($_agTurns[$_i-1]['end_time']   ?? null);
+                        $_currStart = timeToSeconds($_agTurns[$_i]['start_time']   ?? null);
+                        if ($_prevEnd && $_currStart && ($_currStart - $_prevEnd) > 1.5) { $agentPauseCount++; }
+                    }
+                }
+                if ($agentPauseCount === 0) {
+                    $agentPauseCount = $data['agent_professionalism']['speech_characteristics']['pauses'] ?? 0;
+                }
+
+                // ─ Call Composition (% of TOTAL call time, 3 slices) ─────────────────
+                $totalCallSecs   = $fnDurToSecs($data['call_duration']['call_duration'] ?? '');
+                $agentCallPct    = $totalCallSecs > 0 ? round(($agentTalkSecs    / $totalCallSecs) * 100) : 40;
+                $custCallPct     = $totalCallSecs > 0 ? round(($customerTalkSecs / $totalCallSecs) * 100) : 35;
+                $silenceCallPct  = max(0, 100 - $agentCallPct - $custCallPct);
             @endphp
-            <div class="col-lg-3 animate-fade">
+            <!-- Card 1: Sentiment Analysis -->
+            <div class="col-lg-3 col-md-6 animate-fade">
                 <div class="card h-100 ">
                     <div class="card-header d-flex justify-content-between align-items-center p-2">
                         <h6 class="card-title mb-0">Sentiment Analysis</h6>
@@ -182,20 +243,19 @@
                             <canvas id="sentimentChart" height="150"></canvas>
                         </div>
                         <div class="mt-1 text-center">
-                            <span class="badge mx-1" style="background-color: #8FA998 !important;">{{ $positivePercent }}% Positive</span>
-                            <span class="badge mx-1" style="background-color: #9A8E85 !important;">{{ $neutralPercent }}% Neutral</span>
-                            <span class="badge mx-1" style="background-color: #BF8F8F !important;">{{ $negativePercent }}% Negative</span>
+                            <span class="badge mx-1" style="background-color: #10b981 !important;">{{ $positivePercent }}% Positive</span>
+                            <span class="badge mx-1" style="background-color: #94a3b8 !important;">{{ $neutralPercent }}% Neutral</span>
+                            <span class="badge mx-1" style="background-color: #ef4444 !important;">{{ $negativePercent }}% Negative</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Speech Rate Chart -->
-            <div class="col-lg-3 animate-fade">
+            <!-- Card 2: Speech Rate -->
+            <div class="col-lg-3 col-md-6 animate-fade">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center p-2">
-                        <h6 class="card-title mb-0">Speech Rate <small class="text-muted">(Optimal: 100-150 wpm)</small>
-                        </h6>
+                        <h6 class="card-title mb-0">Speech Rate <small class="text-muted">(100-150)</small></h6>
                         <div class="info-icon" data-bs-toggle="tooltip" title="Words per minute analysis">i</div>
                     </div>
                     <div class="card-body">
@@ -203,47 +263,81 @@
                             <canvas id="speechRateChart" height="150"></canvas>
                         </div>
                         <div class="mt-1 text-center">
-                            <span class="badge mx-1" style="background-color: #8FA3A9 !important;">Agent: {{ $agentPace }} WPM</span>
-                            <span class="badge mx-1" style="background-color: #8FA998 !important;">Customer: {{ $customerPace }} WPM</span>
+                            <span class="badge mx-1" style="background-color: #6366f1 !important;">Agent: {{ $agentPace }} WPM</span>
+                            <span class="badge mx-1" style="background-color: #8b5cf6 !important;">Customer: {{ $customerPace }} WPM</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Loudness Chart -->
-            <div class="col-lg-3 animate-fade">
+            <!-- Card 3: Risk & Compliance (Combined) -->
+            <div class="col-lg-3 col-md-6 animate-fade">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center p-2">
-                        <h6 class="card-title mb-0">Voice Loudness</h6>
-                        <div class="info-icon" data-bs-toggle="tooltip" title="Volume distribution during call">i</div>
+                        <h6 class="card-title mb-0">Risk & Compliance</h6>
+                        <div class="info-icon" data-bs-toggle="tooltip" title="Risk detection and policy compliance summary">i</div>
                     </div>
-                    <div class="card-body">
-                        <div style="height: 150px;">
-                            <canvas id="loudnessChart" height="150"></canvas>
-                        </div>
-                        <div class="mt-1 text-center">
-                            <span class="badge mx-1" style="background-color: #C9B178 !important;">Low: {{ number_format($lowLoudness,2) }}%</span>
-                            <span class="badge mx-1" style="background-color: #8FA998 !important;">Optimal: {{ number_format($optimalLoudness,2) }}%</span>
-                            <span class="badge mx-1" style="background-color: #BF8F8F !important;">High: {{ number_format($highLoudness,2) }}%</span>
+                    <div class="card-body p-0">
+                        @php
+                            $totalP  = count($policyCompliance);
+                            $failP   = collect($policyCompliance)->filter(fn($i) => str_contains(strtolower($i['evaluation'] ?? ''), 'does not meet'))->count();
+                            $passP   = $totalP - $failP;
+                            $passPct = $totalP > 0 ? round(($passP / $totalP) * 100) : 0;
+                            
+                            // Accurate risk detection logic and count
+                            $detectedRisks = collect($riskAssessment)->where('detected', true);
+                            $riskCount      = $detectedRisks->count();
+                            $hasRiskFlag    = (strtolower($riskFlag) === 'yes' || $riskFlag === 'High');
+                            $isRiskDetected = ($hasRiskFlag || $riskCount > 0);
+                            
+                            // If flag is Yes but count is 0, we still count it as 1 for the badge display
+                            $displayRiskCount = max($riskCount, ($hasRiskFlag ? 1 : 0));
+                        @endphp
+                        <div class="row g-0 h-100" style="min-height: 150px;">
+                            <!-- Risk Side -->
+                            <div class="col-6 border-end d-flex flex-column align-items-center justify-content-center p-2 text-center">
+                                <small class="text-muted text-uppercase fw-bold mb-2" style="font-size: 9px; opacity: 0.7;">Risk Level</small>
+                                @if($isRiskDetected)
+                                    <div class="text-danger mb-2" style="font-size: 2.2rem;"><i class="fas fa-exclamation-triangle"></i></div>
+                                    <span class="badge bg-danger shadow-sm py-1 px-3">
+                                        {{ $displayRiskCount }} {{ Str::plural('RISK', $displayRiskCount) }} DETECTED
+                                    </span>
+                                @else
+                                    <div class="text-success mb-2" style="font-size: 2.2rem;"><i class="fas fa-shield-alt"></i></div>
+                                    <span class="badge bg-success shadow-sm py-1 px-3">CLEAR</span>
+                                @endif
+                            </div>
+
+                            <!-- Policy Side -->
+                            <div class="col-6 d-flex flex-column align-items-center justify-content-center p-2 text-center">
+                                <small class="text-muted text-uppercase fw-bold mb-2" style="font-size: 9px; opacity: 0.7;">Policy Compliance</small>
+                                <div class="h3 fw-bold mb-0 {{ $failP > 0 ? 'text-danger' : 'text-success' }}">{{ $passP }}/{{ $totalP }}</div>
+                                <div class="progress w-75 my-2" style="height: 6px; border-radius: 10px;">
+                                    <div class="progress-bar {{ $failP > 0 ? 'bg-danger' : 'bg-success' }}" style="width: {{ $passPct }}%"></div>
+                                </div>
+                                <div class="small fw-bold opacity-75" style="font-size: 10px;">
+                                    {{ $failP > 0 ? $failP . ' ' . Str::plural('FAILURE', $failP) . ' DETECTED' : 'FULL COMPLIANCE' }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-3 animate-fade">
+            <!-- Card 4: KB Analysis -->
+            <div class="col-lg-3 col-md-6 animate-fade">
                 <div class="card h-100 evaluation-card">
                     <div class="card-header d-flex justify-content-between align-items-center p-2">
-                        <h6 class="card-title mb-0">Knowledge base Analysis</h6>
-                        <div class="info-icon" data-bs-toggle="tooltip" title="Distribution of question evaluations">i</div>
+                        <h6 class="card-title mb-0">Knowledge base analysis</h6>
+                        <div class="info-icon" data-bs-toggle="tooltip" title="Factual check against your KB">i</div>
                     </div>
                     <div class="card-body">
-                        <!-- Chart container -->
                         <div style="height: 150px; position: relative;">
-                            <canvas id="evaluationChart" width="400" height="100"></canvas>
+                            <canvas id="evaluationChart" width="400" height="150"></canvas>
                         </div>
-
-                        <!-- Horizontal evaluation row -->
-                        <small>Questions analyzed, Check the chart above for details.</small>
+                        <div class="text-center mt-1">
+                            <small class="text-muted">Analysis complete</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -300,8 +394,8 @@
                                 <h3>Agent Performance</h3>
                                 <div class="overall-score">
                                     <div class="score-circle"
-                                        style="--percentage: {{ $data['agent_professionalism']['total_score']['percentage'] ?? 0 }}%">
-                                        <span>{{ $data['agent_professionalism']['total_score']['percentage'] ?? 0 }}%</span>
+                                        style="--percentage: {{ $data['score'] ?? 0 }}%">
+                                        <span>{{ $data['score'] ?? 0 }}%</span>
                                     </div>
                                     <div class="score-details">
                                         <div class="score-item">
@@ -326,7 +420,7 @@
 
                         <!-- Speech Characteristics -->
                         <div class="speech-analysis">
-                            <h4>Speech Analysis</h4>
+                            <h4 class="mb-2">Speech Analysis</h4>
                             <div class="speech-metrics">
                                 <div class="metric">
                                     <i class="fas fa-volume-up"></i>
@@ -343,17 +437,22 @@
                                 </div>
                                 <div class="metric">
                                     <i class="fas fa-tachometer-alt"></i>
-                                    <span>{{ round($data['agent_professionalism']['speech_characteristics']['speed'] ?? 0) }}
-                                        WPM</span>
+                                    @php
+                                        $displayWpm = $agentPace > 0 ? $agentPace : round($data['agent_professionalism']['speech_characteristics']['speed'] ?? 0);
+                                        $wpmPct = min(100, round($displayWpm / 200 * 100));
+                                        $wpmLabel = ($displayWpm >= 100 && $displayWpm <= 150) ? 'Optimal' : ($displayWpm < 100 ? 'Slow' : 'Fast');
+                                        $wpmGrad  = ($displayWpm >= 100 && $displayWpm <= 150)
+                                            ? 'linear-gradient(90deg,#10b981,#6366f1)'
+                                            : ($displayWpm < 100 ? 'linear-gradient(90deg,#f59e0b,#94a3b8)' : 'linear-gradient(90deg,#ef4444,#f59e0b)');
+                                    @endphp
+                                    <span>{{ $displayWpm }} WPM<small style="font-size:10px;opacity:0.65;margin-left:4px;">({{ $wpmLabel }})</small></span>
                                     <div class="progress-bar">
-                                        <div class="progress" style="width: 80%"></div>
-                                        <!-- Adjust based on your ideal speed range -->
+                                        <div class="progress" style="width: {{ $wpmPct }}%; background: {{ $wpmGrad }};"></div>
                                     </div>
                                 </div>
                                 <div class="metric">
-                                    <i class="fas fa-pause"></i>
-                                    <span>{{ $data['agent_professionalism']['speech_characteristics']['pauses'] ?? 0 }}
-                                        Pauses</span>
+                                    <i class="fas fa-history"></i>
+                                    <span>{{ $data['pause_delay_information']['talking_duration']['agent'] ?? '00:00' }} <small style="font-size:10px;opacity:0.65;margin-left:2px;">Agent Duration</small></span>
                                 </div>
                             </div>
                         </div>
@@ -713,6 +812,8 @@
 
                         </div>
                     </div>
+
+
 
                     <div class="card shadow-sm border-0 rounded-4 animate-fade delay-3" style="overflow: hidden;">
                         <div class="card-header bg-white border-0 py-2 px-3 d-flex justify-content-between align-items-center">
@@ -1226,9 +1327,9 @@
                                     <div class="accordion-item border-bottom">
                                         <h2 class="accordion-header" id="heading{{ $index }}">
                                             <button
-                                                class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                                class="accordion-button {{ $index === 0 ? '' : 'collapsed' }} d-flex justify-content-between align-items-center"
                                                 type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapse{{ $index }}" aria-expanded="false"
+                                                data-bs-target="#collapse{{ $index }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}"
                                                 aria-controls="collapse{{ $index }}">
                                                 <span class="fw-semibold text-dark">
                                                     <i class="fas fa-question-circle me-2 text-primary"></i>
@@ -1239,7 +1340,7 @@
                                                 </span>
                                             </button>
                                         </h2>
-                                        <div id="collapse{{ $index }}" class="accordion-collapse collapse"
+                                        <div id="collapse{{ $index }}" class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}"
                                             aria-labelledby="heading{{ $index }}" data-bs-parent="#analysisAccordion">
                                             <div class="accordion-body">
                                                 <div class="row g-3">
@@ -1336,6 +1437,60 @@
                                 </div>
                             @endif
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 mt-4">
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center p-3">
+                        <div class="d-flex align-items-center">
+                            <h6 class="fw-bold mb-0 me-3">🚩 Company Risk Assessment</h6>
+                            @if(strtolower($riskFlag) === 'yes')
+                                <span class="badge bg-danger rounded-pill px-3 py-1">Risk Detected</span>
+                            @else
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1">Secure</span>
+                            @endif
+                        </div>
+                        <div class="info-icon text-secondary" data-bs-toggle="tooltip" title="Automated check against predefined company risk flags">i</div>
+                    </div>
+                    <div class="card-body p-4">
+                        @if(empty($riskAssessment) || !collect($riskAssessment)->contains('detected', true))
+                            <div class="text-center py-4">
+                                <i class="bi bi-shield-check text-success fs-1 mb-3 d-block"></i>
+                                <p class="text-muted mb-0 fw-medium">No company risks detected in this conversation.</p>
+                                <small class="text-muted">The conversation aligns with standard safety and security protocols.</small>
+                            </div>
+                        @else
+                            <div class="row g-4">
+                                @foreach (collect($riskAssessment)->where('detected', true) as $risk)
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="risk-item p-3 border rounded-3 h-100 bg-light-subtle shadow-sm" style="border-left: 4px solid #dc3545 !important;">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h6 class="fw-bold text-dark mb-0 pe-2">{{ $risk['risk_title'] ?? 'Undefined Risk' }}</h6>
+                                                <span class="badge bg-danger text-white rounded-pill small">Level {{ $risk['severity'] ?? 'High' }}</span>
+                                            </div>
+                                            
+                                            <div class="mb-2">
+                                                <small class="text-muted d-block mb-1 fw-bold text-uppercase" style="font-size: 0.65rem;">Impact</small>
+                                                <p class="small mb-0 text-dark-emphasis">{{ $risk['impact'] ?? 'Potential threat detected' }}</p>
+                                            </div>
+
+                                            <div class="bg-white p-2 border rounded border-danger border-opacity-10">
+                                                <small class="text-danger d-block mb-1 fw-bold text-uppercase" style="font-size: 0.65rem;">Evidence</small>
+                                                <p class="small mb-0 italic text-muted">"{{ $risk['evidence'] ?? 'See transcript' }}"</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                        
+                        @if(isset($data['gpt_evaluation']['risk_reason']) && $data['gpt_evaluation']['risk_reason'] !== 'No risk detected')
+                            <div class="mt-4 pt-3 border-top">
+                                <small class="text-muted d-block mb-1 fw-bold text-uppercase" style="font-size: 0.7rem;">AI Reasoning</small>
+                                <p class="mb-0 small">{{ $data['gpt_evaluation']['risk_reason'] }}</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -1449,11 +1604,9 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Define new color palette
             const chartColors = {
-                sentiment: ['#8FA998', '#9A8E85', '#BF8F8F'], // Success (Greenish), Neutral (Grayish), Danger (Reddish)
-                speechRate: ['#8FA3A9', '#8FA998'], // Muted slate blue, muted sage green
-                loudness: ['#C9B178', '#8FA998', '#BF8F8F'], // Soft gold, muted sage, dusty rose
+                sentiment:  ['#10b981', '#94a3b8', '#ef4444'],
+                speechRate: ['#6366f1', '#8b5cf6'],
             };
 
             // Sentiment Chart
@@ -1471,16 +1624,15 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '65%',
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                font: { size: 13 }
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.label}: ${ctx.raw}%`
                             }
                         }
-                    },
-                    cutout: '65%'
+                    }
                 }
             });
 
@@ -1490,56 +1642,28 @@
                 data: {
                     labels: ['Agent', 'Customer'],
                     datasets: [{
-                        label: 'Words per Minute',
                         data: [{{ $agentPace }}, {{ $customerPace }}],
                         backgroundColor: chartColors.speechRate,
-                        borderWidth: 0,
-                        borderRadius: 6,
-                        hoverBackgroundColor: ['#7A9199', '#7F9889'] // Darker versions
+                        borderRadius: 4,
+                        barThickness: 15
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    indexAxis: 'y',
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'WPM',
-                                font: { size: 13, weight: 'bold' }
-                            },
-                            grid: { drawBorder: false }
-                        },
-                        x: {
-                            grid: { display: false }
+                        x: { display: false, max: 200 },
+                        y: { 
+                            grid: { display: false },
+                            ticks: { font: { size: 9, weight: 'bold' } }
                         }
-                    }
-                }
-            });
-
-            // Loudness Chart
-            new Chart(document.getElementById('loudnessChart'), {
-                type: 'pie',
-                data: {
-                    labels: ['Low', 'Optimal', 'High'],
-                    datasets: [{
-                        data: [{{ $lowLoudness }}, {{ $optimalLoudness }}, {{ $highLoudness }}],
-                        backgroundColor: chartColors.loudness,
-                        borderWidth: 0,
-                        hoverOffset: 15
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    },
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                font: { size: 13 }
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.raw} WPM`
                             }
                         }
                     }
@@ -1556,7 +1680,7 @@
             if (str_contains($eval, '⚠️')) return 'Partial';
             if (str_contains($eval, '❌')) return 'Incorrect';
             return 'Other';
-        })->groupBy(fn($i) => $i)->map->count()->toArray();
+        })->groupBy(fn($i) => $i)->map(fn($group) => count($group))->toArray();
         
         // Ensure consistent order: Correct, Partial, Incorrect, Other
         $orderedCounts = [];
@@ -1571,10 +1695,10 @@
 
         // Map categories to specific premium colors
         $categoryGradients = [
-            'Correct' => ['#8FA998', '#B5C7CC'],   // Sage Green
-            'Partial' => ['#C9B178', '#E8E5E0'],   // Soft Gold
-            'Incorrect' => ['#BF8F8F', '#D1CDC7'], // Dusty Rose
-            'Other' => ['#A89F96', '#C5BDB5']      // Taupe
+            'Correct'   => ['#10b981', '#34d399'],
+            'Partial'   => ['#f59e0b', '#fcd34d'],
+            'Incorrect' => ['#ef4444', '#f87171'],
+            'Other'     => ['#94a3b8', '#cbd5e1'],
         ];
     @endphp
 
@@ -1598,15 +1722,17 @@
             const centerTextPlugin = {
                 id: 'centerText',
                 beforeDraw(chart) {
-                    const { ctx, width, height } = chart;
-                    ctx.restore();
+                    const { ctx, chartArea: { top, bottom, left, right, width, height } } = chart;
+                    ctx.save();
+                    const centerX = left + (width / 2);
+                    const centerY = top + (height / 2);
                     const fontSize = Math.round(height / 6);
                     ctx.font = `bold ${fontSize}px sans-serif`;
                     ctx.textBaseline = 'middle';
                     ctx.textAlign = 'center';
                     ctx.fillStyle = '#4A453E'; // Using our text-primary color
-                    ctx.fillText(total, width / 2, height / 2);
-                    ctx.save();
+                    ctx.fillText(total, centerX, centerY);
+                    ctx.restore();
                 }
             };
 
@@ -1698,8 +1824,8 @@
                         datasets: [{
                             label: 'Sentiment Flow',
                             data: rawTimelineData.map(d => d.v),
-                            borderColor: '#8FA998',
-                            backgroundColor: 'rgba(143, 169, 152, 0.1)',
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.08)',
                             fill: true,
                             tension: 0.4,
                             pointRadius: 3,

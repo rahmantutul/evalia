@@ -31,11 +31,31 @@
                 <div class="col">
                     <h6 class="card-title fw-bold mb-0">Agent Directory</h6>
                 </div>
-                <div class="col-md-4">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-light border-0"><i class="fas fa-search"></i></span>
-                        <input type="text" id="agentSearch" class="form-control bg-light border-0" placeholder="Search agents...">
-                    </div>
+                <div class="col-md-6">
+                    <form action="{{ route('user.agents.index') }}" method="GET" id="searchForm">
+                        <div class="row g-2">
+                            <div class="col-md-5">
+                                <select name="company_id" class="form-select form-select-sm bg-light border-0" onchange="document.getElementById('searchForm').submit()">
+                                    <option value="">All Companies</option>
+                                    @foreach($companies as $company)
+                                        <option value="{{ $company->id }}" {{ request('company_id') == $company->id ? 'selected' : '' }}>
+                                            {{ $company->company_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
+                                    <input type="text" name="search" id="agentSearch" value="{{ request('search') }}" class="form-control bg-light border-0" placeholder="Search name, email...">
+                                    @if(request('search') || request('company_id'))
+                                        <a href="{{ route('user.agents.index') }}" class="btn btn-light border-0 text-danger" title="Clear Filters"><i class="fas fa-times"></i></a>
+                                    @endif
+                                    <button type="submit" class="btn btn-primary btn-sm px-3">Filter</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -45,10 +65,10 @@
                     <thead class="bg-light">
                         <tr>
                             <th class="ps-4">Agent Name</th>
-                            <th>Username / Email</th>
-                            <th>Role / Position</th>
-                            <th>Supervisor</th>
                             <th>Company</th>
+                            <th>Username / Email</th>
+                            <th>Performance</th>
+                            <th>Risk Assessment</th>
                             <th class="text-center">Status</th>
                             <th class="text-end pe-4">Actions</th>
                         </tr>
@@ -57,6 +77,8 @@
                         @forelse($agentsWithPerformance as $item)
                             @php 
                                 $agent = $item['agent']; 
+                                $perf = $item['performance']['current_scores'];
+                                $audio = $perf['audio'];
                             @endphp
                             <tr>
                                 <td class="ps-4">
@@ -73,27 +95,46 @@
                                     </div>
                                 </td>
                                 <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-soft-info p-2 rounded text-info me-2" style="background: rgba(13, 202, 240, 0.1);">
+                                            <i class="fas fa-building small"></i>
+                                        </div>
+                                        <span class="text-dark fw-medium small">{{ $agent['company']['name'] ?? 'Evalia HQ' }}</span>
+                                    </div>
+                                </td>
+                                <td>
                                     <div class="text-dark fw-medium">{{ $agent['username'] }}</div>
                                     <div class="text-muted small">{{ $agent['email'] }}</div>
                                 </td>
                                 <td>
-                                    <div class="text-dark">{{ $agent['role']['name'] }}</div>
-                                    <div class="text-muted small">{{ $agent['position'] ?? 'N/A' }}</div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <span class="fw-bold text-dark me-2">{{ $perf['overall_score'] }}%</span>
+                                        <div class="progress flex-grow-1" style="height: 4px; max-width: 60px;">
+                                            <div class="progress-bar {{ $perf['overall_score'] >= 90 ? 'bg-success' : ($perf['overall_score'] >= 75 ? 'bg-info' : 'bg-warning') }}" 
+                                                 style="width: {{ $perf['overall_score'] }}%"></div>
+                                        </div>
+                                    </div>
+                                    <span class="text-muted small"><i class="fas fa-phone-alt me-1"></i> {{ $perf['evaluated_calls'] }} Calls</span>
                                 </td>
                                 <td>
-                                    <div class="text-dark fw-medium">{{ $agent['supervisor_name'] }}</div>
-                                </td>
-                                <td>
-                                    <div class="text-dark">{{ $agent['company']['name'] }}</div>
+                                    @if($perf['risk_count'] > 0)
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
+                                            <i class="fas fa-exclamation-triangle me-1"></i> {{ $perf['risk_count'] }} Risks
+                                        </span>
+                                    @else
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                            <i class="fas fa-check-circle me-1"></i> No Risks
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="text-center">
                                     @if($agent['is_active'])
-                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2">
-                                            <i class="fas fa-check-circle me-1 small"></i> Active
+                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-1">
+                                            Active
                                         </span>
                                     @else
-                                        <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-2">
-                                            <i class="fas fa-times-circle me-1 small"></i> Inactive
+                                        <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-1">
+                                            Inactive
                                         </span>
                                     @endif
                                 </td>
@@ -137,6 +178,7 @@
 
 @push('scripts')
 <script>
+    // Keep live filtering for quick results, but the form supports full server-side search
     document.getElementById('agentSearch').addEventListener('keyup', function() {
         const val = this.value.toLowerCase();
         const rows = document.querySelectorAll('#agentsTable tbody tr');

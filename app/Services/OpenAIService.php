@@ -19,99 +19,79 @@ class OpenAIService
         $this->baseUrl = 'https://api.openai.com/v1/chat/completions';
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // STAGE 1 — Identify relevant Knowledge Base entries
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Identify which Knowledge Base entries are genuinely relevant to the call.
-     * Returns an array of integer indices from $kbMapping.
-     */
     public function identifyMatchedKnowledgeBase(string $transcription, array $kbMapping): array
     {
         if (empty($kbMapping)) {
             return [];
         }
-
         $kbList = '';
         foreach ($kbMapping as $index => $kb) {
             $keywords = implode(', ', array_filter($kb['keywords'] ?? []));
-            $kbList .= "ID: {$index} | Title: {$kb['name']} | Keywords: {$keywords}\n";
+            if (empty($keywords)) continue; 
+            $kbList .= "ID:{$index} [{$keywords}]\n";
+        }
+
+        if (empty($kbList)) {
+            return []; 
         }
 
         $systemPrompt = <<<SYSTEM
-You are a precise call-quality assistant. Your ONLY task is to identify which Knowledge Base (KB) entries contain information that is **directly relevant** to the factual content of this phone call transcript.
+You are a KB matcher. Match a conversation snippet to Knowledge Base IDs by keywords only.
 
 Rules:
-- Include a KB entry ONLY if an agent statement or customer question directly relates to its specific content.
-- SKIP pure greetings, sign-off phrases, and generic social exchanges.
-- SKIP KB entries about general etiquette unless there is a clear policy violation in the transcript.
-- Return a JSON array of integer IDs. If nothing matches, return an empty array [].
+- Return ONLY the IDs whose keywords closely match topics discussed in the text.
+- IGNORE: greetings, farewells, "thank you", hold phrases, and small-talk.
+- If nothing matches, return [].
 
-Output format: raw JSON array only, e.g. [0, 2]
+Output: raw JSON integer array only. Example: [0, 2]
 SYSTEM;
 
         $userPrompt = <<<USER
-=== AVAILABLE KNOWLEDGE BASES ===
+KB LIST (ID [keywords]):
 {$kbList}
-
-=== CALL TRANSCRIPT ===
+TEXT:
 {$transcription}
 
-Return the JSON array of relevant KB IDs.
+Return matching IDs as JSON array.
 USER;
-
-        Log::debug('[OpenAI Stage 1] KB Identification prompt sent.', ['kb_count' => count($kbMapping)]);
 
         try {
             $response = Http::withToken($this->apiKey)
-                ->timeout(60)
+                ->timeout(30)
                 ->post($this->baseUrl, [
                     'model'       => $this->model,
                     'messages'    => [
                         ['role' => 'system', 'content' => $systemPrompt],
                         ['role' => 'user',   'content' => $userPrompt],
                     ],
-                    'temperature' => 0,   // Deterministic — no hallucination in selection
-                    'max_tokens'  => 200, // IDs only, short output
+                    'temperature' => 0,
+                    'max_tokens'  => 50,
                 ]);
 
             if ($response->failed()) {
-                Log::error('[OpenAI Stage 1] API call failed.', ['status' => $response->status(), 'body' => $response->body()]);
+                Log::error('[Stage 1] API failed.', ['status' => $response->status()]);
                 return [];
             }
 
             $content = $response->json()['choices'][0]['message']['content'] ?? '[]';
-            Log::debug('[OpenAI Stage 1] Response.', ['content' => $content]);
-
-            // Strip markdown code fences if present
-            $content = preg_replace('/```json\s*|```/', '', trim($content));
+            $content  = preg_replace('/```json\s*|```/', '', trim($content));
 
             $result = json_decode($content, true);
             return is_array($result) ? array_values(array_filter($result, 'is_int')) : [];
 
         } catch (Exception $e) {
-            Log::error('[OpenAI Stage 1] Exception: ' . $e->getMessage());
+            Log::error('[Stage 1] Exception: ' . $e->getMessage());
             return [];
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // STAGE 2 — Deep evaluation of the full transcription
-    // ─────────────────────────────────────────────────────────────────────────
 
-    /**
-     * Evaluate a call transcription against KB content and company policies.
-     * Returns a structured associative array parsed from GPT's JSON response.
-     */
-    public function evaluateTranscription(string $transcription, string $kbContext, array $companyPolicies = [], string $companyContext = ''): array
+    public function evaluateTranscription(string $transcription, string $kbContext, array $companyPolicies = [], string $companyContext = '', array $companyRisks = [], array $extractions = []): array
     {
         if (empty($this->apiKey)) {
-            Log::error('[OpenAI Stage 2] API key is missing.');
             throw new Exception('Evaluation service is currently unavailable (API key missing).');
         }
 
-        // Build policy section — strip any existing numbering prefix to avoid "1. 1. Policy" duplication
         $policySection = '';
         if (!empty($companyPolicies)) {
             $policySection = "\n=== COMPANY POLICIES TO EVALUATE ===\n";
@@ -124,14 +104,27 @@ USER;
             }
         }
 
-        $systemPrompt = $this->buildEvaluationSystemPrompt();
-        $userPrompt   = $this->buildEvaluationUserPrompt($transcription, $kbContext, $policySection, $companyContext);
+        $riskSection = '';
+        if (!empty($companyRisks)) {
+            $riskSection = "\n=== POTENTIAL RISKS TO MONITOR ===\n";
+            $riskSection .= "Check the call transcript against the following risk items. If any occur, flag them in 'risk_assessment'.\n\n";
+            foreach ($companyRisks as $i => $risk) {
+                $clean = preg_replace('/^[\d\x{0660}-\x{0669}]+[\s.\-\)]+/u', '', trim((string) $risk));
+                $riskSection .= ($i + 1) . ". " . $clean . "\n";
+            }
+        }
 
-        Log::debug('[OpenAI Stage 2] Sending evaluation request.', [
-            'model'             => $this->model,
-            'transcription_len' => strlen($transcription),
-            'kb_context_len'    => strlen($kbContext),
-        ]);
+        $extractionSection = '';
+        if (!empty($extractions)) {
+            $extractionSection = "\n=== CUSTOM DATA EXTRACTION ===\n";
+            $extractionSection .= "Extract the following specific data points from the transcript. For each point, return the value in the specified type.\n\n";
+            foreach ($extractions as $i => $ext) {
+                $extractionSection .= ($i + 1) . ". Label: \"{$ext['description']}\" | Expected Type: {$ext['type']}\n";
+            }
+        }
+
+        $systemPrompt = $this->buildEvaluationSystemPrompt();
+        $userPrompt   = $this->buildEvaluationUserPrompt($transcription, $kbContext, $policySection, $companyContext, $riskSection, $extractionSection);
 
         try {
             $response = Http::withToken($this->apiKey)
@@ -154,26 +147,18 @@ USER;
             }
 
             $content = $response->json()['choices'][0]['message']['content'] ?? '{}';
-            Log::debug('[OpenAI Stage 2] Raw response content received.', ['length' => strlen($content)]);
-
             $decoded = json_decode($content, true);
 
             if (!is_array($decoded)) {
-                Log::error('[OpenAI Stage 2] Failed to decode JSON response.', ['content' => $content]);
                 throw new Exception('OpenAI returned invalid JSON.');
             }
 
             return $decoded;
 
         } catch (Exception $e) {
-            Log::error('[OpenAI Stage 2] Exception: ' . $e->getMessage());
             throw $e;
         }
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Private helpers
-    // ─────────────────────────────────────────────────────────────────────────
 
     private function buildEvaluationSystemPrompt(): string
     {
@@ -189,12 +174,28 @@ Your job is to produce a comprehensive, objective, evidence-based evaluation of 
 5. The AGENT is the one answering questions, handling the call, and representing the company.
 6. The CUSTOMER is the one calling with a request or inquiry.
 
+=== NOTEBOOK CONTEXT STRUCTURE (read carefully) ===
+The Knowledge Base section in the prompt is structured as follows:
+
+  === NOTEBOOK: <Title> ===
+  <KB content>
+  Reference Pairs:
+    Pair N: <the specific Customer/Agent exchange from the transcript>
+
+Each NOTEBOOK entry comes with "Reference Pairs" — these are the EXACT transcript exchanges
+that were pre-matched to that KB. This means:
+- When evaluating Pair N against a KB, ONLY use the KB entry listed under that pair's notebook.
+- Different pairs may reference DIFFERENT notebooks — do NOT apply all notebooks to all pairs.
+- If a pair has no reference notebook, skip it for notebook_analysis.
+
 === NOTEBOOK ANALYSIS RULES (critical) ===
 - Only include entries where the agent gives a specific factual answer that CAN be checked against the Knowledge Base.
 - DO NOT include: greetings, closings, "thank you", "one moment please", or generic procedural phrases.
 - DO NOT include simple yes/no answers that lack factual substance.
 - For each included entry: quote the customer's question and the agent's exact answer.
+- Use the "Reference Pairs" mapping above to determine WHICH KB to check each exchange against.
 - Evaluate as: ✅ Correct (matches KB), ❌ Incorrect (contradicts KB), ⚠️ Partially Correct (incomplete match).
+- Set "notebook_name" to the title of the NOTEBOOK that is the reference for that exchange.
 - If no KB content was provided or no factual exchange exists, return an empty array [].
 
 === SCORING METHODOLOGY ===
@@ -222,15 +223,54 @@ Your job is to produce a comprehensive, objective, evidence-based evaluation of 
 - 'confidence' → Float 0.0–1.0 representing your certainty.
 - Policies may be in Arabic — evaluate in Arabic context, keep titles in the original language.
 
+=== RISK ASSESSMENT RULES (MANDATORY) ===
+Check the transcript against the "POTENTIAL RISKS TO MONITOR" list.
+- For EVERY risk identified in the transcript, add an entry to the `risk_assessment` array.
+- If NO risks from the list are detected, return `risk_flag: "No"` and an empty `risk_assessment` array [].
+- If ANY risk is detected, set `risk_flag: "Yes"`.
+- Each entry must include:
+  - 'risk_title': The risk from the provided list.
+  - 'detected': true / false.
+  - 'evidence': exact transcript quote.
+  - 'severity': 1-10.
+  - 'impact': brief explanation.
+
+=== CUSTOM DATA EXTRACTION RULES ===
+If "CUSTOM DATA EXTRACTION" is provided:
+- Extract the requested values precisely.
+- If a value is not mentioned or cannot be determined, return null.
+- Ensure the data type matches (e.g., if type is integer, return a number, not a string).
+- Return an array of objects called `extracted_data`, where each object has:
+  - 'label': The description provided in the request.
+  - 'value': The extracted value (or null).
+  - 'type': The requested type.
+  - 'evidence': A short quote from the transcript confirming the extracted value.
+
 === OUTPUT ===
 Return ONLY valid JSON matching this exact schema. Do not add any explanation outside the JSON:
 
 {
     "agent_id": "The speaker tag for the AGENT (e.g. 'Speaker 1')",
     "customer_id": "The speaker tag for the CUSTOMER (e.g. 'Speaker 0')",
-    "score": 85,
-    "risk_flag": "No",
-    "risk_reason": "Briefly explain if risk is present, otherwise 'No risk detected'",
+    "risk_flag": "Yes/No",
+    "risk_reason": "Summary of all detected risks or 'No risk detected'",
+    "risk_assessment": [
+        {
+            "risk_title": "Risk name from monitor list",
+            "detected": true,
+            "evidence": "quote",
+            "severity": 8,
+            "impact": "explanation"
+        }
+    ],
+    "extracted_data": [
+        {
+            "label": "Description of data",
+            "value": "Extracted value",
+            "type": "string",
+            "evidence": "Transcript quote"
+        }
+    ],
     "summary": "3–5 sentence factual summary: what was the call about, what happened, what was resolved or left open",
     "call_outcome": "One-line outcome, e.g. 'Issue resolved — customer confirmed satisfaction', 'Appointment scheduled for follow-up', 'Complaint escalated to supervisor'",
 
@@ -295,7 +335,7 @@ Return ONLY valid JSON matching this exact schema. Do not add any explanation ou
 SYSTEM;
     }
 
-    private function buildEvaluationUserPrompt(string $transcription, string $kbContext, string $policySection, string $companyContext = ''): string
+    private function buildEvaluationUserPrompt(string $transcription, string $kbContext, string $policySection, string $companyContext = '', string $riskSection = '', string $extractionSection = ''): string
     {
         $contextBlock = $companyContext ? "=== COMPANY CONTEXT ===\n{$companyContext}\n" : '';
 
@@ -306,6 +346,8 @@ SYSTEM;
         return <<<USER
 {$contextBlock}
 {$policySection}{$noPolicyNote}
+{$riskSection}
+{$extractionSection}
 === KNOWLEDGE BASE CONTENT (for verification) ===
 {$kbContext}
 
@@ -315,5 +357,46 @@ SYSTEM;
 Evaluate this call thoroughly and objectively. Base every score on direct transcript evidence.
 Return ONLY the JSON object described in the system instructions — no extra text.
 USER;
+    }
+    public function identifyClientSegments(string $transcription): array
+    {
+        $systemPrompt = <<<SYSTEM
+Identify the client’s timestamps only, group them into sequential from–to pairs representing continuous segments, calculate the duration for each segment (to - from), and return the results strictly in valid JSON format including from, to, and duration for each segment.
+SYSTEM;
+
+        $userPrompt = <<<USER
+TRANSCRIPTION WITH TIMESTAMPS:
+{$transcription}
+
+Identify client segments and return JSON.
+USER;
+
+        try {
+            $response = Http::withToken($this->apiKey)
+                ->timeout(60)
+                ->post($this->baseUrl, [
+                    'model'       => 'gpt-4o', // Using gpt-4o specifically for this task
+                    'messages'    => [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user',   'content' => $userPrompt],
+                    ],
+                    'response_format' => ['type' => 'json_object'],
+                    'temperature' => 0,
+                ]);
+
+            if ($response->failed()) {
+                Log::error('GPT Segment Identification failed.', ['status' => $response->status()]);
+                return [];
+            }
+
+            $content = $response->json()['choices'][0]['message']['content'] ?? '{"segments": []}';
+            $decoded = json_decode($content, true);
+            
+            return $decoded['segments'] ?? (is_array($decoded) ? $decoded : []);
+
+        } catch (Exception $e) {
+            Log::error('GPT Segment Identification Exception: ' . $e->getMessage());
+            return [];
+        }
     }
 }

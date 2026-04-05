@@ -369,6 +369,68 @@
         0%, 100% { box-shadow: 0 0 0 0 rgba(67,97,238,0.6); }
         50% { box-shadow: 0 0 0 8px rgba(67,97,238,0); }
     }
+
+    /* Searchable Agent Selector */
+    .agent-selector-container {
+        position: relative;
+        background: #fff;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        transition: all 0.2s;
+    }
+    .agent-selector-container:focus-within {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    }
+    .agent-selector-display {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        min-height: 42px;
+    }
+    .agent-selector-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        margin-top: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        z-index: 1060;
+        display: none;
+        overflow: hidden;
+    }
+    .agent-selector-dropdown.show { display: block; }
+    .agent-search-wrapper {
+        padding: 10px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .agent-options-list {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .agent-option {
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.1s;
+    }
+    .agent-option:hover { background: #f1f5f9; }
+    .agent-option.selected { background: #eff6ff; }
+    .agent-option.d-none { display: none !important; }
+    .agent-opt-avatar {
+        width: 28px; height: 28px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: bold; font-size: 11px;
+    }
 </style>
 @endpush
 
@@ -488,7 +550,6 @@
                         <th class="ps-4">Timestamp</th>
                         <th>Agent Intelligence</th>
                         <th>Outcome / Channel</th>
-                        <th class="text-center">AI Score</th>
                         <th>Sentiment</th>
                         <th>Risk Status</th>
                         <th class="text-end pe-4">Actions</th>
@@ -518,18 +579,6 @@
                                     <i class="bi bi-{{ ($task['channel'] ?? 'Call') == 'Call' ? 'telephone' : 'chat-dots' }} me-1"></i>
                                     {{ strtoupper($task['source'] ?? 'API') }}
                                 </div>
-                            </td>
-                            <td class="text-center">
-
-                            <div class="d-inline-block text-center">
-                                <div class="fw-800 text-{{ ($task['score'] ?? 0) >= 90 ? 'success' : (($task['score'] ?? 0) >= 75 ? 'primary' : 'danger') }}" style="font-size: 14px;">
-                                    {{ $task['score'] ?? 0 }}%
-                                </div>
-                                <div class="progress mt-1" style="height: 3px; width: 60px; margin: 0 auto;">
-                                    <div class="progress-bar bg-{{ ($task['score'] ?? 0) >= 90 ? 'success' : (($task['score'] ?? 0) >= 75 ? 'primary' : 'danger') }}" 
-                                            style="width: {{ $task['score'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
                             </td>
                             <td>
                                 @php $sent = $task['sentiment'] ?? 'Neutral'; @endphp
@@ -609,10 +658,6 @@
                     <div class="mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label class="form-label small fw-bold text-uppercase text-slate-500 mb-0">1. Audio Source</label>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <button type="button" class="btn btn-outline-primary active" id="btn-upload-mode">Upload</button>
-                                <button type="button" class="btn btn-outline-primary" id="id-mode-btn">Job ID</button>
-                            </div>
                         </div>
 
                         {{-- Upload Zone --}}
@@ -621,28 +666,46 @@
                                 <i class="bi bi-cloud-arrow-up fs-2 text-slate-400 d-block mb-2"></i>
                                 <span class="fw-bold text-slate-700">Browse Record</span>
                                 <span class="text-slate-400 d-block small">MP3, WAV, M4A, OGG (Max 100MB)</span>
-                                <input type="file" name="audio_file" id="audio_file_input" class="d-none" accept=".wav,.mp3,.m4a,.ogg,.webm" onchange="this.previousElementSibling.previousElementSibling.textContent = this.files[0].name; this.previousElementSibling.previousElementSibling.className='fw-bold text-primary'">
+                                <input type="file" name="audio_file" id="audio_file_input" class="d-none" accept=".wav,.mp3,.m4a,.ogg,.webm" required onchange="this.previousElementSibling.previousElementSibling.textContent = this.files[0].name; this.previousElementSibling.previousElementSibling.className='fw-bold text-primary'">
                             </label>
                         </div>
 
-                        {{-- Job ID Input --}}
-                        <div id="job-id-wrapper" class="d-none">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0 text-slate-400"><i class="bi bi-hash"></i></span>
-                                <input type="text" name="hamsa_job_id" class="form-control border-start-0 filter-input" placeholder="Paste Hamsa Job ID here...">
-                            </div>
-                            <small class="text-muted mt-2 d-block px-1">Use an existing Hamsa Job ID to avoid re-uploading charges.</small>
-                        </div>
+
                     </div>
 
                     <div class="mb-4">
                         <label class="form-label small fw-bold text-uppercase text-slate-500">2. Workforce Assignment</label>
-                        <select name="agent_id" class="form-select filter-select" required>
-                            <option value="">Choose Agent...</option>
-                            @foreach($companyAgents as $agent)
-                                <option value="{{ $agent['id'] }}">{{ $agent['full_name'] }}</option>
-                            @endforeach
-                        </select>
+                        <div class="agent-selector-container" id="agent-selector-container">
+                            <div class="agent-selector-display" id="agent-selector-display">
+                                <span class="text-muted" id="selected-agent-name">Choose Agent...</span>
+                                <i class="bi bi-chevron-down small opacity-50"></i>
+                            </div>
+                            <div class="agent-selector-dropdown" id="agent-selector-dropdown">
+                                <div class="agent-search-wrapper">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted small"></i></span>
+                                        <input type="text" class="form-control border-start-0 ps-0" id="agent-selector-search" placeholder="Search agent name..." style="background: transparent; border: 0;">
+                                    </div>
+                                </div>
+                                <div class="agent-options-list" id="agent-options-list">
+                                    @foreach($companyAgents as $agent)
+                                        <div class="agent-option" 
+                                             data-id="{{ $agent['id'] }}" 
+                                             data-name="{{ strtolower($agent['full_name']) }}">
+                                            <div class="agent-opt-avatar bg-primary" style="background: var(--primary-gradient); color: #fff;">
+                                                {{ strtoupper(substr($agent['full_name'] ?? 'U', 0, 1)) }}
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-medium small text-slate-900">{{ $agent['full_name'] }}</div>
+                                            </div>
+                                            <i class="bi bi-check text-primary small d-none check-icon"></i>
+                                        </div>
+                                    @endforeach
+                                    <div id="no-agents-found" class="p-3 text-center text-muted small d-none">No agents found</div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="agent_id" id="modal-agent-id-hidden" required>
                     </div>
 
                     <input type="hidden" name="company_id" value="{{ $company_id }}">
@@ -745,33 +808,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Modal Mode Toggle
-    const btnUpload = document.getElementById('btn-upload-mode');
-    const btnId     = document.getElementById('id-mode-btn');
-    const uploadWrap = document.getElementById('upload-zone-wrapper');
-    const idWrap     = document.getElementById('job-id-wrapper');
-    const fileInput  = document.getElementById('audio_file_input');
-    const idInput    = document.querySelector('input[name="hamsa_job_id"]');
 
-    if (btnUpload && btnId) {
-        btnUpload.addEventListener('click', () => {
-            btnUpload.classList.add('active');
-            btnId.classList.remove('active');
-            uploadWrap.classList.remove('d-none');
-            idWrap.classList.add('d-none');
-            fileInput.required = true;
-            idInput.required = false;
-        });
-
-        btnId.addEventListener('click', () => {
-            btnId.classList.add('active');
-            btnUpload.classList.remove('active');
-            uploadWrap.classList.add('d-none');
-            idWrap.classList.remove('d-none');
-            fileInput.required = false;
-            idInput.required = true;
-        });
-    }
 
     // ── Company Switcher ──────────────────────────────────────
     const companySwitcher = document.getElementById('company-switcher');
@@ -868,6 +905,73 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => { convBody.scrollTop = 0; }, 200);
         });
     });
+
+    // Searchable Agent Selector Logic
+    const ageContainer = document.getElementById('agent-selector-container');
+    const ageDisplay = document.getElementById('agent-selector-display');
+    const ageDropdown = document.getElementById('agent-selector-dropdown');
+    const ageSearch = document.getElementById('agent-selector-search');
+    const ageOptionsList = document.getElementById('agent-options-list');
+    const ageHiddenInput = document.getElementById('modal-agent-id-hidden');
+    const ageSelectedName = document.getElementById('selected-agent-name');
+
+    if (ageDisplay) {
+        ageDisplay.addEventListener('click', (e) => {
+            e.stopPropagation();
+            ageDropdown.classList.toggle('show');
+            if (ageDropdown.classList.contains('show')) ageSearch.focus();
+        });
+
+        ageDropdown.addEventListener('click', (e) => e.stopPropagation());
+
+        document.addEventListener('click', (e) => {
+            ageDropdown.classList.remove('show');
+        });
+
+        ageSearch.addEventListener('input', () => {
+            const query = ageSearch.value.toLowerCase().trim();
+            let foundAny = false;
+
+            ageContainer.querySelectorAll('.agent-option').forEach(opt => {
+                const name = opt.getAttribute('data-name');
+                if (name.includes(query)) {
+                    opt.classList.remove('d-none');
+                    foundAny = true;
+                } else {
+                    opt.classList.add('d-none');
+                }
+            });
+
+            const noFoundDiv = document.getElementById('no-agents-found');
+            if (noFoundDiv) {
+                noFoundDiv.classList.toggle('d-none', foundAny);
+            }
+        });
+
+        ageContainer.querySelectorAll('.agent-option').forEach(opt => {
+            opt.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const id = this.getAttribute('data-id');
+                const name = this.querySelector('.fw-medium').textContent;
+
+                ageHiddenInput.value = id;
+                ageSelectedName.textContent = name;
+                ageSelectedName.classList.remove('text-muted');
+                ageSelectedName.classList.add('text-slate-900');
+                
+                ageContainer.querySelectorAll('.agent-option').forEach(o => {
+                    o.classList.remove('selected');
+                    const check = o.querySelector('.check-icon');
+                    if (check) check.classList.add('d-none');
+                });
+                
+                this.classList.add('selected');
+                const check = this.querySelector('.check-icon');
+                if (check) check.classList.remove('d-none');
+                ageDropdown.classList.remove('show');
+            });
+        });
+    }
 });
 </script>
 @endpush

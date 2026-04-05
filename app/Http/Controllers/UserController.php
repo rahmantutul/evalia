@@ -74,32 +74,39 @@ class UserController extends Controller
             }
         }
 
-        $user = User::create([
-            'name' => $request->full_name,
-            'username' => $request->username,
-            'email' => $request->email,
-            'user_type' => $userType,
-            'password' => Hash::make($request->password),
-            'position' => $request->position,
-            'phone' => $request->phone,
-            'is_active' => true,
-            'company_id' => $request->company_id,
-            'supervisor_id' => $request->supervisor_id,
-        ]);
+        try {
+            $user = User::create([
+                'name' => $request->full_name,
+                'username' => $request->username,
+                'email' => $request->email,
+                'user_type' => $userType,
+                'password' => Hash::make($request->password),
+                'position' => $request->position,
+                'phone' => $request->phone,
+                'is_active' => true,
+                'company_id' => $request->company_id,
+                'supervisor_id' => $request->supervisor_id,
+            ]);
 
-        if ($request->type === 'agent') {
-            // No role required for agents now as we use user_type
-            if (!$request->supervisor_id) {
-                $user->update(['supervisor_id' => $user->id]);
+            if ($request->type === 'agent') {
+                if (!$request->supervisor_id) {
+                    $user->update(['supervisor_id' => $user->id]);
+                }
+            } elseif ($request->role_id) {
+                $role = Role::findById($request->role_id);
+                if ($role) {
+                    $user->assignRole($role->name);
+                }
             }
-        } elseif ($request->role_id) {
-            $role = Role::findById($request->role_id);
-            if ($role) {
-                $user->assignRole($role->name);
-            }
+
+            return redirect()->route($request->type === 'agent' ? 'user.agents.index' : 'users.index')
+                             ->with('success', ($request->type === 'agent' ? 'Agent' : 'User') . ' created successfully!');
+        } catch (\Exception $e) {
+            Log::error('User Creation Error: ' . $e->getMessage());
+            return redirect()->back()
+                             ->with('error', 'Failed to create ' . ($request->type === 'agent' ? 'agent' : 'user') . '. ' . $e->getMessage())
+                             ->withInput();
         }
-
-        return redirect()->route($request->type === 'agent' ? 'user.agents.index' : 'users.index')->with('success', ($request->type === 'agent' ? 'Agent' : 'User') . ' created successfully!');
     }
 
     public function show($id)
@@ -158,32 +165,45 @@ class UserController extends Controller
             }
         }
 
-        $updateData = [
-            'name' => $request->full_name,
-            'email' => $request->email,
-            'user_type' => $userType,
-            'position' => $request->position,
-            'phone' => $request->phone,
-            'company_id' => $request->company_id,
-            'supervisor_id' => $request->supervisor_id,
-        ];
-        
-        if ($request->type === 'agent' && !$request->supervisor_id) {
-            $updateData['supervisor_id'] = $user->id;
-        }
-
-        $user->update($updateData);
-
-        if ($request->type === 'agent') {
-            // No role required for agents, we use user_type
-        } elseif ($request->role_id) {
-            $role = Role::findById($request->role_id);
-            if ($role) {
-                $user->syncRoles([$role->name]);
+        try {
+            $updateData = [
+                'name' => $request->full_name,
+                'email' => $request->email,
+                'user_type' => $userType,
+                'position' => $request->position,
+                'phone' => $request->phone,
+                'company_id' => $request->company_id,
+                'supervisor_id' => $request->supervisor_id,
+            ];
+            
+            if ($request->type === 'agent' && !$request->supervisor_id) {
+                $updateData['supervisor_id'] = $user->id;
             }
-        }
 
-        return redirect()->route($request->type === 'agent' ? 'user.agents.index' : 'users.index')->with('success', ($request->type === 'agent' ? 'Agent' : 'User') . ' updated successfully!');
+            // Handle password update if provided
+            if ($request->filled('new_password')) {
+                $updateData['password'] = Hash::make($request->new_password);
+            }
+
+            $user->update($updateData);
+
+            if ($request->type === 'agent') {
+                // No role required for agents, we use user_type
+            } elseif ($request->role_id) {
+                $role = Role::findById($request->role_id);
+                if ($role) {
+                    $user->syncRoles([$role->name]);
+                }
+            }
+
+            return redirect()->route($request->type === 'agent' ? 'user.agents.index' : 'users.index')
+                             ->with('success', ($request->type === 'agent' ? 'Agent' : 'User') . ' updated successfully!');
+        } catch (\Exception $e) {
+            Log::error('User Update Error: ' . $e->getMessage());
+            return redirect()->back()
+                             ->with('error', 'Failed to update ' . ($request->type === 'agent' ? 'agent' : 'user') . '. ' . $e->getMessage())
+                             ->withInput();
+        }
     }
 
     public function destroy($id)

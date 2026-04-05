@@ -9,7 +9,7 @@ class HamsaService
 {
     protected string $baseUrl = 'https://api.tryhamsa.com';
     protected string $v1Url  = 'https://api.tryhamsa.com';
-    protected string $apiKey = 'f8f7b582-ecb6-43fb-8921-0542f5169378';
+    protected string $apiKey = '87727d21-3265-4442-a44d-b07711238887';
 
     public function createTranscriptionJob(string $mediaUrl, string $title = 'Untitled', string $language = 'ar'): array
     {
