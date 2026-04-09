@@ -288,6 +288,26 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+
+                            @if($type === 'agent')
+                            <div class="col-md-6" id="evaluation_role_container">
+                                <label for="evaluation_role_id" class="form-label">Evaluation Role <span class="text-muted fw-normal">(Optional)</span></label>
+                                <select class="form-control input-focus @error('evaluation_role_id') is-invalid @enderror" 
+                                        id="evaluation_role_id" 
+                                        name="evaluation_role_id">
+                                    <option value="">Select Role</option>
+                                    @foreach($evaluationRoles as $role)
+                                        <option value="{{ $role->id }}" {{ (old('evaluation_role_id', $user['evaluation_role_id'] ?? '') == $role->id) ? 'selected' : '' }}>
+                                            {{ $role->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('evaluation_role_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">Defines which criteria to evaluate for this agent.</small>
+                            </div>
+                            @endif
                         </div>
 
                         <div class="row g-3 mb-3">
@@ -368,6 +388,34 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Fetch Evaluation Roles when company changes
+    const companySelect = document.getElementById('company_id');
+    const evalRoleSelect = document.getElementById('evaluation_role_id');
+
+    companySelect.addEventListener('change', function() {
+        const companyId = this.value;
+        if (!companyId) {
+            evalRoleSelect.innerHTML = '<option value="">Select Role</option>';
+            return;
+        }
+
+        evalRoleSelect.innerHTML = '<option value="">Loading...</option>';
+
+        fetch(`{{ route('api.get-evaluation-roles') }}?company_id=${companyId}`)
+            .then(res => res.json())
+            .then(data => {
+                let html = '<option value="">Select Role</option>';
+                data.forEach(role => {
+                    html += `<option value="${role.id}">${role.name}</option>`;
+                });
+                evalRoleSelect.innerHTML = html;
+            })
+            .catch(err => {
+                console.error(err);
+                evalRoleSelect.innerHTML = '<option value="">Error loading roles</option>';
+            });
+    });
+
     // Clear error styling when user starts typing
     const errorFields = document.querySelectorAll('.is-invalid');
     errorFields.forEach(field => {

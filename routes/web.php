@@ -147,6 +147,7 @@ Route::group(['middleware' => 'auth.api'], function () {
     Route::post('/users/{id}/activate', [UserController::class, 'activate'])->name('users.activate');
     Route::get('/users/{id}/change-password', [UserController::class, 'showChangePasswordForm'])->name('users.change-password.form');
     Route::post('/users/{id}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
+    Route::get('/api/get-evaluation-roles', [UserController::class, 'getEvaluationRoles'])->name('api.get-evaluation-roles');
     
     // Role management routes
     Route::prefix('roles')->group(function () {
@@ -183,6 +184,14 @@ Route::group(['middleware' => 'auth.api'], function () {
     Route::post('/user/company/store', [CompanyController::class, 'companyStore'])->name('user.company.store');
     Route::put('/user/company/update/{id}', [CompanyController::class, 'companyUpdate'])->name('user.company.update');
     Route::get('/user/company/delete/{id}', [CompanyController::class, 'companyDelete'])->name('user.company.delete');
+
+    // Evaluation Roles
+    Route::get('/user/evaluation-roles', [\App\Http\Controllers\EvaluationRoleController::class, 'index'])->name('user.evaluation_roles.index');
+    Route::get('/user/evaluation-roles/create', [\App\Http\Controllers\EvaluationRoleController::class, 'create'])->name('user.evaluation_roles.create');
+    Route::post('/user/evaluation-roles', [\App\Http\Controllers\EvaluationRoleController::class, 'store'])->name('user.evaluation_roles.store');
+    Route::get('/user/evaluation-roles/{id}/edit', [\App\Http\Controllers\EvaluationRoleController::class, 'edit'])->name('user.evaluation_roles.edit');
+    Route::put('/user/evaluation-roles/{id}', [\App\Http\Controllers\EvaluationRoleController::class, 'update'])->name('user.evaluation_roles.update');
+    Route::delete('/user/evaluation-roles/{id}', [\App\Http\Controllers\EvaluationRoleController::class, 'destroy'])->name('user.evaluation_roles.destroy');
 
 
     // Task routes start

@@ -92,6 +92,12 @@
                                             <td class="fw-bold">{{ $user['supervisor_id'] }}</td>
                                         </tr>
                                         @endif
+                                        <tr>
+                                            <td class="text-muted">Eval Role:</td>
+                                            <td>
+                                                <span class="badge bg-info">{{ $user['evaluation_role_name'] ?? 'None' }}</span>
+                                            </td>
+                                        </tr>
                                     </table>
                                 </div>
                             </div>

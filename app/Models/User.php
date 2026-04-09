@@ -29,7 +29,13 @@ class User extends Authenticatable
         'is_active',
         'company_id',
         'supervisor_id',
+        'evaluation_role_id',
     ];
+
+    public function evaluationRole()
+    {
+        return $this->belongsTo(AgentEvaluationRole::class, 'evaluation_role_id');
+    }
 
     protected $hidden = [
         'password',
@@ -96,6 +102,8 @@ class User extends Authenticatable
             'company_id'   => $this->company_id,
             'supervisor_id'=> $this->supervisor_id,
             'supervisor_name' => ($this->supervisor && $this->supervisor->id != $this->id) ? $this->supervisor->name : 'Self',
+            'evaluation_role_id' => $this->evaluation_role_id,
+            'evaluation_role_name' => $this->evaluationRole ? $this->evaluationRole->name : 'None',
             'role'      => [
                 'id' => $role ? $role->id : null, 
                 'name' => $role ? $role->name : 'No Role'

@@ -111,6 +111,35 @@
                 </a>
             </div>
         </div>
+        
+        @if(isset($data['evaluation_role_name']))
+        <div class="row mb-4 animate-fade">
+            <div class="col-12">
+                <div class="alert alert-light border-start border-info border-4 shadow-sm d-flex align-items-center py-2 px-3 mb-0" style="border-radius: 10px; background: white;">
+                    <i class="fas fa-info-circle text-info me-3 fs-5"></i>
+                    <div>
+                        <span class="text-info fw-bold me-2 uppercase small" style="letter-spacing: 0.5px;">Evaluation Policy:</span>
+                        <span class="text-dark fw-bold">{{ $data['evaluation_role_name'] }}</span>
+                        @php
+                            $skipped = [];
+                            $settings = $data['evaluation_settings'] ?? [];
+                            if (!($settings['eval_kb'] ?? true)) $skipped[] = 'Knowledge Base';
+                            if (!($settings['eval_policies'] ?? true)) $skipped[] = 'Policies';
+                            if (!($settings['eval_risks'] ?? true)) $skipped[] = 'Risks';
+                            if (!($settings['eval_extractions'] ?? true)) $skipped[] = 'Extractions';
+                            if (!($settings['eval_professionalism'] ?? true)) $skipped[] = 'Professionalism';
+                            if (!($settings['eval_assessment'] ?? true)) $skipped[] = 'Skills';
+                            if (!($settings['eval_cooperation'] ?? true)) $skipped[] = 'Cooperation';
+                            if (!($settings['eval_linguistic'] ?? true)) $skipped[] = 'Linguistic';
+                        @endphp
+                        @if(!empty($skipped))
+                            <span class="text-muted ms-2 small">• Criteria skipped: {{ implode(', ', $skipped) }}</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <div class="row gy-4">
             @php
@@ -297,7 +326,13 @@
                             <!-- Risk Side -->
                             <div class="col-6 border-end d-flex flex-column align-items-center justify-content-center p-2 text-center">
                                 <small class="text-muted text-uppercase fw-bold mb-2" style="font-size: 9px; opacity: 0.7;">Risk Level</small>
-                                @if($isRiskDetected)
+                                @if(!($data['evaluation_settings']['eval_risks'] ?? true))
+                                    <div class="text-muted mb-1" style="font-size: 1.5rem; opacity: 0.3;"><i class="fas fa-lock"></i></div>
+                                    <span class="badge bg-secondary opacity-50 shadow-sm py-1 px-2 mb-1" style="font-size: 8px;">NO PERMISSION</span>
+                                    @can('evaluationroles.view')
+                                    <a href="{{ route('user.evaluation_roles.index') }}" class="btn btn-link p-0 text-primary x-small fw-bold" style="font-size: 8px; text-decoration: none;">Manage Roles</a>
+                                    @endcan
+                                @elseif($isRiskDetected)
                                     <div class="text-danger mb-2" style="font-size: 2.2rem;"><i class="fas fa-exclamation-triangle"></i></div>
                                     <span class="badge bg-danger shadow-sm py-1 px-3">
                                         {{ $displayRiskCount }} {{ Str::plural('RISK', $displayRiskCount) }} DETECTED
@@ -311,13 +346,21 @@
                             <!-- Policy Side -->
                             <div class="col-6 d-flex flex-column align-items-center justify-content-center p-2 text-center">
                                 <small class="text-muted text-uppercase fw-bold mb-2" style="font-size: 9px; opacity: 0.7;">Policy Compliance</small>
-                                <div class="h3 fw-bold mb-0 {{ $failP > 0 ? 'text-danger' : 'text-success' }}">{{ $passP }}/{{ $totalP }}</div>
-                                <div class="progress w-75 my-2" style="height: 6px; border-radius: 10px;">
-                                    <div class="progress-bar {{ $failP > 0 ? 'bg-danger' : 'bg-success' }}" style="width: {{ $passPct }}%"></div>
-                                </div>
-                                <div class="small fw-bold opacity-75" style="font-size: 10px;">
-                                    {{ $failP > 0 ? $failP . ' ' . Str::plural('FAILURE', $failP) . ' DETECTED' : 'FULL COMPLIANCE' }}
-                                </div>
+                                @if(!($data['evaluation_settings']['eval_policies'] ?? true))
+                                    <div class="text-muted mb-1" style="font-size: 1.5rem; opacity: 0.3;"><i class="fas fa-lock"></i></div>
+                                    <span class="badge bg-secondary opacity-50 shadow-sm py-1 px-2 mb-1" style="font-size: 8px;">NO PERMISSION</span>
+                                    @can('evaluationroles.view')
+                                    <a href="{{ route('user.evaluation_roles.index') }}" class="btn btn-link p-0 text-primary x-small fw-bold" style="font-size: 8px; text-decoration: none;">Manage Roles</a>
+                                    @endcan
+                                @else
+                                    <div class="h3 fw-bold mb-0 {{ $failP > 0 ? 'text-danger' : 'text-success' }}">{{ $passP }}/{{ $totalP }}</div>
+                                    <div class="progress w-75 my-2" style="height: 6px; border-radius: 10px;">
+                                        <div class="progress-bar {{ $failP > 0 ? 'bg-danger' : 'bg-success' }}" style="width: {{ $passPct }}%"></div>
+                                    </div>
+                                    <div class="small fw-bold opacity-75" style="font-size: 10px;">
+                                        {{ $failP > 0 ? $failP . ' ' . Str::plural('FAILURE', $failP) . ' DETECTED' : 'FULL COMPLIANCE' }}
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -332,12 +375,24 @@
                         <div class="info-icon" data-bs-toggle="tooltip" title="Factual check against your KB">i</div>
                     </div>
                     <div class="card-body">
-                        <div style="height: 150px; position: relative;">
-                            <canvas id="evaluationChart" width="400" height="150"></canvas>
-                        </div>
-                        <div class="text-center mt-1">
-                            <small class="text-muted">Analysis complete</small>
-                        </div>
+                        @if(!($data['evaluation_settings']['eval_kb'] ?? true))
+                            <div class="d-flex flex-column align-items-center justify-content-center h-100 py-3 text-center">
+                                <div class="text-muted mb-2" style="font-size: 2rem; opacity: 0.2;"><i class="fas fa-lock"></i></div>
+                                <span class="badge bg-secondary opacity-50 px-3 mb-2">NO PERMISSION</span>
+                                @can('evaluationroles.view')
+                                <a href="{{ route('user.evaluation_roles.index') }}" class="btn btn-sm btn-outline-primary py-1" style="font-size: 10px;">
+                                    Manage Evaluation Roles
+                                </a>
+                                @endcan
+                            </div>
+                        @else
+                            <div style="height: 150px; position: relative;">
+                                <canvas id="evaluationChart" width="400" height="150"></canvas>
+                            </div>
+                            <div class="text-center mt-1">
+                                <small class="text-muted">Analysis complete</small>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -399,19 +454,27 @@
                                     </div>
                                     <div class="score-details">
                                         <div class="score-item">
-                                            <span class="label">Professionalism</span>
-                                            <span
-                                                class="value">{{ $data['agent_professionalism']['total_score']['percentage'] ?? 0 }}%</span>
+                                            @if($data['evaluation_settings']['eval_professionalism'] ?? true)
+                                                <span class="value">{{ $data['agent_professionalism']['total_score']['percentage'] ?? 0 }}%</span>
+                                            @else
+                                                <span class="value text-muted small" style="font-size: 10px;">Skipped</span>
+                                            @endif
                                         </div>
                                         <div class="score-item">
                                             <span class="label">Assessment</span>
-                                            <span
-                                                class="value">{{ $data['agent_assessment']['total_score']['percentage'] ?? 0 }}%</span>
+                                            @if($data['evaluation_settings']['eval_assessment'] ?? true)
+                                                <span class="value">{{ $data['agent_assessment']['total_score']['percentage'] ?? 0 }}%</span>
+                                            @else
+                                                <span class="value text-muted small" style="font-size: 10px;">Skipped</span>
+                                            @endif
                                         </div>
                                         <div class="score-item">
                                             <span class="label">Cooperation</span>
-                                            <span
-                                                class="value">{{ $data['agent_cooperation']['total_score']['percentage'] ?? 0 }}%</span>
+                                            @if($data['evaluation_settings']['eval_cooperation'] ?? true)
+                                                <span class="value">{{ $data['agent_cooperation']['total_score']['percentage'] ?? 0 }}%</span>
+                                            @else
+                                                <span class="value text-muted small" style="font-size: 10px;">Skipped</span>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -462,15 +525,19 @@
                     <div class="tabs">
                         <button class="tab-btn active" data-tab="professionalism">
                             <i class="fas fa-award"></i> Professionalism
+                            @if(!($data['evaluation_settings']['eval_professionalism'] ?? true)) <i class="fas fa-lock ms-1 small opacity-50"></i> @endif
                         </button>
                         <button class="tab-btn" data-tab="assessment">
                             <i class="fas fa-clipboard-check"></i> Skills Assessment
+                            @if(!($data['evaluation_settings']['eval_assessment'] ?? true)) <i class="fas fa-lock ms-1 small opacity-50"></i> @endif
                         </button>
                         <button class="tab-btn" data-tab="cooperation">
                             <i class="fas fa-handshake"></i> Cooperation
+                            @if(!($data['evaluation_settings']['eval_cooperation'] ?? true)) <i class="fas fa-lock ms-1 small opacity-50"></i> @endif
                         </button>
                         <button class="tab-btn" data-tab="linguistic">
                             <i class="fas fa-language"></i> Linguistic Analysis
+                            @if(!($data['evaluation_settings']['eval_linguistic'] ?? true)) <i class="fas fa-lock ms-1 small opacity-50"></i> @endif
                         </button>
                     </div>
 
@@ -478,6 +545,22 @@
                     <div class="tab-content">
                         <!-- Professionalism Tab -->
                         <div class="tab-pane active" id="professionalism">
+                            @if(!($data['evaluation_settings']['eval_professionalism'] ?? true))
+                                <div class="text-center py-5 border rounded-4 bg-light mx-3 my-4 shadow-sm animate-fade">
+                                    <div class="mb-3">
+                                        <div class="bg-white p-3 rounded-circle d-inline-block shadow-sm">
+                                            <i class="fas fa-lock text-muted fs-2"></i>
+                                        </div>
+                                    </div>
+                                    <h5 class="fw-bold text-dark">Professionalism Not Evaluated</h5>
+                                    <p class="text-muted px-5 mb-4">This section was not evaluated because the assigned role permissions for this agent have this criteria disabled.</p>
+                                    @can('evaluationroles.view')
+                                    <a href="{{ route('user.evaluation_roles.index') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                        <i class="fas fa-cog me-2"></i> Manage Evaluation Roles
+                                    </a>
+                                    @endcan
+                                </div>
+                            @else
                             <div class="metrics-grid">
                                 @foreach (['customer_satisfaction', 'professionalism', 'tone_consistency', 'polite_language_usage', 'configured_standards_compliance'] as $metric)
                                     <div class="metric-card">
@@ -519,10 +602,27 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
                         </div>
 
                         <!-- Skills Assessment Tab -->
                         <div class="tab-pane" id="assessment">
+                            @if(!($data['evaluation_settings']['eval_assessment'] ?? true))
+                                <div class="text-center py-5 border rounded-4 bg-light mx-3 my-4 shadow-sm animate-fade">
+                                    <div class="mb-3">
+                                        <div class="bg-white p-3 rounded-circle d-inline-block shadow-sm">
+                                            <i class="fas fa-lock text-muted fs-2"></i>
+                                        </div>
+                                    </div>
+                                    <h5 class="fw-bold text-dark">Skills Assessment Not Evaluated</h5>
+                                    <p class="text-muted px-5 mb-4">This section was not evaluated because the assigned role permissions for this agent have this criteria disabled.</p>
+                                    @can('evaluationroles.view')
+                                    <a href="{{ route('user.evaluation_roles.index') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                        <i class="fas fa-cog me-2"></i> Manage Evaluation Roles
+                                    </a>
+                                    @endcan
+                                </div>
+                            @else
                             <div class="metrics-grid">
                                 @foreach (['communication', 'problem_solving', 'technical_knowledge', 'efficiency'] as $metric)
                                     <div class="metric-card">
@@ -540,10 +640,27 @@
                                     </div>
                                 @endforeach
                             </div>
+                            @endif
                         </div>
 
                         <!-- Cooperation Tab -->
                         <div class="tab-pane" id="cooperation">
+                            @if(!($data['evaluation_settings']['eval_cooperation'] ?? true))
+                                <div class="text-center py-5 border rounded-4 bg-light mx-3 my-4 shadow-sm animate-fade">
+                                    <div class="mb-3">
+                                        <div class="bg-white p-3 rounded-circle d-inline-block shadow-sm">
+                                            <i class="fas fa-lock text-muted fs-2"></i>
+                                        </div>
+                                    </div>
+                                    <h5 class="fw-bold text-dark">Cooperation Not Evaluated</h5>
+                                    <p class="text-muted px-5 mb-4">This section was not evaluated because the assigned role permissions for this agent have this criteria disabled.</p>
+                                    @can('evaluationroles.view')
+                                    <a href="{{ route('user.evaluation_roles.index') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                        <i class="fas fa-cog me-2"></i> Manage Evaluation Roles
+                                    </a>
+                                    @endcan
+                                </div>
+                            @else
                             <div class="metrics-grid">
                                 @foreach (['agent_proactive_assistance', 'agent_responsiveness', 'agent_empathy', 'effectiveness'] as $metric)
                                     <div class="metric-card">
@@ -561,9 +678,26 @@
                                     </div>
                                 @endforeach
                             </div>
+                            @endif
                         </div>
                         <!-- Linguistic Analysis Tab -->
                         <div class="tab-pane" id="linguistic">
+                            @if(!($data['evaluation_settings']['eval_linguistic'] ?? true))
+                                <div class="text-center py-5 border rounded-4 bg-light mx-3 my-4 shadow-sm animate-fade">
+                                    <div class="mb-3">
+                                        <div class="bg-white p-3 rounded-circle d-inline-block shadow-sm">
+                                            <i class="fas fa-lock text-muted fs-2"></i>
+                                        </div>
+                                    </div>
+                                    <h5 class="fw-bold text-dark">Linguistic Analysis Not Evaluated</h5>
+                                    <p class="text-muted px-5 mb-4">This section was not evaluated because the assigned role permissions for this agent have this criteria disabled.</p>
+                                    @can('evaluationroles.view')
+                                    <a href="{{ route('user.evaluation_roles.index') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                        <i class="fas fa-cog me-2"></i> Manage Evaluation Roles
+                                    </a>
+                                    @endcan
+                                </div>
+                            @else
                             <div class="container-fluid py-3">
 
                                 <!-- Tone Analysis -->
@@ -659,6 +793,7 @@
                                 </div>
 
                             </div>
+                            @endif
                         </div>
 
                         <style>
@@ -1145,43 +1280,61 @@
                 <div class="card shadow-sm border-0 rounded-3">
                     <div class="card-header d-flex justify-content-between align-items-center p-2 bg-white border-bottom">
                         <h6 class="card-title mb-0 fw-bold text-dark">📋 Policy Compliance Check</h6>
-                        <div class="info-icon" data-bs-toggle="tooltip" title="Analysis of agent performance against organization policies">i</div>
+                        @if(!($data['evaluation_settings']['eval_policies'] ?? true))
+                            <span class="badge bg-secondary opacity-50 small"><i class="fas fa-lock me-1"></i>RESTRICED</span>
+                        @else
+                            <div class="info-icon" data-bs-toggle="tooltip" title="Analysis of agent performance against organization policies">i</div>
+                        @endif
                     </div>
 
-                    @php
-                        $totalPolicies   = count($policyCompliance);
-                        $metPolicies     = collect($policyCompliance)->filter(fn($i) => !str_contains(strtolower($i['evaluation'] ?? ''), 'not') || str_contains(strtolower($i['evaluation'] ?? ''), 'applicable'))->count();
-                        $failedPolicies  = collect($policyCompliance)->filter(fn($i) => str_contains(strtolower($i['evaluation'] ?? ''), 'does not meet'))->count();
-                        $naPolicies      = collect($policyCompliance)->filter(fn($i) => str_contains(strtolower($i['evaluation'] ?? ''), 'not applicable'))->count();
-                        $metPolicies     = $totalPolicies - $failedPolicies - $naPolicies;
-                        $complianceRate  = $totalPolicies > 0 ? round(($metPolicies / $totalPolicies) * 100) : 0;
-                    @endphp
-
-                    @if($totalPolicies > 0)
-                        {{-- Summary Bar --}}
-                        <div class="px-3 py-2 border-bottom bg-light-subtle">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <small class="text-muted fw-semibold">Overall Compliance</small>
-                                <span class="fw-bold {{ $complianceRate >= 80 ? 'text-success' : ($complianceRate >= 50 ? 'text-warning' : 'text-danger') }}">
-                                    {{ $complianceRate }}%
-                                </span>
-                            </div>
-                            <div class="progress mb-2" style="height: 6px; border-radius: 4px;">
-                                <div class="progress-bar {{ $complianceRate >= 80 ? 'bg-success' : ($complianceRate >= 50 ? 'bg-warning' : 'bg-danger') }}"
-                                    style="width: {{ $complianceRate }}%; transition: width 0.8s ease;"></div>
-                            </div>
-                            <div class="d-flex gap-3">
-                                <span class="small"><i class="fas fa-check-circle text-success me-1"></i>{{ $metPolicies }} Met</span>
-                                <span class="small"><i class="fas fa-times-circle text-danger me-1"></i>{{ $failedPolicies }} Failed</span>
-                                @if($naPolicies > 0)
-                                    <span class="small"><i class="fas fa-minus-circle text-secondary me-1"></i>{{ $naPolicies }} N/A</span>
-                                @endif
+                    @if(!($data['evaluation_settings']['eval_policies'] ?? true))
+                        <div class="card-body p-0">
+                            <div class="text-center py-5 px-3">
+                                <i class="fas fa-lock fs-2 text-muted opacity-50 mb-3 d-block"></i>
+                                <p class="text-muted mb-1 fw-semibold">No Permission</p>
+                                <small class="text-muted">Policy evaluation is disabled for this agent's role.</small>
+                                @can('evaluationroles.view')
+                                <div class="mt-3">
+                                    <a href="{{ route('user.evaluation_roles.index') }}" class="btn btn-sm btn-outline-primary">Manage Roles</a>
+                                </div>
+                                @endcan
                             </div>
                         </div>
-                    @endif
+                    @else
+                        @php
+                            $totalPolicies   = count($policyCompliance);
+                            $metPolicies     = collect($policyCompliance)->filter(fn($i) => !str_contains(strtolower($i['evaluation'] ?? ''), 'not') || str_contains(strtolower($i['evaluation'] ?? ''), 'applicable'))->count();
+                            $failedPolicies  = collect($policyCompliance)->filter(fn($i) => str_contains(strtolower($i['evaluation'] ?? ''), 'does not meet'))->count();
+                            $naPolicies      = collect($policyCompliance)->filter(fn($i) => str_contains(strtolower($i['evaluation'] ?? ''), 'not applicable'))->count();
+                            $metPolicies     = $totalPolicies - $failedPolicies - $naPolicies;
+                            $complianceRate  = $totalPolicies > 0 ? round(($metPolicies / $totalPolicies) * 100) : 0;
+                        @endphp
 
-                    <div class="card-body p-0">
-                        @if(empty($policyCompliance))
+                        @if($totalPolicies > 0)
+                            {{-- Summary Bar --}}
+                            <div class="px-3 py-2 border-bottom bg-light-subtle">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted fw-semibold">Overall Compliance</small>
+                                    <span class="fw-bold {{ $complianceRate >= 80 ? 'text-success' : ($complianceRate >= 50 ? 'text-warning' : 'text-danger') }}">
+                                        {{ $complianceRate }}%
+                                    </span>
+                                </div>
+                                <div class="progress mb-2" style="height: 6px; border-radius: 4px;">
+                                    <div class="progress-bar {{ $complianceRate >= 80 ? 'bg-success' : ($complianceRate >= 50 ? 'bg-warning' : 'bg-danger') }}"
+                                        style="width: {{ $complianceRate }}%; transition: width 0.8s ease;"></div>
+                                </div>
+                                <div class="d-flex gap-3">
+                                    <span class="small"><i class="fas fa-check-circle text-success me-1"></i>{{ $metPolicies }} Met</span>
+                                    <span class="small"><i class="fas fa-times-circle text-danger me-1"></i>{{ $failedPolicies }} Failed</span>
+                                    @if($naPolicies > 0)
+                                        <span class="small"><i class="fas fa-minus-circle text-secondary me-1"></i>{{ $naPolicies }} N/A</span>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="card-body p-0">
+                            @if(empty($policyCompliance))
                             <div class="text-center py-5 px-3">
                                 @if(isset($data['needs_evaluation']) && $data['needs_evaluation'])
                                     <i class="fas fa-robot fs-2 text-muted opacity-50 mb-3 d-block"></i>
@@ -1305,9 +1458,10 @@
                                 @endforeach
                             </div>
                         @endif
-                    </div>
-                </div>
-            </div>
+                    </div>{{-- /.card-body --}}
+                    @endif{{-- /eval_policies --}}
+                </div>{{-- /.card --}}
+            </div>{{-- /.col --}}
 
 
             <div class="col-lg-6">
@@ -1445,7 +1599,9 @@
                     <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center p-3">
                         <div class="d-flex align-items-center">
                             <h6 class="fw-bold mb-0 me-3">🚩 Company Risk Assessment</h6>
-                            @if(strtolower($riskFlag) === 'yes')
+                            @if(!($data['evaluation_settings']['eval_risks'] ?? true))
+                                <span class="badge bg-secondary opacity-50 rounded-pill px-3 py-1"><i class="fas fa-lock me-1"></i>RESTRICTED</span>
+                            @elseif(strtolower($riskFlag) === 'yes')
                                 <span class="badge bg-danger rounded-pill px-3 py-1">Risk Detected</span>
                             @else
                                 <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1">Secure</span>
@@ -1454,7 +1610,18 @@
                         <div class="info-icon text-secondary" data-bs-toggle="tooltip" title="Automated check against predefined company risk flags">i</div>
                     </div>
                     <div class="card-body p-4">
-                        @if(empty($riskAssessment) || !collect($riskAssessment)->contains('detected', true))
+                        @if(!($data['evaluation_settings']['eval_risks'] ?? true))
+                            <div class="text-center py-5 px-3">
+                                <i class="fas fa-lock fs-2 text-muted opacity-50 mb-3 d-block"></i>
+                                <p class="text-muted mb-1 fw-semibold">No Permission</p>
+                                <small class="text-muted">Company Risk assessment is disabled for this agent's role.</small>
+                                @can('evaluationroles.view')
+                                <div class="mt-3">
+                                    <a href="{{ route('user.evaluation_roles.index') }}" class="btn btn-sm btn-outline-primary">Manage Roles</a>
+                                </div>
+                                @endcan
+                            </div>
+                        @elseif(empty($riskAssessment) || !collect($riskAssessment)->contains('detected', true))
                             <div class="text-center py-4">
                                 <i class="bi bi-shield-check text-success fs-1 mb-3 d-block"></i>
                                 <p class="text-muted mb-0 fw-medium">No company risks detected in this conversation.</p>

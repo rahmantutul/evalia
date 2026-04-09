@@ -2,7 +2,6 @@
 @push('styles')
     <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
     <!-- Custom CSS -->
     <style>
         :root {
@@ -465,11 +464,16 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="bg-primary p-3 d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center text-white">
+                <div class="d-flex align-items-center text-black">
                     <i class="bi bi-cpu-fill me-2 fs-5"></i>
-                    <h6 class="modal-title mb-0 fw-bold text-black">AI Extraction Intelligence</h6>
+                    <h6 class="modal-title mb-0 fw-bold">AI Extraction Intelligence</h6>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-dark btn-sm rounded-circle d-flex align-items-center justify-content-center shadow-sm" id="add-extraction-group-btn" style="width: 32px; height: 32px;" title="Add New Group">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
             </div>
             
             <div class="modal-body p-0 bg-light" style="max-height: 70vh; overflow-y: auto;">
@@ -508,32 +512,68 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
         const extractionContainer = document.getElementById('extraction-configs-container');
         let groupCounter = 0;
 
-        function createExtractionRule(groupId, rule = {type: 'string', description: ''}) {
+        function createExtractionRule(groupId, rule = {type: 'string', description: '', options: []}) {
             const ruleId = Math.random().toString(36).substr(2, 9);
+            const hasOptions = rule.options && rule.options.length > 0;
             const div = document.createElement('div');
-            div.className = 'extraction-rule d-flex gap-2 mb-2 animate-fade';
+            div.className = 'extraction-rule mb-3 animate-fade';
             
             div.innerHTML = `
-                <div class="bg-light rounded-3 p-2 flex-grow-1 border">
-                    <div class="row g-2 align-items-center">
-                        <div class="col-md-3">
-                            <select class="form-select form-select-sm border-0 bg-transparent text-primary fw-bold rule-type">
-                                <option value="string" ${rule.type === 'string' ? 'selected' : ''}>Text</option>
-                                <option value="integer" ${rule.type === 'integer' ? 'selected' : ''}>Number</option>
-                                <option value="boolean" ${rule.type === 'boolean' ? 'selected' : ''}>Yes/No</option>
-                                <option value="date" ${rule.type === 'date' ? 'selected' : ''}>Date</option>
-                                <option value="json" ${rule.type === 'json' ? 'selected' : ''}>JSON</option>
-                            </select>
-                        </div>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control form-control-sm border-0 bg-transparent rule-description" placeholder="Description..." value="${rule.description}">
+                <div class="d-flex gap-2">
+                    <div class="bg-light rounded-3 p-2 flex-grow-1 border">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-3 border-end">
+                                <select class="form-select form-select-sm border-0 bg-transparent text-primary fw-bold rule-type">
+                                    <option value="string" ${rule.type === 'string' ? 'selected' : ''}>Text</option>
+                                    <option value="integer" ${rule.type === 'integer' ? 'selected' : ''}>Number</option>
+                                    <option value="boolean" ${rule.type === 'boolean' ? 'selected' : ''}>Yes/No</option>
+                                    <option value="date" ${rule.type === 'date' ? 'selected' : ''}>Date</option>
+                                    <option value="json" ${rule.type === 'json' ? 'selected' : ''}>JSON</option>
+                                </select>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="d-flex align-items-center">
+                                    <input type="text" class="form-control form-control-sm border-0 bg-transparent rule-description flex-grow-1" placeholder="What to extract (e.g. Customer City)..." value="${rule.description}">
+                                    <button type="button" class="btn btn-xs ${hasOptions ? 'btn-primary' : 'btn-outline-secondary'} rounded-pill ms-2 options-btn" style="font-size: 10px; padding: 2px 8px;">
+                                        <i class="bi ${hasOptions ? 'bi-check-circle-fill' : 'bi-plus-circle'} me-1"></i>
+                                        ${hasOptions ? '' : ''}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <button type="button" class="btn btn-sm text-danger remove-rule-btn px-2">
+                        <i class="bi bi-trash3-fill"></i>
+                    </button>
                 </div>
-                <button type="button" class="btn btn-sm text-danger remove-rule-btn px-2">
-                    <i class="bi bi-x-circle-fill"></i>
-                </button>
+                <div class="options-container mt-2 ps-3 ${hasOptions ? '' : 'd-none'}">
+                    <div class="bg-white border rounded-3 p-2 shadow-sm">
+                        <label class="fs-9 text-uppercase fw-bold text-muted mb-1 d-block">Define Allowed Values (Strict Mapping)</label>
+                        <textarea class="form-control form-control-sm border-0 bg-light rule-options" placeholder="Enter options separated by commas (e.g. Riyadh, Dubai, Cairo)..." rows="1">${rule.options ? rule.options.join(', ') : ''}</textarea>
+                    </div>
+                </div>
             `;
+
+            const optionsBtn = div.querySelector('.options-btn');
+            const optionsContainer = div.querySelector('.options-container');
+            const optionsInput = div.querySelector('.rule-options');
+
+            optionsBtn.addEventListener('click', () => {
+                const isHidden = optionsContainer.classList.contains('d-none');
+                optionsContainer.classList.toggle('d-none');
+                
+                if (isHidden) {
+                    optionsBtn.classList.replace('btn-outline-secondary', 'btn-primary');
+                    optionsBtn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>';
+                    optionsInput.focus();
+                } else {
+                    // Check if it's empty, then reset
+                    if (!optionsInput.value.trim()) {
+                        optionsBtn.classList.replace('btn-primary', 'btn-outline-secondary');
+                        optionsBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i>';
+                    }
+                }
+            });
 
             div.querySelector('.remove-rule-btn').addEventListener('click', () => {
                 div.style.opacity = '0';
@@ -543,18 +583,27 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
             return div;
         }
 
-        function createExtractionGroup(groupData = {agent_ids: [], extractions: []}) {
+        function createExtractionGroup(groupData = {group_name: '', agent_ids: [], extractions: []}, placement = 'append') {
             const groupIdx = ++groupCounter;
             const groupId = `group_${groupIdx}`;
             const div = document.createElement('div');
-            div.className = 'extraction-group bg-white border-0 rounded-4 shadow-sm overflow-hidden animate-fade';
+            div.className = 'extraction-group bg-white border-0 rounded-4 shadow-sm overflow-hidden animate-fade mb-4';
             
             div.innerHTML = `
-                <div class="p-3 border-bottom bg-white">
-                    <div class="w-100">
-                        <label class="form-label fs-8 text-uppercase fw-bold text-muted mb-1">Assign to Agents</label>
-                        <div class="w-100"><input class="agent-selector-input"></div>
+                <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="mb-3">
+                            <label class="form-label fs-8 text-uppercase fw-bold text-muted mb-1">Group Name</label>
+                            <input type="text" class="form-control form-control-sm border-0 border-bottom bg-transparent fw-bold group-name-input" placeholder="e.g., Sales Group..." value="${groupData.group_name || ''}">
+                        </div>
+                        <div>
+                            <label class="form-label fs-8 text-uppercase fw-bold text-muted mb-1">Assign to Agents</label>
+                            <div class="w-100"><input class="agent-selector-input"></div>
+                        </div>
                     </div>
+                    <button type="button" class="btn btn-sm text-danger remove-group-btn ms-2 pt-4">
+                        <i class="bi bi-trash3-fill"></i>
+                    </button>
                 </div>
                 <div class="p-4 bg-white">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -578,7 +627,9 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
             });
 
             if (groupData.agent_ids && groupData.agent_ids.length > 0) {
-                const selectedAgents = companyAgents.filter(a => groupData.agent_ids.includes(a.id));
+                // Ensure type-safe comparison (convert everything to String)
+                const storedIds = groupData.agent_ids.map(String);
+                const selectedAgents = companyAgents.filter(a => storedIds.includes(String(a.id)));
                 tagify.addTags(selectedAgents);
             }
 
@@ -586,14 +637,30 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
 
             addRuleBtn.addEventListener('click', () => rulesContainer.appendChild(createExtractionRule(groupId)));
 
+            div.querySelector('.remove-group-btn').addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete this group?')) {
+                    div.style.opacity = '0';
+                    div.style.transform = 'translateY(10px)';
+                    setTimeout(() => div.remove(), 250);
+                }
+            });
+
             if (groupData.extractions && groupData.extractions.length > 0) {
                 groupData.extractions.forEach(rule => rulesContainer.appendChild(createExtractionRule(groupId, rule)));
             } else {
                 rulesContainer.appendChild(createExtractionRule(groupId));
             }
 
-            extractionContainer.appendChild(div);
+            if (placement === 'prepend') {
+                extractionContainer.prepend(div);
+            } else {
+                extractionContainer.appendChild(div);
+            }
         }
+
+        document.getElementById('add-extraction-group-btn').addEventListener('click', () => {
+            createExtractionGroup(undefined, 'prepend');
+        });
 
         // Initialize from existing or create fresh
         if (extractionConfigs && extractionConfigs.length > 0) {
@@ -604,21 +671,54 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
 
         document.getElementById('save-extraction-configs').addEventListener('click', async () => {
             const groups = [];
-            document.querySelectorAll('.extraction-group').forEach(groupDiv => {
+            let isValid = true;
+            
+            const groupDivs = document.querySelectorAll('.extraction-group');
+            
+            groupDivs.forEach(groupDiv => {
+                // Clear any previous error highlighting
+                groupDiv.classList.remove('border', 'border-danger');
+                
+                const group_name = groupDiv.querySelector('.group-name-input').value.trim();
                 const agentIds = groupDiv.tagify.value.map(tag => tag.id);
                 const extractions = [];
+                
                 groupDiv.querySelectorAll('.extraction-rule').forEach(ruleDiv => {
                     const type = ruleDiv.querySelector('.rule-type').value;
                     const description = ruleDiv.querySelector('.rule-description').value.trim();
+                    const optionsContainer = ruleDiv.querySelector('.options-container'); 
+                    const optionsRaw = ruleDiv.querySelector('.rule-options').value.trim();
+                    
                     if (description) {
-                        extractions.push({ type, description });
+                        const ruleData = { type, description };
+                        // Check if container is visible instead of non-existent checkbox
+                        if (!optionsContainer.classList.contains('d-none') && optionsRaw) {
+                            ruleData.options = optionsRaw.split(',').map(o => o.trim()).filter(o => o.length > 0);
+                        }
+                        extractions.push(ruleData);
                     }
                 });
 
-                if (agentIds.length > 0 && extractions.length > 0) {
-                    groups.push({ agent_ids: agentIds, extractions });
+                // Validation: A group must have agents AND extractions
+                if (agentIds.length === 0 || extractions.length === 0) {
+                    isValid = false;
+                    groupDiv.classList.add('border', 'border-danger');
+                    groupDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
                 }
+
+                groups.push({ group_name, agent_ids: agentIds, extractions });
             });
+
+            if (!isValid) {
+                alert('Each group must have at least one assigned agent and one extraction rule.');
+                return;
+            }
+
+            if (groups.length === 0 && groupDivs.length > 0) {
+                 alert('Please complete the extraction groups before saving.');
+                 return;
+            }
 
             // Update local hidden input for form persistence
             configInput.value = JSON.stringify(groups);

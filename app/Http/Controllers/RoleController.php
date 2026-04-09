@@ -125,6 +125,7 @@ class RoleController extends Controller
             'knowledgebase' => ['label' => 'Knowledge Base',     'icon' => 'fas fa-brain',            'color' => 'primary'],
             'tasks'         => ['label' => 'Tasks / Calls',      'icon' => 'fas fa-phone-alt',        'color' => 'secondary'],
             'reports'       => ['label' => 'Reports',            'icon' => 'fas fa-chart-bar',        'color' => 'dark'],
+            'evaluationroles' => ['label' => 'Evaluation Roles', 'icon' => 'fas fa-user-shield',      'color' => 'warning'],
         ];
 
         $grouped = [];

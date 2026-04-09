@@ -31,6 +31,7 @@ class UserController extends Controller
     {
         $companies = Company::all();
         $type = $request->get('type', 'user');
+        $evaluationRoles = collect([]);
         
         if ($type === 'agent') {
             // No roles needed for agent creation UI as it's auto-assigned
@@ -42,7 +43,17 @@ class UserController extends Controller
             $supervisors = collect([]);
         }
 
-        return view('user.users.create', compact('roles', 'companies', 'supervisors', 'type'));
+        // If company is already selected or user belongs to one
+        $selectedCompanyId = old('company_id');
+        if ($selectedCompanyId) {
+            $evaluationRoles = \App\Models\AgentEvaluationRole::where('company_id', $selectedCompanyId)
+                ->orWhereNull('company_id')
+                ->get();
+        } else {
+            $evaluationRoles = \App\Models\AgentEvaluationRole::whereNull('company_id')->get();
+        }
+
+        return view('user.users.create', compact('roles', 'companies', 'supervisors', 'type', 'evaluationRoles'));
     }
 
     public function store(Request $request)
@@ -57,6 +68,7 @@ class UserController extends Controller
             'position' => 'nullable|string',
             'phone' => 'nullable|string',
             'supervisor_id' => 'nullable',
+            'evaluation_role_id' => 'nullable|exists:agent_evaluation_roles,id',
         ]);
 
         if ($validator->fails()) {
@@ -86,6 +98,7 @@ class UserController extends Controller
                 'is_active' => true,
                 'company_id' => $request->company_id,
                 'supervisor_id' => $request->supervisor_id,
+                'evaluation_role_id' => $request->evaluation_role_id,
             ]);
 
             if ($request->type === 'agent') {
@@ -111,7 +124,7 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user = User::with('roles')->findOrFail($id);
+        $user = User::with(['roles', 'evaluationRole'])->findOrFail($id);
         // Normalize for the view which expects an array or specific keys
         $userData = $user->toSessionArray();
         return view('user.users.show', ['user' => $userData]);
@@ -119,12 +132,13 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $userModel = User::with('roles')->findOrFail($id);
+        $userModel = User::with(['roles', 'evaluationRole'])->findOrFail($id);
         $user = $userModel->toSessionArray();
         $companies = Company::all();
         
         $type = $userModel->user_type;
-        
+        $evaluationRoles = collect([]);
+
         if ($type === User::TYPE_AGENT) {
             $roles = collect([]); 
             $supervisors = User::where('user_type', User::TYPE_AGENT)->get()->map->toSessionArray();
@@ -133,7 +147,15 @@ class UserController extends Controller
             $supervisors = collect([]);
         }
 
-        return view('user.users.edit', compact('user', 'roles', 'companies', 'supervisors', 'type'));
+        if ($userModel->company_id) {
+            $evaluationRoles = \App\Models\AgentEvaluationRole::where('company_id', $userModel->company_id)
+                ->orWhereNull('company_id')
+                ->get();
+        } else {
+            $evaluationRoles = \App\Models\AgentEvaluationRole::whereNull('company_id')->get();
+        }
+
+        return view('user.users.edit', compact('user', 'roles', 'companies', 'supervisors', 'type', 'evaluationRoles'));
     }
 
     public function update(Request $request, $id)
@@ -148,6 +170,7 @@ class UserController extends Controller
             'position' => 'nullable|string',
             'phone' => 'nullable|string',
             'supervisor_id' => 'nullable',
+            'evaluation_role_id' => 'nullable|exists:agent_evaluation_roles,id',
         ]);
 
         if ($validator->fails()) {
@@ -155,7 +178,7 @@ class UserController extends Controller
         }
 
         $userType = User::TYPE_STAFF;
-        if ($request->type === 'agent') {
+        if ($request->type === User::TYPE_AGENT || $request->type === 'agent') {
             $userType = User::TYPE_AGENT;
         } else if ($request->role_id) {
             $role = Role::findById($request->role_id);
@@ -174,9 +197,10 @@ class UserController extends Controller
                 'phone' => $request->phone,
                 'company_id' => $request->company_id,
                 'supervisor_id' => $request->supervisor_id,
+                'evaluation_role_id' => $request->evaluation_role_id,
             ];
             
-            if ($request->type === 'agent' && !$request->supervisor_id) {
+            if (($request->type === 'agent' || $userType === User::TYPE_AGENT) && !$request->supervisor_id) {
                 $updateData['supervisor_id'] = $user->id;
             }
 
@@ -187,7 +211,7 @@ class UserController extends Controller
 
             $user->update($updateData);
 
-            if ($request->type === 'agent') {
+            if ($userType === User::TYPE_AGENT) {
                 // No role required for agents, we use user_type
             } elseif ($request->role_id) {
                 $role = Role::findById($request->role_id);
@@ -260,5 +284,21 @@ class UserController extends Controller
         $supervisorRole = Role::where('name', 'Supervisor')->first();
         $supervisors = $supervisorRole ? User::role('Supervisor')->get() : collect([]);
         return response()->json($supervisors);
+    }
+
+    public function getEvaluationRoles(Request $request)
+    {
+        $companyId = $request->get('company_id');
+        
+        $query = \App\Models\AgentEvaluationRole::query();
+        
+        if ($companyId) {
+            $query->where('company_id', $companyId)->orWhereNull('company_id');
+        } else {
+            $query->whereNull('company_id');
+        }
+        
+        $roles = $query->get();
+        return response()->json($roles);
     }
 }

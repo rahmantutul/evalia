@@ -32,7 +32,7 @@ class VoicePintController extends Controller
     {
         $directory = public_path('uploads/voice-pints');
         $files = [];
-        $groups = []; // voice_id => [files...]
+        $groups = [];
         
         if (file_exists($directory)) {
             $allFiles = array_diff(scandir($directory), ['.', '..']);
@@ -79,25 +79,29 @@ class VoicePintController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'audio' => 'required|mimes:mp3,wav|max:102400', 
+            'audio' => 'required|array|max:5',
+            'audio.*' => 'required|mimes:mp3,wav|max:8192', // 8MB per file
         ]);
 
-        // Increase maximum execution time (Both pre-processing and identification can be slow)
-        set_time_limit(600);
+        // Increase maximum execution time for batch processing
+        set_time_limit(900);
 
-        if ($request->hasFile('audio')) {
-            $file = $request->file('audio');
+        $files = $request->file('audio');
+        $results = [];
+        $errors = [];
+
+        $tempDirectory = public_path('uploads/voice-pints');
+        if (!file_exists($tempDirectory)) {
+            mkdir($tempDirectory, 0755, true);
+        }
+
+        foreach ($files as $file) {
             $timestamp = time();
             $originalFileName = $timestamp . '_' . $file->getClientOriginalName();
-            
-            $tempDirectory = public_path('uploads/voice-pints');
-            if (!file_exists($tempDirectory)) {
-                mkdir($tempDirectory, 0755, true);
-            }
+            $localFilePath = $tempDirectory . '/' . $originalFileName;
 
             // Save original upload locally for processing
             $file->move($tempDirectory, $originalFileName);
-            $localFilePath = $tempDirectory . '/' . $originalFileName;
 
             try {
                 // 1. Send to port 8001 (Pre-Processing API) - Trims the audio
@@ -117,47 +121,24 @@ class VoicePintController extends Controller
                 }
                 $finalPath = $tempDirectory . '/' . $finalFileName;
 
-                // 4. TRANSCRIPTION LOGIC (Using Hamsa & DB for reference)
-                $currentTranscription = null;
-                $referenceTranscription = null;
-                
-                try {
-                    // A. Transcribe CURRENT file
-                    $currentTranscription = $this->getOrTranscribeFile($finalFileName, $finalPath, $matchedId);
-
-                    // B. If MATCHED, find and ensure reference transcription exists
-                    if ($matchedId) {
-                        // Find the first/reference recording for this identity (excluding the one we just made)
-                        $allFilesInDir = array_diff(scandir($tempDirectory), ['.', '..']);
-                        $otherFiles = [];
-                        foreach ($allFilesInDir as $f) {
-                            if (str_starts_with($f, $matchedId . '_') && $f !== $finalFileName) {
-                                $otherFiles[] = $f;
-                            }
-                        }
-
-                        if (!empty($otherFiles)) {
-                            // Sort by time ascending to get the EARLIEST (original) print for comparison
-                            usort($otherFiles, fn($a, $b) => filemtime($tempDirectory . '/' . $a) <=> filemtime($tempDirectory . '/' . $b));
-                            $referenceFile = $otherFiles[0];
-                            $referencePath = $tempDirectory . '/' . $referenceFile;
-                            
-                            // Get or Transcribe the reference file
-                            $referenceTranscription = $this->getOrTranscribeFile($referenceFile, $referencePath, $matchedId);
+                // Reference Audio Logic
+                $referenceFileUrl = null;
+                if ($matchedId) {
+                    $allFilesInDir = array_diff(scandir($tempDirectory), ['.', '..']);
+                    $otherFiles = [];
+                    foreach ($allFilesInDir as $f) {
+                        if (str_starts_with($f, $matchedId . '_') && $f !== $finalFileName) {
+                            $otherFiles[] = $f;
                         }
                     }
-
-                    // C. GPT SCORING (Structure ready for prompt)
-                    if ($currentTranscription && $referenceTranscription) {
-                        // $gptMatch = $this->openai->compareTranscriptions($currentTranscription, $referenceTranscription);
-                        // session(['gpt_match' => $gptMatch]);
+                    if (!empty($otherFiles)) {
+                        usort($otherFiles, fn($a, $b) => filemtime($tempDirectory . '/' . $a) <=> filemtime($tempDirectory . '/' . $b));
+                        $referenceFile = $otherFiles[0];
+                        $referenceFileUrl = route('user.voice-pint.stream', $referenceFile);
                     }
-
-                } catch (Exception $transEx) {
-                    Log::warning('Transcription Pipeline Error: ' . $transEx->getMessage());
                 }
 
-                // 5. History grouping for matches
+                // History grouping
                 $relatedFiles = [];
                 if (isset($matchedId)) {
                     $allFilesInDir = array_diff(scandir($tempDirectory), ['.', '..']);
@@ -172,32 +153,44 @@ class VoicePintController extends Controller
                     }
                 }
 
-                // Cleanup: Delete original upload as we now have the processed WAV
+                // Cleanup original
                 if (file_exists($localFilePath)) {
                     unlink($localFilePath);
                 }
 
-                return back()->with('success', 'Processing and identification complete!')
-                             ->with('file_url', route('user.voice-pint.stream', $finalFileName))
-                             ->with('voice_info', $voiceInfo)
-                             ->with('related_files', $relatedFiles)
-                             ->with('hamsa_response', $currentTranscription) // Showing latest for UI
-                             ->with('reference_response', $referenceTranscription); 
+                $results[] = [
+                    'file_url'           => route('user.voice-pint.stream', $finalFileName),
+                    'reference_file_url' => $referenceFileUrl,
+                    'voice_info'         => $voiceInfo,
+                    'related_files'      => $relatedFiles,
+                    'filename'           => $finalFileName
+                ];
 
             } catch (Exception $e) {
-                Log::error('Voice Identification Error: ' . $e->getMessage());
-                // Clean up both the original upload and processed WAV so they don't appear in Recent Audios
-                if (file_exists($localFilePath)) {
-                    unlink($localFilePath);
-                }
-                if (isset($processedWavPath) && file_exists($processedWavPath)) {
-                    unlink($processedWavPath);
-                }
-                return back()->with('error', 'Error: ' . $e->getMessage());
+                Log::error('Voice Identification Error for ' . $file->getClientOriginalName() . ': ' . $e->getMessage());
+                if (file_exists($localFilePath)) unlink($localFilePath);
+                if (isset($processedWavPath) && file_exists($processedWavPath)) unlink($processedWavPath);
+                $errors[] = $file->getClientOriginalName() . ': ' . $e->getMessage();
             }
         }
 
-        return back()->with('error', 'Failed to upload audio.');
+        if (empty($results)) {
+            return back()->with('error', 'Failed to process any files. ' . implode(', ', $errors));
+        }
+
+        // Return with information from the last processed file for the summary card
+        $lastResult = end($results);
+        $message = count($results) . ' file(s) processed successfully.';
+        if (!empty($errors)) {
+            $message .= ' (' . count($errors) . ' failed)';
+        }
+
+        return back()->with('success', $message)
+                     ->with('batch_results', $results)
+                     ->with('file_url', $lastResult['file_url'])
+                     ->with('reference_file_url', $lastResult['reference_file_url'])
+                     ->with('voice_info', $lastResult['voice_info'])
+                     ->with('related_files', $lastResult['related_files']);
     }
 
     /**

@@ -234,6 +234,27 @@ class TaskController extends Controller
             ];
         }
 
+        // ── Always resolve the agent's CURRENT live evaluation role ──────────
+        // This overrides any stale value stored in the analysis JSON, ensuring
+        // permissions are always accurate even for tasks evaluated before this
+        // feature was introduced, or when an agent's role changes after evaluation.
+        if (!empty($task['agent_id'])) {
+            $agent = \App\Models\User::with('evaluationRole')->find($task['agent_id']);
+            $evalRole = $agent?->evaluationRole;
+            $data['evaluation_settings'] = [
+                'eval_kb'              => $evalRole ? (bool)$evalRole->eval_kb              : true,
+                'eval_policies'        => $evalRole ? (bool)$evalRole->eval_policies        : true,
+                'eval_risks'           => $evalRole ? (bool)$evalRole->eval_risks            : true,
+                'eval_extractions'     => $evalRole ? (bool)$evalRole->eval_extractions      : true,
+                'eval_professionalism' => $evalRole ? (bool)$evalRole->eval_professionalism  : true,
+                'eval_assessment'      => $evalRole ? (bool)$evalRole->eval_assessment       : true,
+                'eval_cooperation'     => $evalRole ? (bool)$evalRole->eval_cooperation      : true,
+                'eval_linguistic'      => $evalRole ? (bool)$evalRole->eval_linguistic       : true,
+            ];
+            // Also refresh the role name shown in the policy alert banner
+            $data['evaluation_role_name'] = $evalRole?->name ?? $data['evaluation_role_name'] ?? null;
+        }
+
         return view('user.task.task_details', [
             'data' => $data,
             'workId' => $workId,
@@ -461,123 +482,127 @@ class TaskController extends Controller
     private function performEvaluation($taskId)
     {
         set_time_limit(0);
-        $task = \App\Models\Task::find($taskId);
+        $task = \App\Models\Task::with(['agent.evaluationRole'])->find($taskId);
         if (!$task) throw new Exception("Task not found");
 
+        $agent = $task->agent;
+        $evalRole = $agent?->evaluationRole;
+        
+        // Default settings — all true if no role assigned
+        $evalSettings = [
+            'eval_kb' => $evalRole ? (bool)$evalRole->eval_kb : true,
+            'eval_policies' => $evalRole ? (bool)$evalRole->eval_policies : true,
+            'eval_risks' => $evalRole ? (bool)$evalRole->eval_risks : true,
+            'eval_extractions' => $evalRole ? (bool)$evalRole->eval_extractions : true,
+            'eval_professionalism' => $evalRole ? (bool)$evalRole->eval_professionalism : true,
+            'eval_assessment' => $evalRole ? (bool)$evalRole->eval_assessment : true,
+            'eval_cooperation' => $evalRole ? (bool)$evalRole->eval_cooperation : true,
+            'eval_linguistic' => $evalRole ? (bool)$evalRole->eval_linguistic : true,
+        ];
+
         // ── Load KB entries for this company ─────────────────────────────
-        $kbEntries = \App\Models\KnowledgeBase::where('company_id', $task->company_id)
-            ->where('is_active', true)
-            ->select(['id', 'title', 'keywords', 'content'])
-            ->get();
+        $kbContext = '';
+        $pairResults = [];
+        
+        if ($evalSettings['eval_kb']) {
+            $kbEntries = \App\Models\KnowledgeBase::where('company_id', $task->company_id)
+                ->where('is_active', true)
+                ->select(['id', 'title', 'keywords', 'content'])
+                ->get();
 
-        $kbMapping = [];
-        foreach ($kbEntries as $entry) {
-            $kbMapping[] = [
-                'id'       => $entry->id,
-                'name'     => $entry->title,
-                'keywords' => array_map('trim', explode(',', $entry->keywords ?? ''))
-            ];
-        }
-
-        // ── Build formatted transcript ────────────────────────────────────
-        $conversation = $task->analysis['conversation'] ?? [];
-        $transcriptFormatted = '';
-        foreach ($conversation as $turn) {
-            $speaker = $turn['speaker'] ?? 'Unknown';
-            $text    = $turn['text']    ?? '';
-            $transcriptFormatted .= "{$speaker}: {$text}\n";
-        }
-        if (empty($transcriptFormatted)) {
-            $transcriptFormatted = $task->transcription;
-        }
-
-        $pairs = $this->splitTranscriptIntoPairs($transcriptFormatted);
-
-        $collectedKbIds = []; 
-        $pairResults    = []; 
-
-        foreach ($pairs as $pairText) {
-            if (!empty($kbMapping)) {
-                $matchedIndices = $this->openai->identifyMatchedKnowledgeBase($pairText, $kbMapping);
-            } else {
-                $matchedIndices = [];
+            $kbMapping = [];
+            foreach ($kbEntries as $entry) {
+                $kbMapping[] = [
+                    'id'       => $entry->id,
+                    'name'     => $entry->title,
+                    'keywords' => array_map('trim', explode(',', $entry->keywords ?? ''))
+                ];
             }
 
-            $pairKbIds = [];
-            foreach ($matchedIndices as $index) {
-                if (isset($kbMapping[$index])) {
-                    $id = $kbMapping[$index]['id'];
-                    $pairKbIds[] = $id;
-                    if (!in_array($id, $collectedKbIds)) {
-                        $collectedKbIds[] = $id;
+            // ── Build formatted transcript ────────────────────────────────────
+            $conversation = $task->analysis['conversation'] ?? [];
+            $transcriptFormatted = '';
+            foreach ($conversation as $turn) {
+                $speaker = $turn['speaker'] ?? 'Unknown';
+                $text    = $turn['text']    ?? '';
+                $transcriptFormatted .= "{$speaker}: {$text}\n";
+            }
+            if (empty($transcriptFormatted)) {
+                $transcriptFormatted = $task->transcription;
+            }
+
+            $pairs = $this->splitTranscriptIntoPairs($transcriptFormatted);
+
+            $collectedKbIds = []; 
+
+            foreach ($pairs as $pairText) {
+                if (!empty($kbMapping)) {
+                    $matchedIndices = $this->openai->identifyMatchedKnowledgeBase($pairText, $kbMapping);
+                } else {
+                    $matchedIndices = [];
+                }
+
+                $pairKbIds = [];
+                foreach ($matchedIndices as $index) {
+                    if (isset($kbMapping[$index])) {
+                        $id = $kbMapping[$index]['id'];
+                        $pairKbIds[] = $id;
+                        if (!in_array($id, $collectedKbIds)) {
+                            $collectedKbIds[] = $id;
+                        }
                     }
                 }
+
+                $pairResults[] = [
+                    'pair_text'      => $pairText,
+                    'matched_kb_ids' => $pairKbIds,
+                ];
             }
 
-            $pairResults[] = [
-                'pair_text'      => $pairText,
-                'matched_kb_ids' => $pairKbIds,
-            ];
-        }
+            Log::info("[Stage 1] Matched KB IDs across all pairs: " . implode(', ', $collectedKbIds));
 
-        Log::info("[Stage 1] Matched KB IDs across all pairs: " . implode(', ', $collectedKbIds));
+            foreach ($collectedKbIds as $kbId) {
+                $kb = $kbEntries->firstWhere('id', $kbId);
+                if (!$kb) continue;
 
-        // ── STAGE 2: Build pair-aware KB context for the evaluator ────────
-        //
-        // Format fed to GPT:
-        //
-        //   === NOTEBOOK: Return Policy ===
-        //   <content>
-        //   Reference Pairs:
-        //     Pair 1: Customer: ... / Agent: ...
-        //
-        //   === NOTEBOOK: Pricing Plans ===
-        //   <content>
-        //   Reference Pairs:
-        //     Pair 2: Customer: ... / Agent: ...
-        //
-        // This lets GPT know exactly which part of the transcript to check
-        // against which KB entry.
+                $kbContext .= "=== NOTEBOOK: {$kb->title} ===\n";
+                $kbContext .= $kb->content . "\n";
+                $kbContext .= "Reference Pairs:\n";
 
-        $kbContext = '';
-
-        foreach ($collectedKbIds as $kbId) {
-            $kb = $kbEntries->firstWhere('id', $kbId);
-            if (!$kb) continue;
-
-            $kbContext .= "=== NOTEBOOK: {$kb->title} ===\n";
-            $kbContext .= $kb->content . "\n";
-            $kbContext .= "Reference Pairs:\n";
-
-            foreach ($pairResults as $pairIndex => $pair) {
-                if (in_array($kbId, $pair['matched_kb_ids'])) {
-                    $shortPair = mb_substr(trim($pair['pair_text']), 0, 300);
-                    $kbContext .= "  Pair " . ($pairIndex + 1) . ": " . $shortPair . "\n";
+                foreach ($pairResults as $pairIndex => $pair) {
+                    if (in_array($kbId, $pair['matched_kb_ids'])) {
+                        $shortPair = mb_substr(trim($pair['pair_text']), 0, 300);
+                        $kbContext .= "  Pair " . ($pairIndex + 1) . ": " . $shortPair . "\n";
+                    }
                 }
+                $kbContext .= "\n";
             }
 
-            $kbContext .= "\n";
-        }
-
-        if (empty($kbContext)) {
-            $kbContext = "No specific knowledge base content matched this conversation.";
+            if (empty($kbContext)) {
+                $kbContext = "No specific knowledge base content matched this conversation.";
+            }
         }
 
         // 2. Get Company Policies & Risks — filter out empty/placeholder lines
         $company      = \App\Models\Company::find($task->company_id);
-        $rawPolicies  = $company->company_policies ?? [];
-        $rawRisks     = $company->company_risks ?? [];
+        $policies = [];
+        $risks = [];
 
-        // Strip blank entries and obvious placeholders
-        $policies = array_values(array_filter($rawPolicies, function ($p) {
-            $p = trim((string) $p);
-            return strlen($p) > 5 && !preg_match('/^policy\s*\d+$/i', $p);
-        }));
+        if ($evalSettings['eval_policies']) {
+            $rawPolicies  = $company->company_policies ?? [];
+            $policies = array_values(array_filter($rawPolicies, function ($p) {
+                $p = trim((string) $p);
+                return strlen($p) > 5 && !preg_match('/^policy\s*\d+$/i', $p);
+            }));
+        }
 
-        $risks = array_values(array_filter($rawRisks, function ($p) {
-            $p = trim((string) $p);
-            return strlen($p) > 5 && !preg_match('/^risk\s*\d+$/i', $p);
-        }));
+        if ($evalSettings['eval_risks']) {
+            $rawRisks     = $company->company_risks ?? [];
+            $risks = array_values(array_filter($rawRisks, function ($p) {
+                $p = trim((string) $p);
+                return strlen($p) > 5 && !preg_match('/^risk\s*\d+$/i', $p);
+            }));
+        }
 
         // Build extra company context to help GPT understand evaluation scope
         $companyContext = '';
@@ -596,19 +621,30 @@ class TaskController extends Controller
 
         // 3. Get Extractions for this agent
         $extractions = [];
-        $rawExtractionGroups = $company->data_extraction_config ?? [];
-        foreach ($rawExtractionGroups as $group) {
-            // Check if this task's agent is in the group of agents for these extractions
-            if (isset($group['agent_ids']) && is_array($group['agent_ids']) && in_array($task->agent_id, $group['agent_ids'])) {
-                $extractions = array_merge($extractions, $group['extractions'] ?? []);
+        if ($evalSettings['eval_extractions']) {
+            $rawExtractionGroups = $company->data_extraction_config ?? [];
+            foreach ($rawExtractionGroups as $group) {
+                if (isset($group['agent_ids']) && is_array($group['agent_ids']) && in_array($task->agent_id, $group['agent_ids'])) {
+                    $extractions = array_merge($extractions, $group['extractions'] ?? []);
+                }
             }
         }
 
-        Log::info("[performEvaluation] Task #{$task->id} — Policies count: " . count($policies) . ", Risks count: " . count($risks) . ", Extractions count: " . count($extractions), [
-            'policies' => $policies,
-            'risks' => $risks,
-            'extractions' => $extractions,
-            'company_context' => $companyContext,
+        // ── Ensure Transcript is available for final prompt ─────────────────
+        $transcriptFormatted = '';
+        $conversation = $task->analysis['conversation'] ?? [];
+        foreach ($conversation as $turn) {
+            $speaker = $turn['speaker'] ?? 'Unknown';
+            $text    = $turn['text']    ?? '';
+            $transcriptFormatted .= "{$speaker}: {$text}\n";
+        }
+        if (empty($transcriptFormatted)) {
+            $transcriptFormatted = $task->transcription;
+        }
+
+        Log::info("[performEvaluation] Task #{$task->id} — Policies: " . count($policies) . ", Risks: " . count($risks) . ", Extractions: " . count($extractions), [
+            'settings' => $evalSettings,
+            'role' => $evalRole->name ?? 'None',
         ]);
 
         Log::info("Stage 2: Performing deep evaluation for task {$task->id}");
@@ -618,7 +654,8 @@ class TaskController extends Controller
             $policies,
             $companyContext,
             $risks,
-            $extractions
+            $extractions,
+            $evalSettings
         );
 
         // 4. Update task analysis with GPT result
@@ -669,6 +706,8 @@ class TaskController extends Controller
         $analysis['kb_mapping_used']  = $kbContext;
         $analysis['kb_pair_results']   = $pairResults;  // pair-level KB breakdown
         $analysis['gpt_evaluation']    = $gptResponse;
+        $analysis['evaluation_settings'] = $evalSettings;
+        $analysis['evaluation_role_name'] = $evalRole->name ?? 'Default';
 
         // Calculate average score from the 3 sections
         $scores = [
@@ -1227,6 +1266,7 @@ class TaskController extends Controller
         });
         
         $counts = array_count_values($filteredWords);
+        
         arsort($counts);
         
         $result = [];
@@ -1241,43 +1281,81 @@ class TaskController extends Controller
     {
         $user = auth()->user();
         
-        // Fetch all agents possible
-        $query = User::where('user_type', User::TYPE_AGENT);
-        if ($user->company_id && !$user->isAdmin()) {
-            $query->where('company_id', $user->company_id);
+        // Fetch all agents (Open for all users as requested)
+        $agents = User::where('user_type', User::TYPE_AGENT)->get();
+
+        // Get extraction groups from ALL companies to build unified filters
+        $allCompanies = \App\Models\Company::whereNotNull('data_extraction_config')->get();
+        $allGroups = [];
+        $groupNames = [];
+        
+        foreach ($allCompanies as $comp) {
+            $compGroups = $comp->data_extraction_config ?? [];
+            if (is_array($compGroups)) {
+                foreach ($compGroups as $g) {
+                    $name = is_array($g) ? ($g['group_name'] ?? null) : ($g->group_name ?? null);
+                    if ($name) {
+                        $groupNames[] = $name;
+                        // Store the group with its agent ids for filtering later
+                        $allGroups[] = $g;
+                    }
+                }
+            }
         }
-        $agents = $query->get();
+        $groupNames = array_unique($groupNames);
 
-        // Get selected agent ID - now defaults to 'all'
+        // Get filters from request
         $selectedAgentId = $request->get('agent_id', 'all');
+        $selectedGroupName = trim($request->get('group_name', '')) ?: 'all';
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
 
-        // Fetch tasks with evaluations 
+        // Fetch tasks
         $taskQuery = Task::where('status', 'evaluated')
             ->whereNotNull('analysis')
             ->where('analysis', 'like', '%extracted_data%')
             ->with('agent')
             ->orderByDesc('created_at');
             
-        // Filter by specific agent if requested
+        // Filter by Agent
         if ($selectedAgentId !== 'all') {
             $taskQuery->where('agent_id', $selectedAgentId);
         }
 
-        // Filter by company ONLY IF the user is restricted
-        if ($user->company_id && !$user->isAdmin()) {
-            $taskQuery->where('company_id', $user->company_id);
+        // Filter by Group Name (by finding agents assigned to that group across all companies)
+        if ($selectedGroupName !== 'all') {
+            $matchingAgentIds = [];
+            foreach ($allGroups as $g) {
+                $name = is_array($g) ? ($g['group_name'] ?? null) : ($g->group_name ?? null);
+                if ($name === $selectedGroupName) {
+                    $ids = is_array($g) ? ($g['agent_ids'] ?? []) : ($g->agent_ids ?? []);
+                    $matchingAgentIds = array_merge($matchingAgentIds, (array)$ids);
+                }
+            }
+            
+            if (!empty($matchingAgentIds)) {
+                $taskQuery->whereIn('agent_id', array_unique($matchingAgentIds));
+            } else {
+                $taskQuery->where('id', 0); // No match found
+            }
         }
+
+        // Filter by Date
+        if ($startDate) {
+            $taskQuery->whereDate('created_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $taskQuery->whereDate('created_at', '<=', $endDate);
+        }
+
+
 
         $tasks = $taskQuery->get();
 
-        // Prepare data for the view
+        // Prepare data
         $extractions = [];
         foreach ($tasks as $task) {
-            $extractedData = $task->analysis['gpt_evaluation']['extracted_data'] ?? [];
-            if (empty($extractedData)) {
-                $extractedData = $task->analysis['extracted_data'] ?? [];
-            }
-            
+            $extractedData = $task->analysis['gpt_evaluation']['extracted_data'] ?? $task->analysis['extracted_data'] ?? [];
             if (!empty($extractedData)) {
                 $extractions[] = [
                     'task_id'    => $task->id,
@@ -1293,10 +1371,13 @@ class TaskController extends Controller
         }
 
         return view('user.extractions.agent_wise', [
-            'agents'          => $agents,
-            'selectedAgentId' => $selectedAgentId,
-            'extractions'     => $extractions,
-            'selectedAgent'   => $selectedAgentId !== 'all' ? User::find($selectedAgentId) : null
+            'agents'            => $agents,
+            'groupNames'        => $groupNames,
+            'selectedAgentId'   => $selectedAgentId,
+            'selectedGroupName' => $selectedGroupName,
+            'startDate'         => $startDate,
+            'endDate'           => $endDate,
+            'extractions'       => $extractions
         ]);
     }
 }

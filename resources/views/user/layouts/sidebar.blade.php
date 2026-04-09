@@ -103,11 +103,21 @@
                         </li>
                         @endcan
 
+                        {{-- Evaluation Roles --}}
+                        @can('evaluationroles.view')
+                        <li class="nav-item {{ Route::is('user.evaluation_roles.*') ? 'active' : '' }}">
+                            <a class="nav-link {{ Route::is('user.evaluation_roles.*') ? 'active' : '' }}" href="{{ route('user.evaluation_roles.index') }}">
+                                <i class="fas fa-user-shield menu-icon"></i>
+                                <span>Evaluation Roles</span>
+                            </a>
+                        </li>
+                        @endcan
+
                         {{-- Voice Pint --}}
                         <li class="nav-item {{ Route::is('user.voice-pint.*') ? 'active' : '' }}">
                             <a class="nav-link {{ Route::is('user.voice-pint.*') ? 'active' : '' }}" href="{{ route('user.voice-pint.index') }}">
                                 <i class="fas fa-microphone-alt menu-icon"></i>
-                                <span>Voice Pint</span>
+                                <span>Voice Print</span>
                             </a>
                         </li>
 
