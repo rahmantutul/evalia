@@ -23,6 +23,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TelephonyAccountController;
 use App\Http\Controllers\VoicePintController;
 use App\Http\Controllers\HamsaController;
+use Illuminate\Support\Facades\Session;
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -65,10 +66,24 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 Route::get('/', function () {
-    return redirect()->route(session()->has('user') ? 'user.home' : 'login');
+    if (session()->has('user')) {
+        return redirect()->route('user.home');
+    }
+
+    return view('landing');
 });
 
-
+Route::get('/clear-cache', function() {
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('config:clear');
+    Artisan::call('view:clear');
+    Artisan::call('storage:link');
+    Artisan::call('clear-compiled');
+    Artisan::call('optimize:clear');
+    Session::flash('msg',"Cache is cleared");
+    return redirect()->back();
+})->middleware(['auth.api', 'role:Admin'])->name('clear.cache');
 
 Route::post('/set-active-product', [HomeController::class, 'setActiveProduct'])->name('setActiveProduct');
 
@@ -183,7 +198,7 @@ Route::group(['middleware' => 'auth.api'], function () {
     Route::get('/user/company/edit/{id}', [CompanyController::class, 'companyEdit'])->name('user.company.edit');
     Route::post('/user/company/store', [CompanyController::class, 'companyStore'])->name('user.company.store');
     Route::put('/user/company/update/{id}', [CompanyController::class, 'companyUpdate'])->name('user.company.update');
-    Route::get('/user/company/delete/{id}', [CompanyController::class, 'companyDelete'])->name('user.company.delete');
+    Route::delete('/user/company/delete/{id}', [CompanyController::class, 'companyDelete'])->name('user.company.delete');
 
     // Evaluation Roles
     Route::get('/user/evaluation-roles', [\App\Http\Controllers\EvaluationRoleController::class, 'index'])->name('user.evaluation_roles.index');
@@ -233,15 +248,15 @@ Route::group(['middleware' => 'auth.api'], function () {
     Route::get('/user/knowledgeBase/details/{id}', [KnowledgeBaseController::class, 'knowledgeBaseDetails'])->name('user.knowledgeBase.details');
     Route::get('/user/knowledgeBase/edit/{id}', [KnowledgeBaseController::class, 'knowledgeBaseEdit'])->name('user.knowledgeBase.edit');
     Route::post('/user/knowledgeBase/update/{id}', [KnowledgeBaseController::class, 'knowledgeBaseUpdate'])->name('user.knowledgeBase.update');
-    Route::get('/user/knowledgeBase/delete/{id}', [KnowledgeBaseController::class, 'knowledgeBaseDelete'])->name('user.knowledgeBase.delete');
+    Route::delete('/user/knowledgeBase/delete/{id}', [KnowledgeBaseController::class, 'knowledgeBaseDelete'])->name('user.knowledgeBase.delete');
     Route::get('/user/knowledgeBase/simulator', [KnowledgeBaseController::class, 'kbSimulator'])->name('user.knowledgeBase.simulator');
     Route::post('/user/knowledgeBase/simulator', [KnowledgeBaseController::class, 'kbSimulatorRun'])->name('user.knowledgeBase.simulator.run');
 
     Route::prefix('voice-pint')->name('user.voice-pint.')->group(function () {
         Route::get('/', [VoicePintController::class, 'index'])->name('index');
         Route::post('/upload', [VoicePintController::class, 'upload'])->name('upload');
-        Route::get('/delete/{filename}', [VoicePintController::class, 'delete'])->name('delete');
-        Route::get('/clear-all', [VoicePintController::class, 'deleteAll'])->name('clear-all');
+        Route::delete('/delete/{filename}', [VoicePintController::class, 'delete'])->name('delete');
+        Route::delete('/clear-all', [VoicePintController::class, 'deleteAll'])->name('clear-all');
         Route::get('/stream/{filename}', [VoicePintController::class, 'stream'])->name('stream');
     });
 

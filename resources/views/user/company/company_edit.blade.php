@@ -150,6 +150,203 @@
         .fs-7 { font-size: 0.875rem; }
         .fs-8 { font-size: 0.75rem; }
         .italic { font-style: italic; }
+
+        @media (max-width: 767.98px) {
+            .company-edit-page {
+                padding-bottom: 1rem !important;
+            }
+
+            .company-edit-page .container-fluid {
+                padding: 0.4rem !important;
+            }
+
+            /* Card */
+            .company-edit-page .card {
+                border-radius: 12px;
+                box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+            }
+
+            /* Header */
+            .company-edit-page .card-header {
+                padding: 0.8rem !important;
+                border-radius: 12px 12px 0 0 !important;
+            }
+
+            .company-edit-page .card-header .d-flex.justify-content-between {
+                flex-direction: column;
+                gap: 0.6rem;
+            }
+
+            .company-edit-page .card-header .d-flex.align-items-center {
+                gap: 0.6rem;
+                align-items: center !important;
+            }
+
+            .company-edit-page .icon-wrapper {
+                padding: 0.5rem !important;
+                border-radius: 8px !important;
+            }
+
+            .company-edit-page .icon-wrapper i {
+                font-size: 1rem !important;
+            }
+
+            .company-edit-page .card-header h3 {
+                font-size: 1rem !important;
+                font-weight: 600 !important;
+            }
+
+            .company-edit-page .card-header p {
+                font-size: 0.7rem !important;
+            }
+
+            .company-edit-page .card-header .btn-primary {
+                width: 100%;
+                justify-content: center;
+                min-height: 38px;
+                font-size: 0.82rem;
+                border-radius: 8px;
+                padding: 0.5rem 1rem;
+            }
+
+            /* Card body */
+            .company-edit-page .card-body {
+                padding: 0.6rem !important;
+            }
+
+            /* Form sections */
+            .company-edit-page .form-section {
+                padding: 0.8rem !important;
+                margin-bottom: 0.8rem !important;
+                border-left-width: 3px !important;
+                border-radius: 8px !important;
+            }
+
+            .company-edit-page .section-title {
+                font-size: 0.88rem !important;
+                margin-bottom: 0.8rem !important;
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
+
+            .company-edit-page .section-title .icon-title {
+                font-size: 0.95rem !important;
+                margin-right: 0 !important;
+            }
+
+            .company-edit-page .section-title .badge {
+                font-size: 0.6rem !important;
+            }
+
+            /* Form elements */
+            .company-edit-page .form-label {
+                font-size: 0.78rem !important;
+                margin-bottom: 0.2rem !important;
+                font-weight: 500;
+                color: #555;
+            }
+
+            .company-edit-page .form-control,
+            .company-edit-page .form-select {
+                padding: 0.45rem 0.6rem !important;
+                font-size: 0.85rem !important;
+                border-radius: 8px !important;
+                min-height: 36px;
+                margin-top: 0 !important;
+            }
+
+            .company-edit-page textarea.form-control {
+                min-height: 80px !important;
+            }
+
+            .company-edit-page .row.g-3 {
+                --bs-gutter-x: 0.5rem;
+                --bs-gutter-y: 0.4rem;
+            }
+
+            .company-edit-page .row.g-3 > [class*="col-"] {
+                margin-bottom: 0;
+            }
+
+            /* Tagify */
+            .company-edit-page .tagify {
+                padding: 0.25rem !important;
+                margin-top: 0 !important;
+            }
+
+            .company-edit-page .tagify__input {
+                margin: 0.1rem 0 !important;
+            }
+
+            /* FAQ pairs */
+            .company-edit-page .faq-pair {
+                padding: 0.6rem !important;
+            }
+
+            /* Prompt overlay */
+            .company-edit-page #prompt-lock-overlay p {
+                font-size: 0.85rem !important;
+            }
+
+            .company-edit-page #prompt-lock-overlay .btn {
+                font-size: 0.78rem !important;
+                padding: 0.35rem 0.8rem !important;
+            }
+
+            /* Bottom buttons */
+            .company-edit-page .d-grid.gap-2.d-md-flex {
+                display: flex !important;
+                flex-direction: column-reverse !important;
+                gap: 0.5rem !important;
+                margin-top: 0.8rem !important;
+            }
+
+            .company-edit-page .d-grid.gap-2.d-md-flex .btn,
+            .company-edit-page .d-grid.gap-2.d-md-flex .btn-group {
+                width: 100% !important;
+            }
+
+            .company-edit-page .d-grid.gap-2.d-md-flex .btn {
+                justify-content: center !important;
+                min-height: 40px !important;
+                font-size: 0.85rem !important;
+                border-radius: 8px !important;
+                padding: 0.5rem 1.2rem !important;
+                white-space: nowrap;
+            }
+
+            .company-edit-page .d-grid.gap-2.d-md-flex .btn-group {
+                display: flex !important;
+            }
+
+            .company-edit-page .d-grid.gap-2.d-md-flex .btn-group .btn {
+                flex: 1 !important;
+            }
+
+            /* Modal */
+            .company-edit-page .modal-dialog {
+                margin: 0.5rem !important;
+            }
+
+            .company-edit-page .modal-content {
+                border-radius: 12px !important;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .company-edit-page .form-section {
+                padding: 0.6rem !important;
+            }
+
+            .company-edit-page .card-header {
+                padding: 0.6rem !important;
+            }
+
+            .company-edit-page .card-header h3 {
+                font-size: 0.9rem !important;
+            }
+        }
     </style>
     <style>
     .icon-wrapper {
@@ -163,7 +360,7 @@
 </style>
 @endpush
 @section('content')
-<div class="min-v d-flex align-items-center">
+<div class="min-v d-flex align-items-center company-edit-page">
     <div class="container-fluid py-2">
         <div class="row justify-content-center">
             <div class="col-lg-10">
@@ -388,7 +585,7 @@ notAvailable: السؤال لا يستند إلى معلومات في القاع
                                         <input type="text" class="form-control" id="agent_cooperation_configs" name="agent_cooperation_configs" 
                                             value="{{ isset($company) ? implode(',', $company['agent_cooperation_configs'] ?? []) : 'agent_proactive_assistance,agent_responsiveness,agent_emphasis,effectiveness' }}">
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-md-6">
                                         <label for="agent_performance_configs" class="form-label">Agent Performance:</label>
                                         <input type="text" class="form-control" id="agent_performance_configs" name="agent_performance_configs" 
                                             value="{{ isset($company) ? implode(',', $company['agent_performance_configs'] ?? []) : 'customer_satisfaction,professionalism,tone_consistency,polite_language_usage,configured_standards_compliance' }}">

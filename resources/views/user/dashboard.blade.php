@@ -215,11 +215,398 @@
         display: flex; align-items: center; justify-content: center;
         font-weight: bold; font-size: 12px;
     }
+
+    .dashboard-page {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .dashboard-page .page-header .btn {
+        min-width: max-content;
+    }
+
+    .dashboard-page .table-responsive {
+        scrollbar-width: thin;
+    }
+
+    @media (max-width: 991.98px) {
+        .dashboard-page {
+            padding: 1.25rem !important;
+        }
+
+        .dashboard-page .page-header > .d-flex,
+        .dashboard-page .section-card > .d-flex,
+        .dashboard-page .card-header .d-flex {
+            align-items: flex-start !important;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .dashboard-page .page-header .d-flex.gap-2 {
+            width: 100%;
+            align-items: stretch !important;
+        }
+
+        .dashboard-page .page-header .btn {
+            width: 100%;
+            min-width: 0;
+            white-space: normal;
+            text-align: center;
+        }
+
+        .dashboard-page .chart-container {
+            height: 240px;
+            padding: 1rem;
+        }
+
+        #trendChart {
+            height: 220px !important;
+        }
+
+        #sentimentBadges {
+            flex-wrap: wrap;
+            padding-inline: 1rem;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .dashboard-page {
+            padding: 1rem !important;
+        }
+
+        .dashboard-page .row.g-4 {
+            --bs-gutter-x: 0.9rem;
+            --bs-gutter-y: 0.9rem;
+        }
+
+        .dashboard-page .section-card,
+        .dashboard-page .dashboard-card,
+        .dashboard-page .card {
+            border-radius: 10px;
+        }
+
+        .dashboard-page .section-card {
+            padding: 1rem;
+        }
+
+        .dashboard-page .card-header {
+            padding: 0.9rem 1rem;
+        }
+
+        .dashboard-page .card-body.p-3,
+        .dashboard-page .dashboard-card .card-body {
+            padding: 1rem !important;
+        }
+
+        .dashboard-page .metric-value {
+            font-size: 1.45rem;
+            line-height: 1.2;
+            overflow-wrap: anywhere;
+        }
+
+        .dashboard-page .icon-circle {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+        }
+
+        .dashboard-page .dashboard-card .d-flex.justify-content-between {
+            gap: 0.75rem;
+        }
+
+        .dashboard-page .btn-group {
+            width: 100%;
+        }
+
+        .dashboard-page .btn-period {
+            flex: 1 1 0;
+            padding-inline: 0.5rem !important;
+        }
+
+        #agentPerformance {
+            height: auto !important;
+            max-height: 520px;
+        }
+
+        #agentPerformance .agent-card > .d-flex {
+            align-items: flex-start !important;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .dashboard-page {
+            padding: 0.85rem !important;
+        }
+
+        .dashboard-page .page-header h4 {
+            font-size: 1.1rem;
+        }
+
+        .dashboard-page .page-header p,
+        .dashboard-page small,
+        .dashboard-page .small {
+            line-height: 1.35;
+        }
+
+        .dashboard-page .page-header .d-flex.gap-2 {
+            flex-direction: column;
+        }
+
+        .dashboard-page .section-title {
+            font-size: 0.72rem;
+            letter-spacing: 0.04em;
+            white-space: normal;
+        }
+
+        .dashboard-page .chart-container {
+            height: 220px;
+            padding: 0.75rem;
+        }
+
+        #trendChart {
+            height: 205px !important;
+            min-height: 205px;
+        }
+
+        #sentimentBadges .sentiment-badge {
+            flex: 1 1 100%;
+            text-align: center;
+        }
+
+        .dashboard-page .table-responsive {
+            overflow: visible;
+        }
+
+        .dashboard-page .table-responsive table,
+        .dashboard-page .table-responsive thead,
+        .dashboard-page .table-responsive tbody,
+        .dashboard-page .table-responsive th,
+        .dashboard-page .table-responsive td,
+        .dashboard-page .table-responsive tr {
+            display: block;
+        }
+
+        .dashboard-page .table-responsive thead {
+            display: none;
+        }
+
+        .dashboard-page .table-responsive tbody {
+            padding: 0.85rem;
+            background: #f8fafc;
+        }
+
+        .dashboard-page .table-responsive tr {
+            background: #fff;
+            border: 1px solid #e5eaf1;
+            border-radius: 12px;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+            margin-bottom: 0.85rem;
+            padding: 0.85rem;
+        }
+
+        .dashboard-page .table-responsive td {
+            border: 0;
+            display: grid;
+            grid-template-columns: minmax(76px, 32%) minmax(0, 1fr);
+            gap: 0.85rem;
+            align-items: center;
+            padding: 0.55rem 0 !important;
+            text-align: left !important;
+        }
+
+        .dashboard-page .table-responsive td::before {
+            content: "";
+            color: #64748b;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .dashboard-page .table-responsive td:first-child {
+            padding-top: 0 !important;
+        }
+
+        .dashboard-page .table-responsive td:first-child::before,
+        .dashboard-page .table-responsive td:last-child::before {
+            content: none;
+        }
+
+        .dashboard-page .table-responsive td:first-child {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #2563eb;
+            font-size: 1rem;
+        }
+
+        .dashboard-page .table-responsive td:first-child::after {
+            content: "Analysis";
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 999px;
+            color: #2563eb;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            padding: 0.25rem 0.55rem;
+            text-transform: uppercase;
+        }
+
+        .dashboard-page .table-responsive td:last-child {
+            border-top: 1px solid #edf2f7;
+            display: block;
+            margin-top: 0.35rem;
+            padding-bottom: 0 !important;
+            padding-top: 0.75rem !important;
+        }
+
+        .dashboard-page .table-responsive td .d-flex.justify-content-end {
+            justify-content: flex-start !important;
+        }
+
+        .dashboard-page .table-responsive td:last-child .btn {
+            flex: 1 1 0;
+            min-height: 36px;
+        }
+
+        .dashboard-page .table-responsive td:nth-child(2)::before { content: "Agent"; }
+        .dashboard-page .table-responsive td:nth-child(3)::before { content: "Score"; }
+        .dashboard-page .table-responsive td:nth-child(4)::before { content: "Sentiment"; }
+        .dashboard-page .table-responsive td:nth-child(5)::before { content: "Status"; }
+        .dashboard-page .table-responsive td:nth-child(6)::before { content: "Date"; }
+
+        #agentPerformance {
+            padding: 0.85rem !important;
+            background: #f8fafc;
+        }
+
+        #agentPerformance .agent-card {
+            background: #fff;
+            border: 1px solid #e5eaf1 !important;
+            border-left-width: 4px !important;
+            border-radius: 12px;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04) !important;
+            margin-bottom: 0.85rem !important;
+            padding: 0.85rem;
+        }
+
+        #agentPerformance .agent-card > .d-flex.align-items-center {
+            display: grid !important;
+            grid-template-columns: 42px minmax(0, 1fr) auto;
+            gap: 0.75rem;
+            align-items: start !important;
+        }
+
+        #agentPerformance .avatar-sm {
+            height: 42px;
+            margin-right: 0 !important;
+            width: 42px;
+        }
+
+        #agentPerformance .agent-card .flex-grow-1 {
+            min-width: 0;
+        }
+
+        #agentPerformance .agent-card h6.d-flex {
+            display: flex !important;
+            align-items: flex-start !important;
+            flex-direction: column;
+            gap: 0.2rem;
+            line-height: 1.25;
+        }
+
+        #agentPerformance .agent-card h6 a {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #agentPerformance .agent-card > .d-flex.align-items-center > .text-end {
+            background: #f8fafc;
+            border: 1px solid #edf2f7;
+            border-radius: 10px;
+            min-width: 76px;
+            padding: 0.45rem 0.55rem;
+            text-align: center !important;
+        }
+
+        #agentPerformance .agent-card > .d-flex.align-items-center > .text-end h5 {
+            font-size: 1rem;
+            line-height: 1.1;
+        }
+
+        #agentPerformance .agent-card > .d-flex.align-items-center > .text-end small {
+            display: block;
+            font-size: 0.66rem;
+            line-height: 1.2;
+        }
+
+        #agentPerformance .agent-card small.text-muted {
+            display: block;
+            margin-top: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .top-performer-badge,
+        .high-achiever-badge,
+        .consistent-badge,
+        .needs-improvement-badge {
+            margin-left: 0 !important;
+            margin-top: 0.2rem;
+            width: fit-content;
+        }
+
+        .dashboard-page #agentSortDropdown {
+            width: 100%;
+        }
+
+        .dashboard-page .card-header .dropdown {
+            width: 100%;
+        }
+
+        .modal-dialog {
+            margin: 0.75rem;
+        }
+
+        .modal-body {
+            padding: 1rem !important;
+        }
+
+        .upload-zone {
+            padding-block: 2rem !important;
+        }
+    }
+
+    @media (max-width: 420px) {
+        #agentPerformance .agent-card > .d-flex.align-items-center {
+            grid-template-columns: 42px minmax(0, 1fr);
+        }
+
+        #agentPerformance .agent-card > .d-flex.align-items-center > .text-end {
+            grid-column: 1 / -1;
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.1rem;
+            min-width: 0;
+            text-align: left !important;
+            width: 100%;
+        }
+
+        #agentPerformance .agent-card > .d-flex.align-items-center > .text-end h5 {
+            margin-bottom: 0 !important;
+        }
+    }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid p-4">
+<div class="container-fluid p-4 dashboard-page">
     @cannot('dashboard.view')
         <div class="row min-vh-75 d-flex align-items-center justify-content-center">
             <div class="col-md-6 text-center">
@@ -262,7 +649,7 @@
 
     {{-- ── KPI Cards ───────────────────────────────────────────────────────── --}}
     <div class="row g-4 mb-4">
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="dashboard-card h-100 shadow-soft border-bottom border-primary border-3">
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between">
@@ -279,7 +666,7 @@
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="dashboard-card h-100 shadow-soft border-bottom border-success border-3">
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between">
@@ -296,7 +683,7 @@
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="dashboard-card h-100 shadow-soft border-bottom border-info border-3">
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between">
@@ -313,7 +700,7 @@
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="dashboard-card h-100 shadow-soft border-bottom border-danger border-3">
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between">
@@ -335,7 +722,7 @@
     <div class="row g-4 mb-4 mt-1">
 
         {{-- Human Time Saved --}}
-        <div class="col-md-4">
+        <div class="col-12 col-lg-4">
             <div class="dashboard-card h-100 shadow-soft border-start border-primary border-4">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -366,7 +753,7 @@
         </div>
 
         {{-- Financial Savings --}}
-        <div class="col-md-4">
+        <div class="col-12 col-lg-4">
             <div class="dashboard-card h-100 shadow-soft border-start border-success border-4">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -410,7 +797,7 @@
         </div>
 
         {{-- ROI Indicator --}}
-        <div class="col-md-4">
+        <div class="col-12 col-lg-4">
             <div class="dashboard-card h-100 shadow-soft border-start border-info border-4">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -451,7 +838,7 @@
     {{-- ── Performance Trend + Sentiment ─────────────────────────────────── --}}
     <div class="row g-4 mb-4">
 
-        <div class="col-md-8">
+        <div class="col-12 col-xl-8">
             <div class="section-card h-100 shadow-sm">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="section-title trend-title mb-0">Performance Trend — Last 7 Days</div>
@@ -465,7 +852,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-12 col-xl-4">
             <div class="dashboard-card h-100 shadow-soft">
                 <div class="card-header bg-white">
                     <h6 class="fw-bold mb-0">Customer Sentiment Analysis</h6>
@@ -485,7 +872,7 @@
     <div class="row g-4">
 
         {{-- Recent Analyses Table --}}
-        <div class="col-md-6">
+        <div class="col-12 col-xl-6">
             <div class="card border-0 shadow-sm overflow-hidden">
                 <div class="card-header bg-white border-bottom py-3">
                     <h5 class="mb-0 fw-600 d-flex align-items-center">
@@ -593,7 +980,7 @@
         </div>
 
         {{-- Agent Performance --}}
-        <div class="col-md-6">
+        <div class="col-12 col-xl-6">
             <div class="dashboard-card h-100 shadow-soft">
                 <div class="card-header bg-white">
                     <div class="d-flex justify-content-between align-items-center">

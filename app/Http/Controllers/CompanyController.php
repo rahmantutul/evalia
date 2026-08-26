@@ -15,6 +15,10 @@ class CompanyController extends Controller
     public function __construct()
     {
         $this->middleware('auth.api');
+        $this->middleware('permission:companies.view')->only(['companyList', 'companyDetails']);
+        $this->middleware('permission:companies.create')->only(['companyCreate', 'companyStore']);
+        $this->middleware('permission:companies.edit')->only(['companyEdit', 'companyUpdate']);
+        $this->middleware('permission:companies.delete')->only(['companyDelete']);
     }
 
     private function groupList()

@@ -147,6 +147,25 @@
             }
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.table-responsive table').forEach(function(table) {
+                const headers = Array.from(table.querySelectorAll('thead th')).map(function(th) {
+                    return th.textContent.replace(/\s+/g, ' ').trim();
+                });
+
+                if (!headers.length) return;
+
+                table.querySelectorAll('tbody tr').forEach(function(row) {
+                    Array.from(row.children).forEach(function(cell, index) {
+                        if (!cell.hasAttribute('data-label') && headers[index]) {
+                            cell.setAttribute('data-label', headers[index]);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

@@ -21,6 +21,30 @@
     <link href="{{ asset('/') }}assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="{{ asset('/') }}assets/css/app.min.css" rel="stylesheet" type="text/css" />
     <link href="{{ asset('/') }}assets/css/custom.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        /* Global Reset for the 'Everything shows a big border' issue */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Prevent sidebar and navbar from animating/snapping on load */
+        .startbar, .navbar, .startbar-menu {
+            transition: none !important;
+        }
+
+        /* Fix the 'skeleton border' flash on Iconoir icons during load */
+        [class*=" iconoir-"]::before, [class^=iconoir-]::before {
+            stroke-width: 1.5px !important;
+        }
+
+        /* Smooth out the sidebar border by ensuring it matches theme defaults immediately */
+        .startbar .startbar-menu .navbar-nav .nav-item .nav-link::before {
+            transition: none !important;
+        }
+    </style>
     <link href="{{ asset('/') }}assets/libs/mobius1-selectr/selectr.min.css" rel="stylesheet" type="text/css" />
     <link href="{{ asset('/') }}assets/libs/huebee/huebee.min.css" rel="stylesheet" type="text/css" />
     <link href="{{ asset('/') }}assets/libs/vanillajs-datepicker/css/datepicker.min.css" rel="stylesheet" type="text/css" />
@@ -69,7 +93,6 @@
     <script src="{{ asset('/') }}assets/js/pages/datatable.init.js"></script>  
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
-     <script src="https://cdn.tailwindcss.com"></script>
     @if(session('success'))
         <script>
             Swal.fire({
@@ -116,6 +139,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const switcher = document.querySelector('.bot-switcher');
         const btn = document.querySelector('.bot-switcher-btn');
+        if (!switcher || !btn) return;
         
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -126,6 +150,25 @@
             switcher.classList.remove('active');
         });
     });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.table-responsive table').forEach(function(table) {
+                const headers = Array.from(table.querySelectorAll('thead th')).map(function(th) {
+                    return th.textContent.replace(/\s+/g, ' ').trim();
+                });
+
+                if (!headers.length) return;
+
+                table.querySelectorAll('tbody tr').forEach(function(row) {
+                    Array.from(row.children).forEach(function(cell, index) {
+                        if (!cell.hasAttribute('data-label') && headers[index]) {
+                            cell.setAttribute('data-label', headers[index]);
+                        }
+                    });
+                });
+            });
+        });
     </script>
     <script>
         // Global error handler for authentication failures

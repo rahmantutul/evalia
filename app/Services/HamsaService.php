@@ -7,9 +7,19 @@ use Exception;
 
 class HamsaService
 {
-    protected string $baseUrl = 'https://api.tryhamsa.com';
-    protected string $v1Url  = 'https://api.tryhamsa.com';
-    protected string $apiKey = '87727d21-3265-4442-a44d-b07711238887';
+    protected string $baseUrl;
+    protected string $v1Url;
+    protected string $apiKey;
+
+    public function __construct()
+    {
+        $configuredBaseUrl = rtrim((string) config('services.hamsa.base_url', 'https://api.tryhamsa.com'), '/');
+        $rootBaseUrl = preg_replace('~/v\d+$~', '', $configuredBaseUrl) ?: 'https://api.tryhamsa.com';
+
+        $this->baseUrl = $rootBaseUrl;
+        $this->v1Url = $rootBaseUrl;
+        $this->apiKey = (string) config('services.hamsa.api_key', '');
+    }
 
     public function createTranscriptionJob(string $mediaUrl, string $title = 'Untitled', string $language = 'ar'): array
     {
@@ -46,7 +56,10 @@ class HamsaService
             }
 
             $data = json_decode($body, true);
-            Log::info('Hamsa Create Job response', ['body' => $data]);
+            Log::info('Hamsa Create Job response', [
+                'job_id' => $data['data']['jobId'] ?? null,
+                'status' => $data['data']['status'] ?? null,
+            ]);
 
             $jobId = $data['data']['jobId'] ?? null;
 

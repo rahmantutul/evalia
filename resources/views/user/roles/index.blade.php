@@ -1,8 +1,433 @@
 @extends('user.layouts.app')
 @section('title', 'Roles & Permissions')
 
+@push('styles')
+<style>
+    .roles-page .role-card {
+        border-radius: 14px;
+        overflow: visible;
+    }
+
+    .roles-page .role-avatar {
+        align-items: center;
+        display: inline-flex;
+        height: 52px;
+        justify-content: center;
+        min-width: 52px;
+        width: 52px;
+    }
+
+    .roles-page .permission-row {
+        border: 1px solid transparent;
+        border-radius: 10px;
+        padding: 0.35rem 0;
+    }
+
+    .roles-page .permission-actions {
+        max-width: 55%;
+    }
+
+    @media (max-width: 767.98px) {
+        .roles-page {
+            padding-top: 0.25rem !important;
+        }
+
+        .roles-page > .row.mb-4 {
+            align-items: stretch;
+            gap: 0.85rem;
+            margin-top: 0.75rem !important;
+        }
+
+        .roles-page > .row.mb-4 > .col,
+        .roles-page > .row.mb-4 > .col-auto {
+            flex: 0 0 100%;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .roles-page .breadcrumb {
+            flex-wrap: wrap;
+            font-size: 0.78rem;
+            margin-bottom: 0;
+        }
+
+        .roles-page .col-auto .btn {
+            justify-content: center;
+            min-height: 42px;
+            width: 100%;
+        }
+
+        .roles-page .role-card {
+            border: 1px solid #e8edf3 !important;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06) !important;
+        }
+
+        .roles-page .role-card .card-header {
+            padding: 1rem 1rem 0.5rem !important;
+        }
+
+        .roles-page .role-card .card-header > .d-flex {
+            align-items: flex-start !important;
+            flex-direction: row;
+            gap: 0.75rem;
+        }
+
+        .roles-page .role-card .card-header > .d-flex > .d-flex {
+            flex: 1 1 auto;
+            gap: 0.75rem !important;
+            min-width: 0;
+        }
+
+        .roles-page .role-card h5 {
+            font-size: 1rem;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+
+        .roles-page .role-avatar {
+            height: 44px;
+            min-width: 44px;
+            padding: 0 !important;
+            width: 44px;
+        }
+
+        .roles-page .role-avatar i {
+            font-size: 1rem !important;
+        }
+
+        .roles-page .role-card .dropdown {
+            flex: 0 0 auto;
+        }
+
+        .roles-page .role-card .dropdown .btn {
+            align-items: center;
+            display: inline-flex;
+            height: 36px;
+            justify-content: center;
+            width: 36px;
+        }
+
+        .roles-page .role-card .card-body {
+            padding: 0.5rem 1rem 1rem !important;
+        }
+
+        .roles-page .permission-row {
+            align-items: flex-start !important;
+            background: #f8fafc;
+            border-color: #eef2f7;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 0.65rem !important;
+            padding: 0.75rem;
+        }
+
+        .roles-page .permission-actions {
+            justify-content: flex-start !important;
+            max-width: none !important;
+            width: 100%;
+        }
+
+        .roles-page .permission-actions .badge {
+            font-size: 0.68rem !important;
+            padding: 0.28rem 0.45rem;
+        }
+
+        .roles-page .card-footer {
+            padding: 0 1rem 1rem !important;
+        }
+
+        .roles-page .modal-dialog {
+            margin: 0.75rem;
+        }
+
+        .roles-page .modal-header,
+        .roles-page .modal-body,
+        .roles-page .modal-footer {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+
+        .roles-page .modal-body {
+            max-height: calc(100vh - 180px) !important;
+        }
+
+        .roles-page .modal-body > .d-flex.justify-content-between {
+            align-items: stretch !important;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .roles-page .modal-body > .d-flex.justify-content-between .d-flex {
+            width: 100%;
+        }
+
+        .roles-page .modal-body > .d-flex.justify-content-between .btn {
+            flex: 1 1 0;
+        }
+
+        .roles-page .modal-footer {
+            flex-direction: column-reverse;
+            gap: 0.5rem;
+        }
+
+        .roles-page .modal-footer .btn,
+        .roles-page .modal-footer form {
+            width: 100%;
+        }
+
+        .roles-page .modal-footer form .btn {
+            width: 100%;
+        }
+
+        .roles-page #createRoleModal .modal-dialog,
+        .roles-page #editRoleModal .modal-dialog {
+            align-items: flex-end;
+            display: flex;
+            margin: 0;
+            max-width: 100%;
+            min-height: 100%;
+            width: 100%;
+        }
+
+        .roles-page #createRoleModal .modal-content,
+        .roles-page #editRoleModal .modal-content {
+            border-radius: 18px 18px 0 0;
+            max-height: 94vh;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .roles-page #createRoleModal .modal-header,
+        .roles-page #editRoleModal .modal-header {
+            align-items: flex-start;
+            border-bottom: 1px solid #eef2f7 !important;
+            padding-bottom: 0.85rem !important;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .roles-page #createRoleModal .modal-title,
+        .roles-page #editRoleModal .modal-title {
+            font-size: 1rem;
+            line-height: 1.35;
+            padding-right: 0.75rem;
+        }
+
+        .roles-page #editRoleDisplayName {
+            display: block;
+            max-width: 72vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .roles-page #createRoleModal .btn-close,
+        .roles-page #editRoleModal .btn-close {
+            background-color: #f8fafc;
+            border-radius: 999px;
+            margin: 0;
+            opacity: 1;
+            padding: 0.7rem;
+        }
+
+        .roles-page #createRoleModal .modal-body,
+        .roles-page #editRoleModal .modal-body {
+            background: #f8fafc;
+            max-height: calc(94vh - 150px) !important;
+            padding-bottom: 1rem;
+        }
+
+        .roles-page #createRoleModal .modal-body > .mb-4,
+        .roles-page #editRoleModal .modal-body > .mb-4 {
+            background: #fff;
+            border: 1px solid #e8edf3;
+            border-radius: 12px;
+            margin-bottom: 0.9rem !important;
+            padding: 0.9rem;
+        }
+
+        .roles-page .permissions-toolbar {
+            background: #fff;
+            border: 1px solid #e8edf3;
+            border-radius: 12px;
+            margin-bottom: 0.9rem !important;
+            padding: 0.85rem;
+        }
+
+        .roles-page .permissions-toolbar h6 {
+            font-size: 0.92rem;
+        }
+
+        .roles-page .permissions-toolbar .btn {
+            border-radius: 10px !important;
+            min-height: 38px;
+        }
+
+        .roles-page #createPermissionsContainer > [class*="col-"],
+        .roles-page #editPermissionsContainer > [class*="col-"] {
+            width: 100%;
+        }
+
+        .roles-page #createPermissionsContainer,
+        .roles-page #editPermissionsContainer {
+            --bs-gutter-y: 0.75rem;
+            padding-bottom: 0 !important;
+        }
+
+        .roles-page .permission-group-card {
+            border: 1px solid #e5eaf1 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+            overflow: hidden;
+        }
+
+        .roles-page .permission-group-header {
+            align-items: center !important;
+            display: grid !important;
+            gap: 0.7rem;
+            grid-template-columns: minmax(0, 1fr) auto;
+            padding: 0.75rem 0.85rem !important;
+        }
+
+        .roles-page .permission-group-title {
+            min-width: 0;
+        }
+
+        .roles-page .permission-group-title span {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .roles-page .permission-group-switch {
+            align-items: center;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 999px;
+            display: inline-flex;
+            gap: 0.45rem;
+            padding-left: 0;
+            padding: 0.28rem 0.55rem;
+            white-space: nowrap;
+        }
+
+        .roles-page .permission-group-switch .form-check-input {
+            margin-left: 0;
+            margin-top: 0;
+        }
+
+        .roles-page .permission-group-body {
+            padding: 0.25rem 0.85rem 0.75rem !important;
+        }
+
+        .roles-page .perm-item {
+            align-items: flex-start;
+            border-bottom: 1px solid #f1f5f9 !important;
+            display: flex;
+            gap: 0.6rem;
+            padding: 0.7rem 0 !important;
+        }
+
+        .roles-page .perm-item .form-check-input {
+            flex: 0 0 auto;
+            margin-left: 0;
+            margin-top: 0.25rem;
+        }
+
+        .roles-page .perm-item .form-check-label {
+            min-width: 0;
+        }
+
+        .roles-page .perm-item .form-check-label .text-muted {
+            overflow-wrap: anywhere;
+        }
+
+        .roles-page #createRoleModal .modal-footer,
+        .roles-page #editRoleModal .modal-footer {
+            background: #fff;
+            border-top: 1px solid #eef2f7 !important;
+            box-shadow: 0 -10px 24px rgba(15, 23, 42, 0.06);
+            position: sticky;
+            bottom: 0;
+            z-index: 2;
+        }
+
+        /* Bottom-sheet slide-up animation */
+        .roles-page #createRoleModal .modal-dialog,
+        .roles-page #editRoleModal .modal-dialog {
+            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translate(0, 105%);
+            -webkit-transform: translate(0, 105%);
+        }
+        .roles-page #createRoleModal.show .modal-dialog,
+        .roles-page #editRoleModal.show .modal-dialog {
+            transform: translate(0, 0);
+            -webkit-transform: translate(0, 0);
+        }
+
+        /* Grabber handle on the sheet */
+        .roles-page #createRoleModal .modal-header,
+        .roles-page #editRoleModal .modal-header {
+            padding-top: 1.2rem !important;
+        }
+        .roles-page #createRoleModal .modal-header::before,
+        .roles-page #editRoleModal .modal-header::before {
+            background: #cbd5e1;
+            border-radius: 999px;
+            content: "";
+            height: 4px;
+            left: 50%;
+            position: absolute;
+            top: 0.5rem;
+            transform: translateX(-50%);
+            width: 44px;
+        }
+
+        /* Permission toolbar stacks on phones */
+        .roles-page .permissions-toolbar {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+        .roles-page .permissions-toolbar .d-flex.gap-2 {
+            width: 100%;
+        }
+        .roles-page .permissions-toolbar .d-flex.gap-2 .btn {
+            flex: 1 1 0;
+        }
+
+        /* Compact centered delete dialog */
+        .roles-page #deleteRoleModal .modal-dialog {
+            margin: 1rem auto;
+            max-width: 420px;
+            width: 100%;
+        }
+        .roles-page #deleteRoleModal .modal-content {
+            border-radius: 16px;
+            max-height: none;
+            overflow: visible;
+        }
+        .roles-page #deleteRoleModal .modal-body {
+            max-height: none !important;
+        }
+        .roles-page #deleteRoleModal .modal-footer {
+            flex-direction: row;
+            justify-content: stretch;
+            gap: 0.5rem;
+        }
+        .roles-page #deleteRoleModal .modal-footer .btn,
+        .roles-page #deleteRoleModal .modal-footer form {
+            flex: 1 1 0;
+            width: auto;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid roles-page">
 
     {{-- Page Header --}}
     <div class="row mb-4 mt-4">
@@ -115,14 +540,14 @@
                                 $icon  = $catIcons[$cat]  ?? 'key';
                                 $color = $catColors[$cat] ?? 'secondary';
                             @endphp
-                            <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="permission-row d-flex align-items-center justify-content-between mb-2">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="badge bg-{{ $color }} bg-opacity-10 text-{{ $color }} p-2 rounded-2">
                                         <i class="fas fa-{{ $icon }}" style="font-size:11px;"></i>
                                     </span>
                                     <span class="fw-semibold text-dark" style="font-size:0.85rem;">{{ ucfirst($cat) }}</span>
                                 </div>
-                                <div class="d-flex flex-wrap gap-1 justify-content-end" style="max-width: 55%;">
+                                <div class="permission-actions d-flex flex-wrap gap-1 justify-content-end">
                                     @foreach($catPerms as $p)
                                     @php $action = explode('.', $p)[1] ?? $p; @endphp
                                     <span class="badge bg-light text-dark border" style="font-size:10px;">{{ $action }}</span>
@@ -170,12 +595,10 @@
         @endforelse
     </div>
 
-</div>
-
-{{-- ══════════════════════════════════════════════════════════════ --}}
-{{-- CREATE MODAL --}}
-{{-- ══════════════════════════════════════════════════════════════ --}}
-<div class="modal fade" id="createRoleModal" tabindex="-1">
+    {{-- ══════════════════════════════════════════════════════════════ --}}
+    {{-- CREATE MODAL --}}
+    {{-- ══════════════════════════════════════════════════════════════ --}}
+    <div class="modal fade" id="createRoleModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
             <form action="{{ route('roles.store') }}" method="POST" id="createRoleForm" class="m-0">
@@ -193,7 +616,7 @@
                                placeholder="e.g. Content Manager, QA Lead…" required>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="permissions-toolbar d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold mb-0">Permissions</h6>
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill"
@@ -243,7 +666,7 @@
                         <input type="text" class="form-control" id="editRoleName" name="name" required>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="permissions-toolbar d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold mb-0">Permissions</h6>
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill"
@@ -300,6 +723,7 @@
         </div>
     </div>
 </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -344,20 +768,20 @@ function renderGrouped(containerId, grouped, selected = []) {
 
         html += `
         <div class="col-md-6 col-xl-4">
-            <div class="card border rounded-3 h-100">
-                <div class="card-header bg-${meta.color} bg-opacity-10 border-0 py-2 px-3 d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-2">
+            <div class="permission-group-card card border rounded-3 h-100">
+                <div class="permission-group-header card-header bg-${meta.color} bg-opacity-10 border-0 py-2 px-3 d-flex align-items-center justify-content-between">
+                    <div class="permission-group-title d-flex align-items-center gap-2">
                         <i class="fas fa-${meta.icon} text-${meta.color}"></i>
                         <span class="fw-bold text-dark" style="font-size:0.85rem;">${meta.label}</span>
                     </div>
-                    <div class="form-check form-switch mb-0">
+                    <div class="permission-group-switch form-check form-switch mb-0">
                         <input class="form-check-input" type="checkbox" id="cat_${containerId}_${cat}"
                                ${allIn ? 'checked' : ''}
                                onchange="toggleCategory('${containerId}', '${cat}', this.checked)">
                         <label class="form-check-label small text-muted" for="cat_${containerId}_${cat}">All</label>
                     </div>
                 </div>
-                <div class="card-body py-2 px-3">
+                <div class="permission-group-body card-body py-2 px-3">
                     ${perms.map(p => {
                         const action  = p.name.split('.')[1] ?? p.name;
                         const checked = selected.includes(p.name) ? 'checked' : '';

@@ -223,11 +223,343 @@
             display: flex; align-items: center; justify-content: center;
             font-weight: bold; font-size: 12px;
         }
+
+        .company-dashboard-page {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        @media (max-width: 991.98px) {
+            .company-dashboard-page {
+                padding: 1rem !important;
+            }
+
+            .company-dashboard-page .page-header > .d-flex,
+            .company-dashboard-page .section-card > .d-flex,
+            .company-dashboard-page .card-header .d-flex {
+                align-items: flex-start !important;
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+
+            .company-dashboard-page .page-header .d-flex.gap-2 {
+                align-items: stretch !important;
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .company-dashboard-page .page-header .btn {
+                justify-content: center;
+                min-height: 40px;
+                width: 100%;
+            }
+
+            .company-dashboard-page .chart-container {
+                height: 235px;
+                padding: 0.9rem;
+            }
+
+            .company-dashboard-page #trendChart {
+                height: 215px !important;
+            }
+
+            .company-dashboard-page #sentimentBadges {
+                flex-wrap: wrap;
+                padding-inline: 0.9rem;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .company-dashboard-page {
+                padding: 0.75rem !important;
+            }
+
+            .company-dashboard-page .row.g-4 {
+                --bs-gutter-x: 0.75rem;
+                --bs-gutter-y: 0.75rem;
+            }
+
+            .company-dashboard-page .page-header {
+                margin-bottom: 0.9rem !important;
+                padding-bottom: 0.75rem;
+            }
+
+            .company-dashboard-page .page-header h4 {
+                font-size: 1.08rem;
+                line-height: 1.25;
+            }
+
+            .company-dashboard-page .page-header p,
+            .company-dashboard-page small,
+            .company-dashboard-page .small {
+                line-height: 1.35;
+            }
+
+            .company-dashboard-page .dashboard-card,
+            .company-dashboard-page .section-card,
+            .company-dashboard-page .card {
+                border-radius: 11px;
+                box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05) !important;
+            }
+
+            .company-dashboard-page .section-card {
+                padding: 0.9rem;
+            }
+
+            .company-dashboard-page .card-header {
+                padding: 0.8rem 0.9rem !important;
+            }
+
+            .company-dashboard-page .card-body,
+            .company-dashboard-page .card-body.p-3 {
+                padding: 0.9rem !important;
+            }
+
+            .company-dashboard-page .metric-value {
+                font-size: 1.35rem;
+                line-height: 1.15;
+                overflow-wrap: anywhere;
+            }
+
+            .company-dashboard-page .icon-circle {
+                height: 40px;
+                min-width: 40px;
+                width: 40px;
+            }
+
+            .company-dashboard-page .dashboard-card .d-flex.justify-content-between {
+                gap: 0.65rem;
+            }
+
+            .company-dashboard-page .btn-group {
+                width: 100%;
+            }
+
+            .company-dashboard-page .btn-period {
+                flex: 1 1 0;
+                padding-inline: 0.45rem !important;
+            }
+
+            .company-dashboard-page .chart-container {
+                height: 205px;
+                padding: 0.7rem;
+            }
+
+            .company-dashboard-page #trendChart {
+                height: 195px !important;
+                min-height: 195px;
+            }
+
+            .company-dashboard-page #sentimentBadges .sentiment-badge {
+                flex: 1 1 100%;
+                text-align: center;
+            }
+
+            .company-dashboard-page .table-responsive {
+                overflow: visible;
+            }
+
+            .company-dashboard-page .table-responsive table,
+            .company-dashboard-page .table-responsive thead,
+            .company-dashboard-page .table-responsive tbody,
+            .company-dashboard-page .table-responsive th,
+            .company-dashboard-page .table-responsive td,
+            .company-dashboard-page .table-responsive tr {
+                display: block;
+            }
+
+            .company-dashboard-page .table-responsive thead {
+                display: none;
+            }
+
+            .company-dashboard-page .table-responsive tbody {
+                background: #f8fafc;
+                padding: 0.75rem;
+            }
+
+            .company-dashboard-page .table-responsive tbody tr {
+                background: #fff;
+                border: 1px solid #e5eaf1;
+                border-radius: 12px;
+                box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+                margin-bottom: 0.75rem;
+                padding: 0.8rem;
+            }
+
+            .company-dashboard-page .table-responsive tbody td {
+                border: 0 !important;
+                display: grid;
+                grid-template-columns: minmax(74px, 30%) minmax(0, 1fr);
+                gap: 0.65rem;
+                min-height: 32px;
+                padding: 0.42rem 0 !important;
+                text-align: left !important;
+                word-break: break-word;
+            }
+
+            .company-dashboard-page .table-responsive tbody td::before {
+                color: #64748b;
+                content: attr(data-label);
+                font-size: 0.68rem;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+
+            .company-dashboard-page .table-responsive tbody td:first-child,
+            .company-dashboard-page .table-responsive tbody td:last-child {
+                display: block;
+            }
+
+            .company-dashboard-page .table-responsive tbody td:first-child::before,
+            .company-dashboard-page .table-responsive tbody td:last-child::before {
+                content: none;
+            }
+
+            .company-dashboard-page .table-responsive tbody td:first-child {
+                color: #2563eb;
+                font-size: 0.98rem;
+                font-weight: 700;
+                padding-top: 0 !important;
+            }
+
+            .company-dashboard-page .table-responsive tbody td:last-child {
+                border-top: 1px solid #edf2f7 !important;
+                margin-top: 0.35rem;
+                padding-top: 0.7rem !important;
+            }
+
+            .company-dashboard-page .table-responsive tbody td:last-child .d-flex {
+                justify-content: flex-start !important;
+            }
+
+            .company-dashboard-page .table-responsive tbody td:last-child .btn {
+                min-height: 36px;
+                min-width: 38px;
+            }
+
+            .company-dashboard-page #agentPerformance {
+                background: #f8fafc;
+                height: auto !important;
+                max-height: 520px;
+                padding: 0.75rem !important;
+            }
+
+            .company-dashboard-page #agentPerformance .agent-card {
+                background: #fff;
+                border: 1px solid #e5eaf1 !important;
+                border-left-width: 4px !important;
+                border-radius: 12px;
+                box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04) !important;
+                margin-bottom: 0.75rem !important;
+                padding: 0.8rem;
+            }
+
+            .company-dashboard-page #agentPerformance .agent-card > .d-flex.align-items-center {
+                display: grid !important;
+                grid-template-columns: 40px minmax(0, 1fr) auto;
+                gap: 0.65rem;
+                align-items: start !important;
+            }
+
+            .company-dashboard-page #agentPerformance .avatar-sm {
+                height: 40px;
+                margin-right: 0 !important;
+                width: 40px;
+            }
+
+            .company-dashboard-page #agentPerformance .agent-card .flex-grow-1 {
+                min-width: 0;
+            }
+
+            .company-dashboard-page #agentPerformance .agent-card h6 {
+                align-items: flex-start !important;
+                flex-direction: column;
+                gap: 0.2rem;
+                line-height: 1.25;
+            }
+
+            .company-dashboard-page #agentPerformance .agent-card h6 a {
+                display: block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .company-dashboard-page #agentPerformance .agent-card .text-end {
+                background: #f8fafc;
+                border: 1px solid #edf2f7;
+                border-radius: 9px;
+                min-width: 70px;
+                padding: 0.4rem 0.5rem;
+                text-align: center !important;
+            }
+
+            .company-dashboard-page #agentPerformance .agent-card .text-end h5 {
+                font-size: 0.95rem;
+                line-height: 1.1;
+            }
+
+            .company-dashboard-page #agentPerformance .agent-card .text-end small {
+                display: block;
+                font-size: 0.63rem;
+                line-height: 1.2;
+            }
+
+            .company-dashboard-page .top-performer-badge,
+            .company-dashboard-page .needs-improvement-badge {
+                margin-left: 0 !important;
+                margin-top: 0.2rem;
+                width: fit-content;
+            }
+
+            .company-dashboard-page #agentSortDropdown,
+            .company-dashboard-page .card-header .dropdown {
+                width: 100%;
+            }
+
+            .company-dashboard-page .modal-dialog {
+                margin: 0.75rem;
+            }
+
+            .company-dashboard-page .modal-body {
+                padding: 1rem !important;
+            }
+
+            .company-dashboard-page .upload-zone {
+                padding-block: 2rem !important;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .company-dashboard-page {
+                padding: 0.65rem !important;
+            }
+
+            .company-dashboard-page #agentPerformance .agent-card > .d-flex.align-items-center {
+                grid-template-columns: 40px minmax(0, 1fr);
+            }
+
+            .company-dashboard-page #agentPerformance .agent-card .text-end {
+                align-items: center;
+                display: flex;
+                grid-column: 1 / -1;
+                justify-content: space-between;
+                min-width: 0;
+                text-align: left !important;
+                width: 100%;
+            }
+
+            .company-dashboard-page #agentPerformance .agent-card .text-end h5 {
+                margin-bottom: 0 !important;
+            }
+        }
     </style>
 @endpush
 @section('content')
 
-    <div class="container-fluid p-4">
+    <div class="container-fluid p-4 company-dashboard-page">
         <!-- Header -->
         <div class="page-header mb-4">
             <div class="d-flex justify-content-between align-items-center">
@@ -533,8 +865,8 @@
                                 <tbody>
                                     @forelse ($taskList as $task)
                                         <tr>
-                                            <td class="ps-4 fw-bold text-primary">#{{ $task->id }}</td>
-                                            <td>
+                                            <td class="ps-4 fw-bold text-primary" data-label="Task">#{{ $task->id }}</td>
+                                            <td data-label="Agent">
                                                 <div class="d-flex align-items-center">
                                                     <span class="avatar-title rounded-circle bg-primary-soft text-primary fw-bold me-2" style="width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;background:#eef2ff;">
                                                         {{ strtoupper(substr($task->agent->name ?? 'U', 0, 1)) }}
@@ -548,7 +880,7 @@
                                                     @endif
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td data-label="Score">
                                                 @if($task->score > 0)
                                                     <span class="fw-bold {{ $task->score >= 80 ? 'text-success' : ($task->score >= 60 ? 'text-warning' : 'text-danger') }}">
                                                         {{ $task->score }}%
@@ -557,14 +889,14 @@
                                                     <span class="text-muted small">—</span>
                                                 @endif
                                             </td>
-                                            <td>
+                                            <td data-label="Sentiment">
                                                 @php $sent = $task->sentiment ?? 'Neutral'; @endphp
                                                 <span class="badge rounded-pill {{ $sent === 'Positive' ? 'bg-success-subtle text-success' : ($sent === 'Negative' ? 'bg-danger-subtle text-danger' : 'bg-secondary-subtle text-secondary') }}">
                                                     {{ $sent }}
                                                 </span>
                                             </td>
 
-                                            <td>
+                                            <td data-label="Status">
                                                 <span class="badge bg-opacity-10 
                                                     @if(in_array($task->status, ['completed','evaluated'])) bg-success text-success 
                                                     @elseif($task->status === 'processing') bg-warning text-warning 
@@ -573,13 +905,13 @@
                                                     {{ ucfirst($task->status) }}
                                                 </span>
                                             </td>
-                                            <td>
+                                            <td data-label="Date">
                                                 <div class="d-flex flex-column">
                                                     <span class="small fw-medium">{{ $task->created_at->format('M j, Y') }}</span>
                                                     <span class="text-muted small">{{ $task->created_at->format('g:i A') }}</span>
                                                 </div>
                                             </td>
-                                            <td class="pe-4 text-end">
+                                            <td class="pe-4 text-end" data-label="Actions">
                                                 <div class="d-flex justify-content-end gap-2">
                                                     <a href="{{ route('user.task.details', $task->id) }}" class="btn btn-sm btn-outline-primary" title="View Details">
                                                         <i class="fas fa-eye"></i>

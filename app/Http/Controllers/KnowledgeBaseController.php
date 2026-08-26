@@ -17,7 +17,17 @@ class KnowledgeBaseController extends Controller
     public function __construct(OpenAIService $openai)
     {
         $this->openai = $openai;
-        // $this->middleware('auth.api'); 
+        $this->middleware('auth.api');
+        $this->middleware('permission:knowledgebase.view')->only([
+            'knowledgeBaseList',
+            'knowledgeBaseDetails',
+            'knowledgeBaseSearch',
+            'kbSimulator',
+            'kbSimulatorRun',
+        ]);
+        $this->middleware('permission:knowledgebase.create')->only(['knowledgeBaseCreate', 'knowledgeBaseStore']);
+        $this->middleware('permission:knowledgebase.edit')->only(['knowledgeBaseEdit', 'knowledgeBaseUpdate']);
+        $this->middleware('permission:knowledgebase.delete')->only(['knowledgeBaseDelete']);
     }
 
     /**

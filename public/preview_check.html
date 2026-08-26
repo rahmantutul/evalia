@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Users Mobile Layout Check</title>
+</head>
+<body>
+<iframe id="f" style="width:100%;height:10000px;border:0"></iframe>
+<pre id="out" style="white-space:pre-wrap;font:12px monospace;padding:8px"></pre>
+<script>
+  const out = document.getElementById('out');
+  const f = document.getElementById('f');
+  f.src = '/preview_mobile.html';
+  const log = msg => out.textContent += msg + '\n';
+  function measure() {
+    const d = f.contentDocument;
+    const w = d.scrollingElement || d.documentElement;
+    const vw = d.documentElement.clientWidth;
+    const sw = w.scrollWidth;
+    log('viewport=' + vw + ' scrollWidth=' + sw + ' overflow=' + (sw > vw ? 'YES(+'+(sw-vw)+'px)' : 'no'));
+    const wide = [];
+    d.querySelectorAll('*').forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.right > vw + 1 && r.width > 0) wide.push(el.tagName + '.' + (typeof el.className==='string'?el.className.split(' ').slice(0,2).join('.'):'') + '=' + Math.round(r.right));
+    });
+    log('overflowing: ' + wide.length);
+    wide.slice(0,15).forEach(t => log('  ' + t));
+    const hdr = d.querySelector('.users-page .card-header');
+    if (hdr) log('hdr flexDir=' + getComputedStyle(hdr.querySelector('.col')).flexDirection + ' addbtn w=' + hdr.querySelector('.btn').offsetWidth + ' h=' + hdr.querySelector('.btn').offsetHeight);
+    const rows = Array.from(d.querySelectorAll('#datatable_1 tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
+    log('user rows: ' + rows.length);
+    const r0 = rows[0];
+    if (r0) {
+      const tds = r0.children;
+      log('cells: ' + tds.length);
+      Array.from(tds).forEach((td,i) => log('  cell'+i+' label='+(td.dataset.label||'')+' display='+getComputedStyle(td).display+' grid='+getComputedStyle(td).gridTemplateColumns.split(' ').map(Number).join('|')));
+      const last = r0.querySelector('td:last-child');
+      log('actions display=' + getComputedStyle(last).display + ' btns=' + last.querySelectorAll('.btn').length + ' grid=' + getComputedStyle(last.querySelector('.d-flex')).gridTemplateColumns);
+      const status = r0.querySelector('td[data-label="Status"]');
+      log('status position=' + getComputedStyle(status).position + ' top=' + getComputedStyle(status).top + ' right=' + getComputedStyle(status).right);
+      const first = r0.querySelector('td:first-child');
+      log('firstcell display=' + getComputedStyle(first).display + ' padB=' + getComputedStyle(first).paddingBottom);
+    }
+    // datatable toolbar
+    const dtToolbar = d.querySelector('.datatable-top');
+    if (dtToolbar) log('dt-top display=' + getComputedStyle(dtToolbar).display + ' flexDir=' + getComputedStyle(dtToolbar).flexDirection);
+    const dtSearch = d.querySelector('.datatable-top .dataTable-search, .datatable-top input');
+    if (dtSearch) log('dt search w=' + dtSearch.offsetWidth);
+    const dtBottom = d.querySelector('.datatable-bottom, .datatable-pagination');
+    if (dtBottom) log('dt bottom tag=' + dtBottom.tagName + '.' + dtBottom.className + ' w=' + dtBottom.offsetWidth + ' parent=' + (dtBottom.parentElement?dtBottom.parentElement.className:'-'));
+  }
+  setTimeout(measure, 3000);
+</script>
+</body>
+</html>

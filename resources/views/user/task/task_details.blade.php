@@ -60,6 +60,550 @@
             font-style: italic;
             cursor: help;
         }
+
+        @media (max-width: 767.98px) {
+            .task-details-page {
+                padding: 0.75rem !important;
+                font-size: 13px;
+            }
+
+            .task-details-page h1,
+            .task-details-page h2,
+            .task-details-page h3,
+            .task-details-page h4,
+            .task-details-page h5,
+            .task-details-page h6,
+            .task-details-page p {
+                line-height: 1.35;
+            }
+
+            .task-details-page h3,
+            .task-details-page h4 {
+                font-size: 0.98rem !important;
+            }
+
+            .task-details-page h5,
+            .task-details-page h6 {
+                font-size: 0.86rem !important;
+            }
+
+            .task-details-page p,
+            .task-details-page .small,
+            .task-details-page small,
+            .task-details-page td,
+            .task-details-page .metric-details p {
+                font-size: 0.76rem !important;
+            }
+
+            .task-details-page > .row.mb-4 {
+                margin-bottom: 0.85rem !important;
+            }
+
+            .task-details-page > .row.mb-4 h2 {
+                font-size: 1.2rem;
+                line-height: 1.25;
+            }
+
+            .task-details-page > .row.mb-4 h2 small {
+                display: inline-block;
+                font-size: 0.78rem !important;
+                margin-left: 0.25rem !important;
+            }
+
+            .task-details-page > .row.mb-4 .d-flex.align-items-center {
+                align-items: flex-start !important;
+                flex-wrap: wrap;
+                gap: 0.35rem;
+            }
+
+            .task-details-page > .row.mb-4 .col-md-4 {
+                margin-top: 0.75rem !important;
+            }
+
+            .task-details-page > .row.mb-4 .btn {
+                justify-content: center;
+                min-height: 40px;
+                padding-left: 0.9rem !important;
+                padding-right: 0.9rem !important;
+                width: 100%;
+            }
+
+            .task-details-page .alert {
+                align-items: flex-start !important;
+                font-size: 0.82rem;
+                line-height: 1.4;
+                padding: 0.75rem !important;
+            }
+
+            .task-details-page .row.gy-4 {
+                --bs-gutter-y: 0.85rem;
+            }
+
+            .task-details-page .card {
+                border-radius: 11px;
+                box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+            }
+
+            .task-details-page .card:hover,
+            .task-details-page .professional-card:hover,
+            .task-details-page .metric-card:hover {
+                transform: none;
+            }
+
+            .task-details-page .card-header {
+                align-items: flex-start !important;
+                gap: 0.6rem;
+                margin-bottom: 0;
+                padding: 0.7rem 0.85rem !important;
+            }
+
+            .task-details-page .card-header h5,
+            .task-details-page .card-header h6,
+            .task-details-page .card-title {
+                font-size: 0.9rem !important;
+                line-height: 1.25;
+            }
+
+            .task-details-page .card-body {
+                padding: 0.85rem !important;
+            }
+
+            .task-details-page .badge {
+                font-size: 0.68rem;
+                line-height: 1.2;
+                padding: 0.28rem 0.45rem;
+                white-space: normal;
+            }
+
+            .task-details-page .progress {
+                background-color: #e8edf2;
+                border-radius: 999px;
+                display: flex;
+                height: 6px !important;
+                overflow: hidden;
+                width: 100%;
+            }
+
+            .task-details-page .progress > .progress-bar {
+                background: var(--primary, #6366f1);
+                border-radius: inherit;
+                display: block;
+                height: 100% !important;
+                min-width: 0;
+            }
+
+            .task-details-page .info-icon {
+                flex: 0 0 20px;
+                height: 20px;
+                width: 20px;
+            }
+
+            .task-details-page canvas {
+                max-height: 180px;
+            }
+
+            .task-details-page .card-body [style*="height: 150px"] {
+                height: 105px !important;
+            }
+
+            .task-details-page .card-body [style*="height: 300px"] {
+                height: 210px !important;
+                padding: 0.75rem !important;
+            }
+
+            .task-details-page .card-body [style*="min-height: 150px"] {
+                min-height: 100px !important;
+            }
+
+            .task-details-page > .row.gy-4 > .col-lg-3 .card-body {
+                min-height: 0;
+            }
+
+            .task-details-page > .row.gy-4 > .col-lg-3 .card-body .mt-1 {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.3rem;
+                justify-content: center;
+            }
+
+            .task-details-page > .row.gy-4 > .col-lg-3 .card-body .badge {
+                margin: 0 !important;
+            }
+
+            .task-details-page > .row.gy-4 > .col-lg-3 .h3,
+            .task-details-page > .row.gy-4 > .col-lg-3 .fs-1,
+            .task-details-page > .row.gy-4 > .col-lg-3 [style*="font-size: 2.2rem"] {
+                font-size: 1.35rem !important;
+            }
+
+            .task-details-page .row.text-center.g-4 {
+                --bs-gutter-x: 0.55rem;
+                --bs-gutter-y: 0.55rem;
+            }
+
+            .task-details-page .row.text-center.g-4 > [class*="col-"] {
+                background: #f8fafc;
+                border: 1px solid #eef2f7 !important;
+                border-radius: 10px;
+                padding: 0.65rem !important;
+            }
+
+            .task-details-page .row.text-center.g-4 h4 {
+                font-size: 0.92rem !important;
+                line-height: 1.2;
+            }
+
+            .task-details-page .row.text-center.g-4 i {
+                font-size: 1rem !important;
+                margin-bottom: 0.35rem !important;
+            }
+
+            .task-details-page .agent-performance-dashboard {
+                border-radius: 12px;
+                margin-bottom: 0.85rem;
+                overflow: hidden;
+                padding: 0 !important;
+            }
+
+            .task-details-page .dashboard-header {
+                display: block;
+                padding: 0.9rem;
+            }
+
+            .task-details-page .agent-profile {
+                align-items: flex-start;
+                display: grid;
+                gap: 0.75rem;
+                grid-template-columns: 44px minmax(0, 1fr);
+                margin-bottom: 0.85rem;
+                width: 100%;
+            }
+
+            .task-details-page .avatar {
+                height: 44px;
+                min-width: 44px;
+                width: 44px;
+            }
+
+            .task-details-page .agent-info h3 {
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .task-details-page .overall-score {
+                align-items: stretch;
+                display: grid;
+                gap: 0.65rem;
+                grid-column: 1 / -1;
+                grid-template-columns: 64px minmax(0, 1fr);
+                width: 100%;
+            }
+
+            .task-details-page .score-circle {
+                height: 64px;
+                min-width: 64px;
+                width: 64px;
+            }
+
+            .task-details-page .score-circle span {
+                font-size: 0.82rem;
+                height: 54px;
+                width: 54px;
+            }
+
+            .task-details-page .score-details {
+                display: grid;
+                gap: 0.45rem;
+                grid-template-columns: 1fr;
+                width: 100%;
+            }
+
+            .task-details-page .score-item {
+                align-items: center;
+                background: #f8fafc;
+                border-radius: 9px;
+                display: flex;
+                justify-content: space-between;
+                min-width: 0;
+                padding: 0.45rem 0.55rem;
+                text-align: left;
+            }
+
+            .task-details-page .score-item .label,
+            .task-details-page .score-item .value {
+                font-size: 0.68rem !important;
+                line-height: 1.2;
+            }
+
+            .task-details-page .speech-analysis {
+                max-width: 100%;
+                padding: 0.75rem;
+                width: 100%;
+            }
+
+            .task-details-page .speech-analysis h4 {
+                font-size: 0.9rem;
+            }
+
+            .task-details-page .speech-metrics {
+                display: grid;
+                gap: 0.5rem;
+            }
+
+            .task-details-page .metric {
+                align-items: start;
+                background: #fff;
+                border: 1px solid #e8edf2;
+                border-radius: 9px;
+                display: grid;
+                gap: 0.4rem;
+                grid-template-columns: 18px minmax(0, 1fr);
+                padding: 0.55rem;
+            }
+
+            .task-details-page .metric span {
+                font-size: 0.72rem;
+                line-height: 1.3;
+                min-width: 0;
+            }
+
+            .task-details-page .agent-performance-dashboard .metric .progress-bar {
+                align-self: center;
+                background: #e8edf2 !important;
+                border-radius: 999px;
+                grid-column: 2;
+                height: 6px !important;
+                min-width: 0 !important;
+                overflow: hidden;
+                width: 100%;
+            }
+
+            .task-details-page .agent-performance-dashboard .metric .progress {
+                background: linear-gradient(90deg, var(--accent), var(--warning));
+                border-radius: inherit;
+                display: block;
+                height: 100% !important;
+                min-width: 0;
+            }
+
+            .task-details-page .tabs {
+                display: flex;
+                gap: 0.45rem;
+                overflow-x: auto;
+                padding: 0.55rem;
+                scrollbar-width: none;
+            }
+
+            .task-details-page .tabs::-webkit-scrollbar {
+                display: none;
+            }
+
+            .task-details-page .tab-btn {
+                border-radius: 999px;
+                flex: 0 0 auto;
+                font-size: 0.68rem;
+                min-height: 32px;
+                padding: 0.38rem 0.58rem;
+                white-space: nowrap;
+            }
+
+            .task-details-page .tab-content {
+                padding: 0.75rem;
+            }
+
+            .task-details-page .metrics-grid {
+                display: grid;
+                gap: 0.75rem;
+                grid-template-columns: 1fr;
+            }
+
+            .task-details-page .metric-card,
+            .task-details-page .professional-card {
+                border-radius: 11px;
+                padding: 0.7rem;
+            }
+
+            .task-details-page .metric-card h4 {
+                font-size: 0.9rem;
+                line-height: 1.3;
+            }
+
+            .task-details-page .metric-score {
+                font-size: 1rem;
+                margin-bottom: 0.45rem;
+            }
+
+            .task-details-page .metric-details p,
+            .task-details-page .professional-card p {
+                font-size: 0.78rem;
+                line-height: 1.45;
+                margin-bottom: 0.5rem;
+            }
+
+            .task-details-page .performance-summary {
+                padding: 0.7rem;
+            }
+
+            .task-details-page .performance-summary h3 {
+                font-size: 0.9rem !important;
+            }
+
+            .task-details-page .summary-stats {
+                display: grid;
+                gap: 0.45rem;
+                grid-template-columns: 1fr;
+                margin-top: 0.65rem;
+            }
+
+            .task-details-page .summary-stats .stat {
+                justify-content: space-between;
+            }
+
+            .task-details-page #linguistic .container-fluid {
+                padding: 0 !important;
+            }
+
+            .task-details-page .speaker-card {
+                padding: 0.75rem !important;
+            }
+
+            .task-details-page .word-cloud {
+                gap: 0.35rem;
+            }
+
+            .task-details-page .word-tag {
+                font-size: 0.72rem;
+                padding: 0.3rem 0.45rem;
+            }
+
+            .task-details-page .transcription-wrap {
+                max-height: 360px !important;
+                padding: 0.45rem 0.75rem !important;
+            }
+
+            .task-details-page .transcript-turn {
+                background: #f8fafc;
+                border: 1px solid #eef2f7;
+                border-radius: 10px;
+                padding: 0.65rem;
+            }
+
+            .task-details-page .transcript-turn > .d-flex {
+                align-items: flex-start !important;
+                flex-direction: column;
+                gap: 0.35rem;
+            }
+
+            .task-details-page .arabic-text {
+                font-size: 0.86rem !important;
+                line-height: 1.55 !important;
+            }
+
+            .task-details-page .sentiment-tabs {
+                display: flex;
+                gap: 0.45rem;
+                overflow-x: auto;
+                padding-bottom: 0.2rem;
+            }
+
+            .task-details-page .sentiment-tabs .nav-item {
+                flex: 0 0 auto;
+            }
+
+            .task-details-page .sentiment-tabs .nav-link {
+                border-radius: 999px;
+                font-size: 0.76rem;
+                min-width: 74px;
+                padding: 0.45rem 0.7rem;
+            }
+
+            .task-details-page .sentiment-table-container {
+                max-height: 320px !important;
+                overflow-x: auto !important;
+            }
+
+            .task-details-page .sentiment-table {
+                min-width: 440px;
+            }
+
+            .task-details-page .sentiment-table th,
+            .task-details-page .sentiment-table td {
+                font-size: 0.76rem;
+                padding: 0.55rem;
+            }
+
+            .task-details-page .accordion-button {
+                align-items: flex-start !important;
+                flex-direction: column;
+                gap: 0.45rem;
+                padding: 0.75rem 0.85rem !important;
+            }
+
+            .task-details-page .accordion-button::after {
+                position: absolute;
+                right: 0.85rem;
+                top: 0.95rem;
+            }
+
+            .task-details-page .accordion-button .badge {
+                margin-left: 0 !important;
+                max-width: calc(100% - 1.5rem);
+            }
+
+            .task-details-page .accordion-body {
+                padding: 0.85rem !important;
+            }
+
+            .task-details-page .accordion-body .row {
+                --bs-gutter-y: 0.65rem;
+            }
+
+            .task-details-page .accordion-body [class*="col-md-"] > div:not(.progress):not(.d-flex) {
+                overflow-wrap: anywhere;
+            }
+
+            .task-details-page .col-6.mt-4 {
+                flex: 0 0 100%;
+                margin-top: 0.85rem !important;
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .task-details-page .risk-item {
+                padding: 0.8rem !important;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .task-details-page {
+                padding: 0.65rem !important;
+            }
+
+            .task-details-page .overall-score {
+                grid-template-columns: 58px minmax(0, 1fr);
+            }
+
+            .task-details-page .score-circle {
+                height: 58px;
+                min-width: 58px;
+                width: 58px;
+            }
+
+            .task-details-page .score-circle span {
+                font-size: 0.76rem;
+                height: 49px;
+                width: 49px;
+            }
+
+            .task-details-page .row.text-center.g-4 > [class*="col-"] {
+                flex: 0 0 calc(50% - 0.3rem);
+                max-width: calc(50% - 0.3rem);
+            }
+
+            .task-details-page .card-body [style*="height: 150px"] {
+                height: 112px !important;
+            }
+        }
     </style>
 
     <style>
@@ -90,7 +634,7 @@
 @endpush
 
 @section('content')
-    <div class="container-fluid py-4 professional-theme">
+    <div class="container-fluid py-4 professional-theme task-details-page">
         
         <!-- Header Section -->
         <div class="row mb-4 align-items-center animate-fade">
@@ -990,13 +1534,19 @@
 
                                 @if(!empty($allTurns))
                                     @foreach($allTurns as $turn)
-                                        <div class="transcript-turn mb-2" data-text="{{ strtolower($turn['transcript'] ?? '') }}">
-                                            <div class="d-flex justify-content-between align-items-center mb-0">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <span class="fw-bold speaker-name" style="font-size: 0.85rem; color: #1e293b;">{{ $turn['speaker'] }}</span>
-                                                    <span class="text-muted" style="font-size: 10px;">• {{ $turn['speaker'] }}</span>
-                                                </div>
-                                                <span class="time-range px-1 rounded text-primary fw-bold" style="font-size: 0.7rem; background: #eef2ff;">
+                                        @php
+                                            $turnSpeaker = strtolower($turn['speaker'] ?? '');
+                                            $turnClass = $turnSpeaker === 'agent' ? 'turn-agent' : ($turnSpeaker === 'customer' ? 'turn-customer' : '');
+                                            $pillClass = $turnSpeaker === 'agent' ? 'pill-agent' : ($turnSpeaker === 'customer' ? 'pill-customer' : 'pill-unknown');
+                                            $pillIcon = $turnSpeaker === 'agent' ? 'fa-headset' : 'fa-user';
+                                        @endphp
+                                        <div class="transcript-turn mb-2 {{ $turnClass }}" data-text="{{ strtolower($turn['transcript'] ?? '') }}">
+                                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                                <span class="speaker-pill {{ $pillClass }}">
+                                                    <i class="fas {{ $pillIcon }}"></i>
+                                                    {{ ucfirst($turnSpeaker ?: 'Unknown') }}
+                                                </span>
+                                                <span class="time-range px-2 rounded text-primary fw-bold" style="font-size: 0.7rem; background: #eef2ff; white-space: nowrap;">
                                                     {{ $turn['start_time'] }} - {{ $turn['end_time'] }}
                                                 </span>
                                             </div>
@@ -1742,12 +2292,15 @@
 
     <script>
         // Toggle timestamps visibility
-        document.getElementById('showTimestamps').addEventListener('change', function() {
-            const timestamps = document.querySelectorAll('.timestamp');
-            timestamps.forEach(ts => {
-                ts.style.display = this.checked ? 'inline' : 'none';
+        const showTimestamps = document.getElementById('showTimestamps');
+        if (showTimestamps) {
+            showTimestamps.addEventListener('change', function() {
+                const timestamps = document.querySelectorAll('.timestamp');
+                timestamps.forEach(ts => {
+                    ts.style.display = this.checked ? 'inline' : 'none';
+                });
             });
-        });
+        }
     </script>
     <script>
         document.querySelectorAll('.tabs').forEach(tabContainer => {
@@ -2077,6 +2630,23 @@
                     });
                 });
             }
+        });
+    </script>
+    <script>
+        // Responsive sentiment tables: expose column labels for the stacked
+        // mobile card layout (UI only — no data/behaviour changes).
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.sentiment-table').forEach(function(table) {
+                const headers = Array.from(table.querySelectorAll('thead th'))
+                    .map(th => th.textContent.replace(/\s+/g, ' ').trim());
+                table.querySelectorAll('tbody tr').forEach(function(row) {
+                    Array.from(row.children).forEach(function(cell, i) {
+                        if (!cell.dataset.label && headers[i]) {
+                            cell.setAttribute('data-label', headers[i]);
+                        }
+                    });
+                });
+            });
         });
     </script>
 @endpush

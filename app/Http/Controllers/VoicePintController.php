@@ -22,6 +22,10 @@ class VoicePintController extends Controller
 
     public function __construct(VoiceIdentificationService $voiceId, AudioProcessingService $audioProcessor, HamsaService $hamsa, OpenAIService $openai)
     {
+        $this->middleware('auth.api');
+        $this->middleware('permission:tasks.view')->only(['index', 'stream']);
+        $this->middleware('permission:tasks.upload')->only(['upload']);
+        $this->middleware('permission:tasks.delete')->only(['delete', 'deleteAll']);
         $this->voiceId = $voiceId;
         $this->audioProcessor = $audioProcessor;
         $this->hamsa = $hamsa;

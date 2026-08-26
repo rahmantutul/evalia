@@ -1,7 +1,7 @@
 @extends('user.layouts.app')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid knowledge-base-page">
     <div class="row mb-4 mt-3">
         <div class="col-md-12">
             <div class="card shadow-sm border-0" style="border-radius: 15px; overflow: hidden;">
@@ -183,8 +183,8 @@
                             <tbody>
                                 @forelse($knowledgeBase as $entry)
                                 <tr class="border-bottom">
-                                    <td class="ps-4 fw-semibold text-muted">#{{ $entry->id }}</td>
-                                    <td>
+                                    <td class="ps-4 fw-semibold text-muted" data-label="ID">#{{ $entry->id }}</td>
+                                    <td data-label="Resource">
                                         <div class="d-flex align-items-center">
                                             <div class="rounded-3 p-2 me-3 bg-soft-primary">
                                                 <i class="fas fa-book fa-lg"></i>
@@ -195,12 +195,12 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Company">
                                         <span class="badge bg-soft-info px-3 py-2" style="border-radius: 8px;">
                                             <i class="icofont-bank-alt me-1"></i> {{ $entry->company->company_name }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="Keywords">
                                         @if($entry->keywords)
                                             <div class="d-flex flex-wrap gap-1">
                                                 @foreach(explode(',', $entry->keywords) as $kw)
@@ -211,7 +211,7 @@
                                             <span class="text-muted small italic">None</span>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td data-label="Status">
                                         @if($entry->is_active)
                                             <span class="badge bg-soft-success text-success px-2 py-1">
                                                 <i class="fas fa-check-circle me-1"></i> Active
@@ -222,11 +222,11 @@
                                             </span>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td data-label="Created">
                                         <small class="fw-bold text-dark">{{ $entry->created_at->format('d M Y') }}</small>
                                         <div class="text-muted" style="font-size: 11px;">{{ $entry->created_at->format('H:i') }}</div>
                                     </td>
-                                    <td>
+                                    <td data-label="Actions">
                                         <div class="d-flex justify-content-end gap-2 pe-3">
                                             <a href="{{ route('user.knowledgeBase.details', $entry->id) }}"
                                                class="btn btn-sm btn-icon btn-light border shadow-sm"
@@ -238,12 +238,15 @@
                                                data-bs-toggle="tooltip" title="Edit">
                                                 <i class="fas fa-edit text-warning"></i>
                                             </a>
-                                            <a href="{{ route('user.knowledgeBase.delete', $entry->id) }}"
-                                               class="btn btn-sm btn-icon btn-light border shadow-sm"
-                                               data-bs-toggle="tooltip" title="Delete"
-                                               onclick="return confirm('Delete this knowledge resource permanently?')">
-                                                <i class="fas fa-trash text-danger"></i>
-                                            </a>
+                                            <form action="{{ route('user.knowledgeBase.delete', $entry->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this knowledge resource permanently?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                   class="btn btn-sm btn-icon btn-light border shadow-sm"
+                                                   data-bs-toggle="tooltip" title="Delete">
+                                                    <i class="fas fa-trash text-danger"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -288,6 +291,262 @@
     .bg-soft-success  { background-color: rgba(34,197,94,0.1);    color: #16a34a; }
     .bg-soft-secondary{ background-color: rgba(107,114,128,0.1);  color: #4b5563; }
     .btn-icon { width:32px; height:32px; display:flex; align-items:center; justify-content:center; padding:0; }
+
+    @media (max-width: 767.98px) {
+        .knowledge-base-page {
+            padding: 0.75rem !important;
+        }
+
+        .knowledge-base-page > .row {
+            margin-top: 0.75rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+
+        .knowledge-base-page .card {
+            border-radius: 12px !important;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06) !important;
+        }
+
+        .knowledge-base-page .card-header {
+            align-items: stretch !important;
+            flex-direction: column;
+            gap: 0.85rem;
+            padding: 1rem !important;
+        }
+
+        .knowledge-base-page .card-header > .d-flex:first-child {
+            align-items: flex-start !important;
+        }
+
+        .knowledge-base-page .card-header .bg-primary {
+            align-items: center;
+            display: inline-flex;
+            height: 40px;
+            justify-content: center;
+            min-width: 40px;
+            padding: 0 !important;
+            width: 40px;
+        }
+
+        .knowledge-base-page .card-title {
+            font-size: 1.08rem;
+            line-height: 1.25;
+        }
+
+        .knowledge-base-page .card-header p {
+            line-height: 1.35;
+        }
+
+        .knowledge-base-page .card-header > .d-flex.gap-2 {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .knowledge-base-page .card-header .btn {
+            justify-content: center;
+            min-height: 40px;
+            padding: 0.55rem 0.85rem !important;
+            width: 100%;
+        }
+
+        .knowledge-base-page .card-body.bg-light {
+            padding: 0.85rem !important;
+        }
+
+        .knowledge-base-page form.row {
+            --bs-gutter-y: 0.75rem;
+        }
+
+        .knowledge-base-page form.row > [class*="col-"] {
+            width: 100%;
+        }
+
+        .knowledge-base-page .form-select,
+        .knowledge-base-page .form-control {
+            min-height: 40px;
+        }
+
+        .knowledge-base-page .alert {
+            margin: 0.75rem !important;
+            padding: 0.75rem;
+        }
+
+        .knowledge-base-page .table-responsive {
+            overflow: visible;
+        }
+
+        .knowledge-base-page table,
+        .knowledge-base-page thead,
+        .knowledge-base-page tbody,
+        .knowledge-base-page th,
+        .knowledge-base-page td,
+        .knowledge-base-page tr {
+            display: block;
+        }
+
+        .knowledge-base-page thead {
+            display: none;
+        }
+
+        .knowledge-base-page tbody {
+            background: #f8fafc;
+            padding: 0.75rem;
+        }
+
+        .knowledge-base-page tbody tr {
+            background: #fff;
+            border: 1px solid #e5eaf1 !important;
+            border-radius: 13px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+            margin-bottom: 0.85rem;
+            overflow: hidden;
+            padding: 0.85rem;
+        }
+
+        .knowledge-base-page tbody tr:last-child {
+            margin-bottom: 0;
+        }
+
+        .knowledge-base-page tbody td {
+            border: 0 !important;
+            display: grid;
+            grid-template-columns: minmax(78px, 30%) minmax(0, 1fr);
+            gap: 0.7rem;
+            min-height: 32px;
+            padding: 0.45rem 0 !important;
+            text-align: left !important;
+            word-break: break-word;
+        }
+
+        .knowledge-base-page tbody td::before {
+            color: #64748b;
+            content: attr(data-label);
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .knowledge-base-page tbody td:first-child,
+        .knowledge-base-page tbody td:nth-child(2),
+        .knowledge-base-page tbody td:last-child {
+            display: block;
+        }
+
+        .knowledge-base-page tbody td:first-child::before,
+        .knowledge-base-page tbody td:nth-child(2)::before,
+        .knowledge-base-page tbody td:last-child::before {
+            content: none;
+        }
+
+        .knowledge-base-page tbody td:first-child {
+            color: #2563eb !important;
+            font-size: 0.82rem;
+            padding-top: 0 !important;
+        }
+
+        .knowledge-base-page tbody td:nth-child(2) {
+            border-bottom: 1px solid #edf2f7 !important;
+            padding-bottom: 0.75rem !important;
+        }
+
+        .knowledge-base-page tbody td:nth-child(2) .d-flex {
+            align-items: flex-start !important;
+            gap: 0.7rem;
+        }
+
+        .knowledge-base-page tbody td:nth-child(2) small {
+            max-width: 100% !important;
+            white-space: normal;
+        }
+
+        .knowledge-base-page tbody td .badge {
+            line-height: 1.25;
+            white-space: normal;
+        }
+
+        .knowledge-base-page tbody td:last-child {
+            border-top: 1px solid #edf2f7 !important;
+            margin-top: 0.35rem;
+            padding-top: 0.75rem !important;
+        }
+
+        .knowledge-base-page tbody td:last-child .d-flex {
+            display: grid !important;
+            gap: 0.55rem !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            padding-right: 0 !important;
+            width: 100%;
+        }
+
+        .knowledge-base-page tbody td:last-child .btn-icon {
+            height: 38px;
+            width: 100%;
+        }
+
+        .knowledge-base-page .card-body > .d-flex.justify-content-between {
+            align-items: stretch !important;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 0.85rem !important;
+            text-align: center;
+        }
+
+        .knowledge-base-page .pagination {
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 0;
+        }
+
+        .knowledge-base-page #ragSimulatorModal .modal-dialog {
+            margin: 0;
+            max-width: 100% !important;
+            min-height: 100%;
+            width: 100% !important;
+        }
+
+        .knowledge-base-page #ragSimulatorModal .modal-content {
+            border-radius: 18px 18px 0 0 !important;
+            max-height: 94vh;
+        }
+
+        .knowledge-base-page #ragSimulatorModal .modal-body {
+            padding: 1rem !important;
+        }
+
+        .knowledge-base-page #ragSimulatorModal .row.g-4 {
+            --bs-gutter-y: 0.85rem;
+        }
+
+        .knowledge-base-page #ragSimulatorModal .bg-light.rounded-4 {
+            padding: 1rem !important;
+        }
+
+        .knowledge-base-page #simQuery {
+            min-height: 120px;
+        }
+
+        .knowledge-base-page #simResultContent {
+            font-size: 0.76rem !important;
+            max-height: 320px !important;
+            padding: 0.85rem !important;
+        }
+
+        .knowledge-base-page #simPlaceholder {
+            padding: 2rem 0.75rem !important;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .knowledge-base-page {
+            padding: 0.65rem !important;
+        }
+
+        .knowledge-base-page tbody td {
+            grid-template-columns: 1fr;
+            gap: 0.22rem;
+        }
+    }
 </style>
 @endsection
 

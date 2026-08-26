@@ -23,6 +23,17 @@ class TaskController extends Controller
     public function __construct(HamsaService $hamsa, \App\Services\KnowledgeService $knowledge, \App\Services\OpenAIService $openai)
     {
         $this->middleware('auth.api');
+        $this->middleware('permission:tasks.view')->only([
+            'TaskList',
+            'taskDetails',
+            'checkTaskStatus',
+            'fetchHamsaJob',
+            'fetchTaskHamsaJob',
+            'agentWiseExtractions',
+        ]);
+        $this->middleware('permission:tasks.upload')->only(['taskStore']);
+        $this->middleware('permission:tasks.evaluate')->only(['reEvaluateTask']);
+        $this->middleware('permission:tasks.delete')->only(['deleteTask']);
         $this->hamsa = $hamsa;
         $this->knowledge = $knowledge;
         $this->openai = $openai;

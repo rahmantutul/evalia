@@ -1525,3 +1525,471 @@ input:checked + .toggle-slider:before {
     white-space: nowrap;
   }
 }
+
+/* ================================================================
+   COMPREHENSIVE MOBILE FIXES (task-details page)
+   ================================================================ */
+@media (max-width: 767.98px) {
+
+  /* Prevent horizontal overflow */
+  .task-details-page { overflow-x: hidden; }
+
+  /* ── Header row: stack button below title ── */
+  .task-details-page > .row.mb-4 { flex-direction: column; }
+  .task-details-page > .row.mb-4 > [class*="col-"] {
+    width: 100% !important; max-width: 100% !important;
+  }
+  .task-details-page > .row.mb-4 .text-md-end {
+    text-align: left !important; margin-top: 0.75rem;
+  }
+
+  /* ── Interaction insights: 3-up grid ── */
+  .task-details-page .row.text-center.g-4 > [class*="col-"] {
+    flex: 0 0 calc(33.333% - 0.35rem) !important;
+    max-width: calc(33.333% - 0.35rem) !important;
+    padding: 0.5rem 0.3rem !important;
+  }
+  .task-details-page .row.text-center.g-4 > .border-end {
+    border-right: none !important;
+  }
+
+  /* ── Agent profile: remove fixed 400 px width ── */
+  .agent-profile {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* ── Speech analysis: remove fixed max-width ── */
+  .speech-analysis {
+    max-width: 100% !important;
+    width: 100% !important;
+    flex: none !important;
+  }
+
+  /* ── Score items: no fixed min-width ── */
+  .score-item { min-width: 0 !important; }
+
+  /* ── Word-cloud col-6 columns → full width ── */
+  .task-details-page .card .row.g-3 > .col-6 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* ── Risk Assessment card (hard-coded col-6) → full width ── */
+  .task-details-page .col-6.mt-4 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-top: 1rem !important;
+  }
+
+  /* ── Risk items inside Risk Assessment → full width ── */
+  .task-details-page .col-md-6.col-lg-4 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* ── Accordion buttons: allow label to wrap ── */
+  .task-details-page .accordion-button {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding-right: 2.5rem !important;
+    position: relative;
+  }
+  .task-details-page .accordion-button::after {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-shrink: 0;
+  }
+  .task-details-page .accordion-button:not(.collapsed)::after {
+    transform: translateY(-50%) rotate(-180deg) !important;
+  }
+
+  /* ── Accordion body sub-columns → full width ── */
+  .task-details-page .accordion-body .col-md-6,
+  .task-details-page .accordion-body .col-md-4 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* ── Tables: horizontal scroll ── */
+  .task-details-page .sentiment-table-container {
+    overflow-x: auto !important;
+  }
+  .task-details-page .sentiment-table { min-width: 360px; }
+
+  /* ── Sentiment timeline chart height ── */
+  .task-details-page .card-body > div[style*="height: 300px"] {
+    height: 200px !important;
+  }
+
+  /* ── Grids: single column on mobile ── */
+  .task-details-page .pace-stats {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  .task-details-page .word-frequency-container {
+    grid-template-columns: 1fr !important;
+  }
+  .task-details-page .language-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Top bar: wrap items ── */
+  .task-details-page .top-bar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  /* ── Summary stats: wrap ── */
+  .task-details-page .summary-stats {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* ── Override common inline fixed widths ── */
+  .task-details-page [style*="max-width: 300px"] { max-width: 100% !important; }
+  .task-details-page [style*="width: 400px"]     { width: 100% !important; max-width: 100% !important; }
+  .task-details-page [style*="max-width: 500px"] { max-width: 100% !important; }
+
+  /* ── Main two-pane columns → full width ── */
+  .task-details-page .col-lg-7,
+  .task-details-page .col-lg-5 {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* ── Very small phones (≤ 420 px) ── */
+@media (max-width: 420px) {
+  /* Stat bar → 2 per row */
+  .task-details-page .row.text-center.g-4 > [class*="col-"] {
+    flex: 0 0 calc(50% - 0.3rem) !important;
+    max-width: calc(50% - 0.3rem) !important;
+  }
+  .task-details-page .agent-info h3 { font-size: 0.9rem !important; }
+}
+
+/* ====================================================================
+   PROFESSIONAL MOBILE VIEW — task details page
+   Aimed at phones; everything below is clamped to the page subtree so
+   desktop layouts are untouched.
+   ==================================================================== */
+
+/* ── Transcript speaker pills (all viewports) ─────────────────────── */
+.speaker-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.speaker-pill i { font-size: 0.68rem; }
+.pill-agent { background: #eef2ff; color: #6366f1; }
+.pill-customer { background: #ecfdf5; color: #0f9d6e; }
+.pill-unknown { background: #f1f5f9; color: #64748b; }
+.transcript-turn.turn-agent {
+  background: #f8fafc !important;
+  border-inline-start: 3px solid #6366f1 !important;
+}
+.transcript-turn.turn-customer {
+  background: #f0fdf6 !important;
+  border-inline-start: 3px solid #10b981 !important;
+}
+
+@media (max-width: 767.98px) {
+  .task-details-page {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  /* Hide the horizontal-janky desktop headers inside the sentiment cards */
+  .task-details-page .sentiment-table thead { display: none; }
+
+  /* ── Header ─────────────────────────────────────────────────────── */
+  .task-details-page > .row.mb-4.align-items-center { margin-bottom: 0.75rem !important; }
+  .task-details-page > .row.mb-4 h2 {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .task-details-page > .row.mb-4 h2 small { margin-left: 0 !important; }
+  .task-details-page > .row.mb-4 .d-flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+    align-items: center;
+  }
+  .task-details-page > .row.mb-4 .col-md-4 { margin-top: 0.6rem !important; }
+  .task-details-page > .row.mb-4 .btn {
+    border-radius: 10px !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    min-height: 44px;
+  }
+
+  /* ── Evaluation policy alert ────────────────────────────────────── */
+  .task-details-page .alert.d-flex {
+    align-items: flex-start !important;
+    border-radius: 12px !important;
+    padding: 0.8rem !important;
+  }
+  .task-details-page .alert.d-flex .me-3 { margin-right: 0.55rem !important; }
+  .task-details-page .alert.d-flex > div { min-width: 0; }
+
+  /* ── 4 metric cards (chat cards) ────────────────────────────────── */
+  .task-details-page > .row.gy-4 > [class*="col-"] { margin-bottom: 0; }
+  .task-details-page .card-header {
+    align-items: center !important;
+    gap: 0.5rem;
+  }
+  .task-details-page .card-header h6 small,
+  .task-details-page .card-header small { display: block; }
+  .task-details-page .card-body .mt-1 .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    margin: 0.15rem 0.1rem !important;
+  }
+
+  /* ── Risk & Compliance split card ───────────────────────────────── */
+  .task-details-page > .row.gy-4 > .col-lg-3 .card-body [style*="min-height: 150px"] {
+    min-height: 120px !important;
+  }
+
+  /* ── Interaction insights stat bar ──────────────────────────────── */
+  .task-details-page .row.text-center.g-4 {
+    --bs-gutter-x: 0.5rem;
+    --bs-gutter-y: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .task-details-page .row.text-center.g-4 > [class*="col-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    padding: 0.7rem 0.5rem !important;
+  }
+  .task-details-page .row.text-center.g-4 i { display: block; }
+  .task-details-page .row.text-center.g-4 h4 {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* ── Agent performance dashboard ────────────────────────────────── */
+  .task-details-page .agent-performance-dashboard {
+    border-radius: 14px;
+    padding: 0.6rem !important;
+  }
+  .task-details-page .dashboard-header { padding: 0.5rem 0.2rem; }
+  .task-details-page .agent-profile { align-items: center; }
+  .task-details-page .agent-info h3 { margin-bottom: 0.5rem; }
+  .task-details-page .score-circle {
+    box-shadow: 0 6px 18px rgba(139, 92, 246, 0.18);
+  }
+  .task-details-page .score-item {
+    border: 1px solid #eef2f7;
+    border-radius: 10px;
+    padding: 0.5rem 0.6rem;
+  }
+  .task-details-page .score-item .label { font-weight: 600; }
+  .task-details-page .score-item .value { text-align: right; }
+  .task-details-page .speech-analysis {
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+  }
+  .task-details-page .agent-performance-dashboard .metric {
+    background: #fff;
+  }
+
+  /* Tabs */
+  .task-details-page .tabs {
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 999px;
+    justify-content: flex-start;
+    margin-bottom: 0.75rem;
+    padding: 0.3rem;
+  }
+  .task-details-page .tab-btn {
+    border-radius: 999px;
+    font-size: 0.68rem;
+    min-height: 34px;
+    padding: 0.45rem 0.7rem;
+    white-space: nowrap;
+  }
+  .task-details-page .tab-btn.active { box-shadow: 0 4px 12px rgba(99, 102, 241, 0.22); }
+
+  /* Tab content / metric cards */
+  .task-details-page .metrics-grid { gap: 0.8rem; }
+  .task-details-page .metric-card {
+    border-radius: 12px;
+    padding: 0.9rem;
+  }
+  .task-details-page .metric-card p,
+  .task-details-page .professional-card p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .task-details-page .performance-summary { border-radius: 12px; }
+  .task-details-page .performance-summary .summary-stats { gap: 0.5rem; }
+
+  /* "Not evaluated" placeholders: clamp huge mx-3 padding */
+  .task-details-page .border.rounded-4.bg-light.mx-3.my-4 {
+    margin-bottom: 0.5rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .task-details-page .text-muted.px-5 { padding-left: 0.25rem !important; padding-right: 0.25rem !important; }
+
+  /* ── Linguistic tab ─────────────────────────────────────────────── */
+  .task-details-page #linguistic .card-body { padding: 0.85rem !important; }
+  .task-details-page #linguistic .col-md-6 > .p-3 { padding: 0.75rem !important; }
+
+  /* ── Most frequent words ────────────────────────────────────────── */
+  .task-details-page .word-frequency-card { padding: 0.85rem !important; }
+  .task-details-page .speaker-card { border-radius: 12px !important; }
+  .task-details-page .word-tag { font-size: 0.74rem; padding: 0.3rem 0.5rem; }
+
+  /* ── Call summary / audio player ────────────────────────────────── */
+  .task-details-page .card .btn.btn-sm.rounded-circle {
+    align-items: center;
+    display: inline-flex;
+    font-size: 0.85rem;
+    height: 40px;
+    justify-content: center;
+    width: 40px;
+  }
+  .task-details-page #progressBarContainer { height: 10px !important; }
+  .task-details-page .p-3.mb-3.rounded-3.bg-light { padding: 0.85rem !important; }
+  .task-details-page .mb-4 > .p-3.bg-light.rounded-3 {
+    border-radius: 10px !important;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    padding: 0.8rem !important;
+  }
+
+  /* ── Full conversation ──────────────────────────────────────────── */
+  .task-details-page .transcript-turn {
+    border-radius: 12px;
+    margin-bottom: 0.6rem !important;
+    padding: 0.7rem !important;
+  }
+  .task-details-page .time-range { font-size: 0.64rem !important; padding: 0.25rem 0.5rem !important; }
+  .task-details-page .arabic-text { font-size: 0.86rem !important; line-height: 1.6 !important; }
+  .task-details-page .transcription-wrap { padding: 0.5rem 0.7rem !important; }
+
+  /* ── Sentiment timeline ─────────────────────────────────────────── */
+  .task-details-page .card > .card-body [style*="height: 300px"] { height: 190px !important; }
+  .task-details-page .sentiment-tabs { gap: 0.4rem; }
+  .task-details-page .sentiment-tabs .nav-link { min-width: 64px; }
+
+  /* Stacked sentiment tables → summary cards */
+  .task-details-page .sentiment-table-container {
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 0.25rem;
+  }
+  .task-details-page .sentiment-table {
+    min-width: 0 !important;
+    width: 100%;
+  }
+  .task-details-page .sentiment-table tbody {
+    background: transparent;
+    display: block;
+    padding: 0;
+  }
+  .task-details-page .sentiment-table tbody tr {
+    background: #fff;
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+    display: grid;
+    gap: 0.1rem 0.9rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 0.7rem;
+    padding: 0.6rem 0.8rem;
+    width: 100%;
+  }
+  .task-details-page .sentiment-table tbody tr:last-child { margin-bottom: 0; }
+  .task-details-page .sentiment-table tbody td {
+    align-items: center;
+    border: 0 !important;
+    display: flex;
+    gap: 0.6rem;
+    justify-content: space-between;
+    min-height: 0;
+    padding: 0.3rem 0 !important;
+  }
+  .task-details-page .sentiment-table tbody td::before {
+    color: #64748b;
+    content: attr(data-label);
+    flex: 0 0 auto;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .task-details-page .sentiment-table tbody td:last-child {
+    border-top: 1px dashed #edf2f7 !important;
+    grid-column: 1 / -1;
+    margin-top: 0.15rem;
+    padding-top: 0.5rem !important;
+  }
+  .task-details-page .sentiment-table tbody td:last-child::before { content: none; }
+  .task-details-page .sentiment-table tbody td .badge { display: inline-flex; align-items: center; }
+  .task-details-page .sentiment-table .sentiment-progress { width: 100%; height: 6px !important; }
+  .task-details-page .sentiment-table .sentiment-progress .progress-bar { border-radius: 999px; }
+
+  /* ── Accordions (policy / KB) ───────────────────────────────────── */
+  .task-details-page .accordion-button {
+    align-items: flex-start !important;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.8rem 2.4rem 0.8rem 0.9rem !important;
+  }
+  .task-details-page .accordion-button span[style*="flex: 1"] { width: 100%; }
+  .task-details-page .accordion-button .badge {
+    align-self: flex-start;
+    line-height: 1.4;
+    margin-left: 0 !important;
+    max-width: 100%;
+    text-align: left;
+    white-space: normal;
+  }
+  .task-details-page .accordion-body { padding: 0.8rem !important; }
+  .task-details-page .accordion-body .p-2.border.rounded.bg-white { overflow-wrap: anywhere; }
+
+  /* ── Company risk assessment ────────────────────────────────────── */
+  .task-details-page .risk-item { border-radius: 12px; padding: 0.9rem !important; }
+  .task-details-page .risk-item h6 { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 420px) {
+  .task-details-page > .row.mb-4 h2 { font-size: 1.1rem; }
+  .task-details-page .agent-profile {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+  .task-details-page .avatar { height: 40px; min-width: 40px; width: 40px; font-size: 1.15rem; }
+  .task-details-page .overall-score {
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+  .task-details-page .score-circle { height: 56px; min-width: 56px; width: 56px; }
+  .task-details-page .score-circle span { height: 47px; width: 47px; }
+  .task-details-page .row.text-center.g-4 h4 { font-size: 0.85rem; }
+  .task-details-page .row.text-center.g-4 .small { font-size: 0.58rem !important; }
+}

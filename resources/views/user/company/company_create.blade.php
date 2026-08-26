@@ -132,6 +132,173 @@
         .form-section:nth-child(4) { animation-delay: 0.4s; }
         .form-section:nth-child(5) { animation-delay: 0.5s; }
         .form-section:nth-child(6) { animation-delay: 0.6s; }
+
+        @media (max-width: 767.98px) {
+            .company-create-page {
+                padding-bottom: 1rem !important;
+            }
+
+            .company-create-page .container-fluid {
+                padding: 0.4rem !important;
+            }
+
+            /* Card */
+            .company-create-page .card {
+                border-radius: 12px;
+                box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+            }
+
+            /* Header */
+            .company-create-page .card-header {
+                padding: 0.8rem !important;
+                border-radius: 12px 12px 0 0 !important;
+            }
+
+            .company-create-page .card-header .d-flex {
+                gap: 0.6rem;
+                align-items: center !important;
+            }
+
+            .company-create-page .icon-wrapper {
+                padding: 0.5rem !important;
+                border-radius: 8px !important;
+            }
+
+            .company-create-page .icon-wrapper i {
+                font-size: 1rem !important;
+            }
+
+            .company-create-page .card-header h3 {
+                font-size: 1rem !important;
+                font-weight: 600 !important;
+            }
+
+            .company-create-page .card-header p {
+                font-size: 0.7rem !important;
+            }
+
+            /* Card body */
+            .company-create-page .card-body {
+                padding: 0.6rem !important;
+            }
+
+            /* Form sections */
+            .company-create-page .form-section {
+                padding: 0.8rem !important;
+                margin-bottom: 0.8rem !important;
+                border-left-width: 3px !important;
+                border-radius: 8px !important;
+            }
+
+            .company-create-page .section-title {
+                font-size: 0.88rem !important;
+                margin-bottom: 0.8rem !important;
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
+
+            .company-create-page .section-title .icon-title {
+                font-size: 0.95rem !important;
+                margin-right: 0 !important;
+            }
+
+            .company-create-page .section-title .badge {
+                font-size: 0.6rem !important;
+            }
+
+            /* Form elements */
+            .company-create-page .form-label {
+                font-size: 0.78rem !important;
+                margin-bottom: 0.2rem !important;
+                font-weight: 500;
+                color: #555;
+            }
+
+            .company-create-page .form-control,
+            .company-create-page .form-select {
+                padding: 0.45rem 0.6rem !important;
+                font-size: 0.85rem !important;
+                border-radius: 8px !important;
+                min-height: 36px;
+                margin-top: 0 !important;
+            }
+
+            .company-create-page textarea.form-control {
+                min-height: 80px !important;
+            }
+
+            .company-create-page .row.g-3 {
+                --bs-gutter-x: 0.5rem;
+                --bs-gutter-y: 0.4rem;
+            }
+
+            .company-create-page .row.g-3 > [class*="col-"] {
+                margin-bottom: 0;
+            }
+
+            /* Tagify */
+            .company-create-page .tagify {
+                padding: 0.25rem !important;
+                margin-top: 0 !important;
+            }
+
+            .company-create-page .tagify__input {
+                margin: 0.1rem 0 !important;
+            }
+
+            /* Form control extra space fix */
+            .company-create-page .form-section .row.g-3 > [class*="col-"] + [class*="col-"] {
+                margin-top: 0;
+            }
+
+            /* FAQ pairs */
+            .company-create-page .faq-pair {
+                padding: 0.6rem !important;
+            }
+
+            /* Prompt overlay */
+            .company-create-page #prompt-lock-overlay p {
+                font-size: 0.85rem !important;
+            }
+
+            .company-create-page #prompt-lock-overlay .btn {
+                font-size: 0.78rem !important;
+                padding: 0.35rem 0.8rem !important;
+            }
+
+            /* Bottom buttons */
+            .company-create-page .d-grid.gap-2.d-md-flex {
+                display: flex !important;
+                flex-direction: column-reverse !important;
+                gap: 0.5rem !important;
+                margin-top: 0.8rem !important;
+            }
+
+            .company-create-page .d-grid.gap-2.d-md-flex .btn {
+                width: 100% !important;
+                justify-content: center !important;
+                min-height: 40px !important;
+                font-size: 0.85rem !important;
+                border-radius: 8px !important;
+                padding: 0.5rem 1.2rem !important;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .company-create-page .form-section {
+                padding: 0.6rem !important;
+            }
+
+            .company-create-page .card-header {
+                padding: 0.6rem !important;
+            }
+
+            .company-create-page .card-header h3 {
+                font-size: 0.9rem !important;
+            }
+        }
     </style>
     <style>
     .icon-wrapper {
@@ -145,7 +312,7 @@
 </style>
 @endpush
 @section('content')
-<div class="min-v d-flex align-items-center">
+<div class="min-v d-flex align-items-center company-create-page">
     <div class="container-fluid py-2">
         <div class="row justify-content-center">
             <div class="col-lg-10">
@@ -351,7 +518,7 @@ TASK RULES:
                                         <label for="agent_cooperation_configs" class="form-label">Agent Cooperation:</label>
                                         <input type="text" class="form-control" id="agent_cooperation_configs" name="agent_cooperation_configs" value="agent_proactive_assistance,agent_responsiveness,agent_emphasis,effectiveness">
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-md-6">
                                         <label for="agent_performance_configs" class="form-label">Agent Performance:</label>
                                         <input type="text" class="form-control" id="agent_performance_configs" name="agent_performance_configs" value="customer_satisfaction,professionalism,tone_consistency,polite_language_usage,configured_standards_compliance">
                                     </div>

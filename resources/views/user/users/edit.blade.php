@@ -125,23 +125,144 @@
     .info-banner i {
         color: #d97706;
     }
+
+    .user-form-page .form-shell {
+        border-color: #e5eaf1 !important;
+        border-radius: 14px;
+    }
+
+    .user-form-page .form-inner {
+        padding: 2rem;
+    }
+
+    .user-form-page .form-heading {
+        color: #1f2937;
+        font-size: 1.55rem;
+        line-height: 1.2;
+    }
+
+    @media (max-width: 767.98px) {
+        .user-form-page {
+            padding: 0.3rem !important;
+        }
+
+        .user-form-page .row.justify-content-center {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .user-form-page .row.justify-content-center > [class*="col-"] {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .user-form-page .form-shell {
+            border-radius: 12px;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06) !important;
+        }
+
+        .user-form-page .form-inner {
+            padding: 0.6rem !important;
+        }
+
+        .user-form-page .form-header-row {
+            align-items: stretch !important;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .user-form-page .form-heading {
+            font-size: 1.05rem !important;
+        }
+
+        .user-form-page .user-badge {
+            max-width: 100%;
+            overflow: hidden;
+            padding: 0.45rem 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        .user-form-page .user-badge span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-form-page .btn-outline-linkedin,
+        .user-form-page .btn-linkedin {
+            justify-content: center;
+            min-height: 40px;
+            width: 100%;
+        }
+
+        .user-form-page .info-banner {
+            margin-bottom: 0.7rem;
+            padding: 0.6rem;
+            font-size: 0.82rem;
+        }
+
+        .user-form-page .section-divider {
+            border-top-width: 1px;
+            margin: 0.9rem 0 0.6rem;
+        }
+
+        .user-form-page .section-divider span {
+            left: 0.3rem;
+            max-width: calc(100% - 0.6rem);
+            overflow: hidden;
+            padding: 0 0.4rem;
+            font-size: 0.72rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-form-page .row.g-3 {
+            --bs-gutter-y: 0.6rem;
+        }
+
+        .user-form-page .form-control,
+        .user-form-page .form-select,
+        .user-form-page select.form-control {
+            min-height: 38px;
+            font-size: 0.85rem;
+        }
+
+        .user-form-page .form-label {
+            font-size: 0.78rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .user-form-page .alert .d-flex {
+            align-items: flex-start !important;
+        }
+
+        .user-form-page .alert ul {
+            padding-left: 1.1rem !important;
+        }
+
+        .user-form-page .form-actions {
+            flex-direction: column-reverse;
+            gap: 0.5rem !important;
+            padding-top: 0.7rem !important;
+        }
+    }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid user-form-page">
     <div class="row justify-content-center">
         <div class="col-lg-10 col-xl-9">
-            <div class="form-container rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="form-container form-shell shadow-sm border overflow-hidden">
                 <!-- Header stripe -->
                 <div class="header-stripe"></div>
                 
-                <div class="p-4 p-md-5">
+                <div class="form-inner">
                     <!-- Header -->
                     <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-start">
+                        <div class="form-header-row d-flex justify-content-between align-items-start">
                             <div>
-                                <h2 class="mb-2 fw-semibold" style="color: #1f2937; font-size: 1.75rem;">
+                                <h2 class="form-heading mb-2 fw-semibold">
                                     {{ $type === 'agent' ? 'Edit Agent Profile' : 'Edit User Profile' }}
                                 </h2>
                                 <div class="user-badge">
@@ -369,7 +490,7 @@
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="d-flex gap-3 justify-content-end pt-3 border-top">
+                        <div class="form-actions d-flex gap-3 justify-content-end pt-3 border-top">
                             <a href="{{ route('users.show', $user['id']) }}" class="btn btn-outline-linkedin">
                                 <i class="fas fa-times me-2"></i>Cancel
                             </a>
@@ -392,29 +513,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const companySelect = document.getElementById('company_id');
     const evalRoleSelect = document.getElementById('evaluation_role_id');
 
-    companySelect.addEventListener('change', function() {
-        const companyId = this.value;
-        if (!companyId) {
-            evalRoleSelect.innerHTML = '<option value="">Select Role</option>';
-            return;
-        }
+    if (companySelect && evalRoleSelect) {
+        companySelect.addEventListener('change', function() {
+            const companyId = this.value;
+            if (!companyId) {
+                evalRoleSelect.innerHTML = '<option value="">Select Role</option>';
+                return;
+            }
 
-        evalRoleSelect.innerHTML = '<option value="">Loading...</option>';
+            evalRoleSelect.innerHTML = '<option value="">Loading...</option>';
 
-        fetch(`{{ route('api.get-evaluation-roles') }}?company_id=${companyId}`)
-            .then(res => res.json())
-            .then(data => {
-                let html = '<option value="">Select Role</option>';
-                data.forEach(role => {
-                    html += `<option value="${role.id}">${role.name}</option>`;
+            fetch(`{{ route('api.get-evaluation-roles') }}?company_id=${companyId}`)
+                .then(res => res.json())
+                .then(data => {
+                    let html = '<option value="">Select Role</option>';
+                    data.forEach(role => {
+                        html += `<option value="${role.id}">${role.name}</option>`;
+                    });
+                    evalRoleSelect.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error(err);
+                    evalRoleSelect.innerHTML = '<option value="">Error loading roles</option>';
                 });
-                evalRoleSelect.innerHTML = html;
-            })
-            .catch(err => {
-                console.error(err);
-                evalRoleSelect.innerHTML = '<option value="">Error loading roles</option>';
-            });
-    });
+        });
+    }
 
     // Clear error styling when user starts typing
     const errorFields = document.querySelectorAll('.is-invalid');

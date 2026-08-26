@@ -13,6 +13,7 @@ class AgentController extends Controller
     public function __construct()
     {
         $this->middleware('auth.api');
+        $this->middleware('permission:agents.view');
     }
 
     private function getAgentDashboardSummaryData()
@@ -264,5 +265,4 @@ class AgentController extends Controller
         ]);
     }
 }
-
 

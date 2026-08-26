@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('plan_feature_pivot');
+        Schema::dropIfExists('plan_feature');
     }
 };

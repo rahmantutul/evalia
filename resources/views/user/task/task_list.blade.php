@@ -431,11 +431,26 @@
         display: flex; align-items: center; justify-content: center;
         font-weight: bold; font-size: 11px;
     }
+
+    @media (max-width: 767.98px) {
+        .task-list-page .d-flex.justify-content-between.align-items-end.mb-4 {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .task-list-page .d-flex.justify-content-between.align-items-end.mb-4 > div {
+            width: 100%;
+        }
+
+        .task-list-page .d-flex.justify-content-between.align-items-end.mb-4 .btn {
+            width: 100%;
+        }
+    }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid p-4">
+<div class="container-fluid p-4 task-list-page">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-end mb-4">
         <div>
@@ -558,11 +573,11 @@
                 <tbody>
                     @forelse ($taskList as $task)
                         <tr>
-                            <td class="ps-4">
+                            <td data-label="Date" class="ps-4">
                                 <div class="fw-bold text-slate-900">{{ \Carbon\Carbon::parse($task['created_at'])->format('M d, Y') }}</div>
                                 <div class="text-slate-400" style="font-size: 11px;">{{ \Carbon\Carbon::parse($task['created_at'])->format('h:i A') }}</div>
                             </td>
-                            <td>
+                            <td data-label="Agent">
                                 <div class="agent-pill">
                                     <div class="avatar-sm">
                                         {{ strtoupper(substr($task['agent_name'] ?? 'A', 0, 1)) }}
@@ -573,20 +588,20 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="Outcome">
                                 <div class="text-slate-700 fw-500">{{ $task['outcome'] ?? 'Connected' }}</div>
                                 <div class="text-slate-400 small">
                                     <i class="bi bi-{{ ($task['channel'] ?? 'Call') == 'Call' ? 'telephone' : 'chat-dots' }} me-1"></i>
                                     {{ strtoupper($task['source'] ?? 'API') }}
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="Sentiment">
                                 @php $sent = $task['sentiment'] ?? 'Neutral'; @endphp
                                 <span class="text-{{ $sent == 'Positive' ? 'success' : ($sent == 'Negative' ? 'danger' : 'muted') }} fw-bold">
                                     {{ $sent }}
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Risk">
                                 @if(($task['status'] ?? '') == 'processing')
                                     <span class="badge-risk bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10">
                                         <span class="spinner-grow spinner-grow-sm me-1" role="status"></span>
@@ -598,7 +613,7 @@
                                     <span class="badge-risk bg-success bg-opacity-10 text-success border border-success border-opacity-10">SECURE</span>
                                 @endif
                             </td>
-                            <td class="pe-4 text-end">
+                            <td data-label="Actions" class="pe-4 text-end">
                                 <div class="d-flex justify-content-end gap-1">
                                     @if(($task['status'] ?? '') != 'processing')
                                         {{-- Chat / Conversation button --}}

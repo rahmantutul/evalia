@@ -360,34 +360,6 @@ class HamsaController extends Controller
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public function conversations(): View
     {
         return view('hamsa.conversations');

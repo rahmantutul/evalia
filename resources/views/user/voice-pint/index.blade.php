@@ -197,10 +197,14 @@
                             <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-history text-primary me-2"></i>Recent Audios</h6>
                                 @if(count($files) > 0)
-                                <a href="{{ route('user.voice-pint.clear-all') }}" class="text-danger small fw-bold text-decoration-none"
-                                   onclick="return confirm('This will delete EVERYTHING (all audio recordings and all learned voice prints). Are you sure?')">
-                                    <i class="fas fa-trash-alt me-1"></i>Clear All
-                                </a>
+                                <form action="{{ route('user.voice-pint.clear-all') }}" method="POST" class="d-inline"
+                                      onsubmit="return confirm('This will delete EVERYTHING (all audio recordings and all learned voice prints). Are you sure?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-link text-danger small fw-bold text-decoration-none p-0">
+                                        <i class="fas fa-trash-alt me-1"></i>Clear All
+                                    </button>
+                                </form>
                                 @endif
                             </div>
                             <div class="card-body p-0">
@@ -224,11 +228,13 @@
                                                     </div>
                                                     <div class="d-flex gap-2 align-items-center">
                                                         <small class="text-muted" style="font-size: 0.7rem;">{{ date('M d, H:i', $file['time']) }}</small>
-                                                        <a href="{{ route('user.voice-pint.delete', $file['filename']) }}"
-                                                           class="text-danger opacity-50 delete-btn"
-                                                           onclick="return confirm('Delete this recording?')">
-                                                            <i class="fas fa-trash-alt" style="font-size:.75rem;"></i>
-                                                        </a>
+                                                        <form action="{{ route('user.voice-pint.delete', $file['filename']) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this recording?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-link text-danger opacity-50 delete-btn p-0">
+                                                                <i class="fas fa-trash-alt" style="font-size:.75rem;"></i>
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </div>
                                                 <audio controls class="w-100 shadow-sm" style="height: 28px; border-radius: 4px;">
@@ -309,11 +315,13 @@
                                                         <span class="badge bg-primary rounded-pill" style="font-size:.6rem;">Rec {{ $i + 1 }}</span>
                                                         <div class="d-flex align-items-center gap-2">
                                                             <small class="text-muted" style="font-size:.65rem;">{{ date('M d, H:i', $gfile['time']) }}</small>
-                                                            <a href="{{ route('user.voice-pint.delete', $gfile['filename']) }}"
-                                                               class="text-danger opacity-40 delete-link"
-                                                               onclick="event.stopPropagation(); return confirm('Delete this recording?')">
-                                                                <i class="fas fa-trash-alt" style="font-size:.65rem;"></i>
-                                                            </a>
+                                                            <form action="{{ route('user.voice-pint.delete', $gfile['filename']) }}" method="POST" class="d-inline" onsubmit="event.stopPropagation(); return confirm('Delete this recording?')">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-link text-danger opacity-40 delete-link p-0">
+                                                                    <i class="fas fa-trash-alt" style="font-size:.65rem;"></i>
+                                                                </button>
+                                                            </form>
                                                         </div>
                                                     </div>
                                                     <div class="p-2">
