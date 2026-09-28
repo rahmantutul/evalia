@@ -24,6 +24,17 @@ class HamsaService
     public function createTranscriptionJob(string $mediaUrl, string $title = 'Untitled', string $language = 'ar'): array
     {
         try {
+            $payload = [
+                'type'           => 'TRANSCRIPTION',
+                'apiKey'         => $this->apiKey,
+                'mediaUrl'       => $mediaUrl,
+                'title'          => $title,
+                'language'       => $language,
+                'processingType' => 'async',
+                'sentiment'      => true,
+                'diarization'    => true,
+            ];
+
             $ch = curl_init();
             curl_setopt_array($ch, [
                 CURLOPT_URL            => $this->baseUrl . '/v2/jobs',
@@ -34,20 +45,12 @@ class HamsaService
                     'Authorization: Token ' . $this->apiKey,
                     'Content-Type: application/json',
                 ],
-                CURLOPT_POSTFIELDS => json_encode([
-                    'type'           => 'TRANSCRIPTION',
-                    'apiKey'         => $this->apiKey,
-                    'mediaUrl'       => $mediaUrl,
-                    'title'          => $title,
-                    'language'       => $language,
-                    'processingType' => 'async',
-                    'sentiment'      => true,
-                    'diarization'    => true,
-                ]),
+                CURLOPT_POSTFIELDS => json_encode($payload),
             ]);
 
             $body  = curl_exec($ch);
             $error = curl_error($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
             if ($error) {
@@ -56,9 +59,11 @@ class HamsaService
             }
 
             $data = json_decode($body, true);
-            Log::info('Hamsa Create Job response', [
-                'job_id' => $data['data']['jobId'] ?? null,
-                'status' => $data['data']['status'] ?? null,
+            Log::info('HAMSA_CREATE_JOB_RAW_RESPONSE', [
+                'http_code' => $httpCode,
+                'request' => $this->sanitizeForLog($payload),
+                'raw_body' => $body,
+                'decoded_body' => $this->sanitizeForLog($data),
             ]);
 
             $jobId = $data['data']['jobId'] ?? null;
@@ -75,12 +80,46 @@ class HamsaService
         }
     }
 
+    public function getFailureReason(array $details): string
+    {
+        $sources = [
+            $details['result'] ?? [],
+            $details['data'] ?? [],
+            $details['full_response']['data'] ?? [],
+            $details['full_response'] ?? [],
+        ];
+
+        foreach ($sources as $source) {
+            if (!is_array($source)) {
+                continue;
+            }
+
+            foreach (['error', 'failureReason', 'failure_reason', 'reason', 'details', 'message'] as $key) {
+                if (!empty($source[$key])) {
+                    $reason = is_scalar($source[$key])
+                        ? (string) $source[$key]
+                        : json_encode($source[$key]);
+
+                    if (in_array(strtoupper(trim($reason)), ['SUCCESS', 'FAILED', 'ERROR', 'REJECTED', 'PENDING'], true)) {
+                        continue;
+                    }
+
+                    return $reason;
+                }
+            }
+        }
+
+        return 'No failure reason returned by Hamsa.';
+    }
+
     public function getJobDetails(string $jobId): array
     {
         try {
+            $url = $this->v1Url . '/v1/jobs?jobId=' . urlencode($jobId);
+
             $ch = curl_init();
             curl_setopt_array($ch, [
-                CURLOPT_URL            => $this->v1Url . '/v1/jobs?jobId=' . urlencode($jobId),
+                CURLOPT_URL            => $url,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING       => '',
                 CURLOPT_MAXREDIRS      => 10,
@@ -95,6 +134,7 @@ class HamsaService
 
             $body  = curl_exec($ch);
             $error = curl_error($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
             if ($error) {
@@ -103,6 +143,13 @@ class HamsaService
             }
 
             $responseData = json_decode($body, true);
+            Log::info('HAMSA_GET_JOB_RAW_RESPONSE', [
+                'job_id' => $jobId,
+                'http_code' => $httpCode,
+                'url' => $url,
+                'raw_body' => $body,
+                'decoded_body' => $this->sanitizeForLog($responseData),
+            ]);
 
             $outer = $responseData['data'] ?? $responseData;
             $inner = isset($outer['data']) && is_array($outer['data']) ? $outer['data'] : $outer;
@@ -142,12 +189,18 @@ class HamsaService
             $status = strtoupper($details['status']);
             Log::info("Hamsa job {$jobId} status after {$waited}s: {$status}");
 
-            if ($status === 'COMPLETED' || $status === 'SUCCESSFUL') {
+            if (in_array($status, ['COMPLETED', 'SUCCESSFUL', 'SUCCEEDED', 'DONE', 'FINISHED'], true)) {
                 return $details;
             }
 
             if (in_array($status, ['FAILED', 'ERROR', 'REJECTED'])) {
-                throw new Exception("Hamsa job failed with status: {$status}");
+                Log::error("Hamsa job {$jobId} failed", [
+                    'status' => $status,
+                    'reason' => $this->getFailureReason($details),
+                    'response' => $this->sanitizeForLog($details['full_response'] ?? $details),
+                ]);
+
+                throw new Exception("Hamsa job failed with status: {$status}. " . $this->getFailureReason($details));
             }
 
         }
@@ -212,5 +265,33 @@ class HamsaService
         }
 
         return $conversation;
+    }
+
+    private function sanitizeForLog(mixed $value): mixed
+    {
+        if (is_array($value)) {
+            $sanitized = [];
+            foreach ($value as $key => $item) {
+                $lowerKey = strtolower((string) $key);
+                if (in_array($lowerKey, ['apikey', 'api_key', 'authorization', 'token'], true)) {
+                    $sanitized[$key] = '[redacted]';
+                    continue;
+                }
+
+                $sanitized[$key] = $this->sanitizeForLog($item);
+            }
+
+            return $sanitized;
+        }
+
+        if (is_string($value)) {
+            if (str_contains($value, 'X-Amz-Signature=') || str_contains($value, 'X-Amz-Credential=')) {
+                return preg_replace('/\?.*/', '?[signed-url-redacted]', $value);
+            }
+
+            return preg_replace('/(Token\s+)[A-Za-z0-9._-]+/', '$1[redacted]', $value);
+        }
+
+        return $value;
     }
 }

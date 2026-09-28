@@ -13,7 +13,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Token f03dbabc-a5f1-424c-a66e-fd9080d83f2e",
+            "value": "Token {{HAMSA_API_KEY}}",
             "type": "text"
           },
           {

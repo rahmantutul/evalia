@@ -187,17 +187,26 @@
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         z-index: 1060;
         display: none;
+        max-height: min(360px, 45vh);
         overflow: hidden;
     }
     .agent-selector-dropdown.show { display: block; }
+    .agent-selector-dropdown.open-up {
+        top: auto;
+        bottom: 100%;
+        margin-bottom: 8px;
+        margin-top: 0;
+    }
     .agent-search-wrapper {
         padding: 12px;
         background: #f8fafc;
         border-bottom: 1px solid #e2e8f0;
     }
     .agent-options-list {
-        max-height: 250px;
+        max-height: min(275px, calc(45vh - 58px));
         overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
     }
     .agent-option {
         padding: 10px 15px;
@@ -219,6 +228,11 @@
     .dashboard-page {
         max-width: 100%;
         overflow-x: hidden;
+    }
+
+    #audioUploadModal .modal-content,
+    #audioUploadModal .modal-body {
+        overflow: visible !important;
     }
 
     .dashboard-page .page-header .btn {
@@ -969,9 +983,9 @@
                         </table>
                     </div>
                 </div>
-                @if($taskList->count() >= 10)
+                @if($taskList->count() >= 10 && $dashboardTaskCompanyId)
                 <div class="card-footer bg-white border-top py-3 text-center">
-                    <a href="{{ route('user.task.list') }}" class="btn btn-sm btn-light fw-600">
+                    <a href="{{ route('user.task.list', ['companyId' => $dashboardTaskCompanyId]) }}" class="btn btn-sm btn-light fw-600">
                         View All Analyses <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
@@ -1200,16 +1214,37 @@
         const companySelect = document.getElementById('modal-company-select');
 
         if (display) {
+            const positionAgentDropdown = () => {
+                dropdown.classList.remove('open-up');
+
+                const displayRect = display.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - displayRect.bottom;
+                const spaceAbove = displayRect.top;
+                const desiredHeight = Math.min(360, window.innerHeight * 0.45);
+
+                if (spaceBelow < desiredHeight && spaceAbove > spaceBelow) {
+                    dropdown.classList.add('open-up');
+                }
+            };
+
             display.addEventListener('click', (e) => {
                 e.stopPropagation();
                 dropdown.classList.toggle('show');
-                if (dropdown.classList.contains('show')) search.focus();
+                if (dropdown.classList.contains('show')) {
+                    positionAgentDropdown();
+                    search.focus();
+                }
             });
 
             dropdown.addEventListener('click', (e) => e.stopPropagation());
 
             document.addEventListener('click', (e) => {
                 dropdown.classList.remove('show');
+                dropdown.classList.remove('open-up');
+            });
+
+            window.addEventListener('resize', () => {
+                if (dropdown.classList.contains('show')) positionAgentDropdown();
             });
 
             search.addEventListener('input', () => {

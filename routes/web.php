@@ -23,7 +23,18 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TelephonyAccountController;
 use App\Http\Controllers\VoicePintController;
 use App\Http\Controllers\HamsaController;
+use App\Http\Controllers\Api\ActivepiecesController;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Session;
+
+Route::post('/auth/token', [ActivepiecesController::class, 'token'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+Route::post('/background_processing_v2', [ActivepiecesController::class, 'upload'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+Route::get('/analysis_result/{workId}', [ActivepiecesController::class, 'result']);
+Route::get('/api/v1/llm/pricing', [ActivepiecesController::class, 'pricing']);
+Route::get('/api/v1/activepieces/extraction-options', [ActivepiecesController::class, 'extractionOptions']);
+Route::get('/api/v1/activepieces/extraction-results', [ActivepiecesController::class, 'extractionResults']);
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -134,7 +145,6 @@ Route::group(['middleware' => 'auth.api'], function () {
         
         // Usage Statistics
         Route::get('/usage', [HamsaController::class, 'usage'])->name('usage');
-        
         // Project Settings
         Route::get('/project', [HamsaController::class, 'project'])->name('project');
     });

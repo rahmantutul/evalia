@@ -641,7 +641,7 @@
             <div class="col-md-8">
                 <h2 class="mb-1 text-dark fw-bold">Task Details <small class="text-muted fs-6 ms-2">#{{ $workId }}</small></h2>
                 <div class="d-flex align-items-center">
-                    <span class="badge {{ $status === 'evaluated' ? 'bg-success' : ($status === 'transcribed' ? 'bg-info' : 'bg-warning') }} me-2">
+                    <span class="badge {{ $status === 'evaluated' ? 'bg-success' : ($status === 'transcribed' ? 'bg-info' : ($status === 'failed' ? 'bg-danger' : 'bg-warning')) }} me-2">
                         {{ ucfirst($status) }}
                     </span>
                     @if(isset($data['created_at']))
@@ -655,6 +655,24 @@
                 </a>
             </div>
         </div>
+
+        @if($status === 'failed')
+            <div class="row mb-4 animate-fade">
+                <div class="col-12">
+                    <div class="alert alert-danger border-0 shadow-sm mb-0" style="border-radius: 12px;">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-exclamation-triangle me-3 mt-1"></i>
+                            <div>
+                                <div class="fw-bold mb-1">Hamsa processing failed</div>
+                                <div class="small">
+                                    {{ $data['error'] ?? $data['error_details']['message'] ?? $data['error_details']['error'] ?? 'Hamsa did not return a readable failure reason. Check the Laravel log entry for the full response.' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
         
         @if(isset($data['evaluation_role_name']))
         <div class="row mb-4 animate-fade">

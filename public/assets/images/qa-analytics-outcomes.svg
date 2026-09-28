@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="50%" stop-color="#0b1736"/>
+      <stop offset="100%" stop-color="#03081c"/>
+    </linearGradient>
+
+    <!-- Glowing Radial Lights -->
+    <radialGradient id="cyanGlow" cx="30%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+    </radialGradient>
+    
+    <radialGradient id="emeraldGlow" cx="80%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="purpleGlow" cx="50%" cy="80%" r="60%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Card Gradients -->
+    <linearGradient id="cardGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02"/>
+    </linearGradient>
+
+    <linearGradient id="cardBorder1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.1"/>
+    </linearGradient>
+
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+
+    <!-- Grid Pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-opacity="0.03" stroke-width="1"/>
+    </pattern>
+
+    <!-- Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Base Background -->
+  <rect width="1200" height="600" fill="url(#bgGrad)"/>
+  <rect width="1200" height="600" fill="url(#grid)"/>
+
+  <!-- Ambient Glow Orbs -->
+  <circle cx="360" cy="240" r="320" fill="url(#cyanGlow)"/>
+  <circle cx="960" cy="180" r="280" fill="url(#emeraldGlow)"/>
+  <circle cx="600" cy="480" r="300" fill="url(#purpleGlow)"/>
+
+  <!-- Floating Network Connections & Data Streams -->
+  <g opacity="0.4">
+    <path d="M 150 450 Q 350 250 550 350 T 950 180 T 1150 280" fill="none" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="6,6"/>
+    <path d="M 100 200 Q 400 380 700 200 T 1100 380" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4,4"/>
+    <circle cx="550" cy="350" r="4" fill="#06b6d4" filter="url(#glow)"/>
+    <circle cx="950" cy="180" r="4" fill="#10b981" filter="url(#glow)"/>
+    <circle cx="400" cy="380" r="4" fill="#818cf8" filter="url(#glow)"/>
+  </g>
+
+  <!-- Left Floating Dashboard Card: QA Score & Compliance -->
+  <g transform="translate(100, 100)">
+    <rect width="360" height="380" rx="20" fill="url(#cardGrad1)" stroke="url(#cardBorder1)" stroke-width="1.5"/>
+    
+    <!-- Card Header -->
+    <text x="32" y="48" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12" font-weight="700" letter-spacing="1.5">LIVE QA SCORE</text>
+    <rect x="270" y="32" width="60" height="24" rx="12" fill="rgba(16, 185, 129, 0.15)"/>
+    <text x="300" y="48" fill="#34d399" font-family="system-ui, sans-serif" font-size="11" font-weight="700" text-anchor="middle">ACTIVE</text>
+
+    <!-- Circular Gauge 98% -->
+    <g transform="translate(180, 180)">
+      <circle cx="0" cy="0" r="70" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12"/>
+      <circle cx="0" cy="0" r="70" fill="none" stroke="url(#waveGrad)" stroke-width="12" stroke-dasharray="440" stroke-dashoffset="40" stroke-linecap="round" filter="url(#glow)"/>
+      <text x="0" y="10" fill="#ffffff" font-family="system-ui, sans-serif" font-size="42" font-weight="900" text-anchor="middle">98<tspan font-size="22" fill="#38bdf8">%</tspan></text>
+      <text x="0" y="34" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">EXCELLENT</text>
+    </g>
+
+    <!-- Bottom Stat Badges -->
+    <rect x="32" y="290" width="140" height="56" rx="12" fill="rgba(6, 182, 212, 0.1)"/>
+    <text x="48" y="314" fill="#67e8f9" font-family="system-ui, sans-serif" font-size="11" font-weight="700">COMPLIANCE</text>
+    <text x="48" y="334" fill="#ffffff" font-family="system-ui, sans-serif" font-size="16" font-weight="800">100% Passed</text>
+
+    <rect x="188" y="290" width="140" height="56" rx="12" fill="rgba(16, 185, 129, 0.1)"/>
+    <text x="204" y="314" fill="#34d399" font-family="system-ui, sans-serif" font-size="11" font-weight="700">RISK FLAGS</text>
+    <text x="204" y="334" fill="#ffffff" font-family="system-ui, sans-serif" font-size="16" font-weight="800">0 Detected</text>
+  </g>
+
+  <!-- Center Floating Audio & Sentiment Waveform Card -->
+  <g transform="translate(500, 70)">
+    <rect width="600" height="260" rx="20" fill="url(#cardGrad1)" stroke="url(#cardBorder1)" stroke-width="1.5"/>
+    
+    <text x="32" y="44" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12" font-weight="700" letter-spacing="1.5">REAL-TIME SPEECH & SENTIMENT FLOW</text>
+    <text x="500" y="44" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="12" font-weight="700" text-anchor="end">+24% Positive</text>
+
+    <!-- Audio Frequency Bars -->
+    <g transform="translate(32, 75)" opacity="0.85">
+      <rect x="0" y="30" width="6" height="30" rx="3" fill="#06b6d4"/>
+      <rect x="12" y="15" width="6" height="60" rx="3" fill="#38bdf8"/>
+      <rect x="24" y="5" width="6" height="80" rx="3" fill="#38bdf8"/>
+      <rect x="36" y="25" width="6" height="40" rx="3" fill="#06b6d4"/>
+      <rect x="48" y="40" width="6" height="15" rx="3" fill="#64748b"/>
+      <rect x="60" y="10" width="6" height="70" rx="3" fill="#10b981"/>
+      <rect x="72" y="0" width="6" height="90" rx="3" fill="#10b981" filter="url(#glow)"/>
+      <rect x="84" y="20" width="6" height="50" rx="3" fill="#38bdf8"/>
+      <rect x="96" y="35" width="6" height="25" rx="3" fill="#06b6d4"/>
+      <rect x="108" y="10" width="6" height="70" rx="3" fill="#38bdf8"/>
+      <rect x="120" y="30" width="6" height="35" rx="3" fill="#06b6d4"/>
+      <rect x="132" y="45" width="6" height="10" rx="3" fill="#64748b"/>
+      <rect x="144" y="15" width="6" height="65" rx="3" fill="#10b981"/>
+      <rect x="156" y="5" width="6" height="85" rx="3" fill="#10b981"/>
+      <rect x="168" y="25" width="6" height="45" rx="3" fill="#38bdf8"/>
+      <rect x="180" y="35" width="6" height="20" rx="3" fill="#06b6d4"/>
+    </g>
+
+    <!-- Smooth Trend Line Over Graph -->
+    <path d="M 260 170 C 310 120, 360 210, 420 140 C 470 80, 520 160, 568 110" fill="none" stroke="url(#waveGrad)" stroke-width="3.5" filter="url(#glow)"/>
+
+    <g transform="translate(568, 110)">
+      <circle cx="0" cy="0" r="6" fill="#10b981" filter="url(#glow)"/>
+      <circle cx="0" cy="0" r="12" fill="none" stroke="#10b981" stroke-width="1.5" opacity="0.6"/>
+    </g>
+
+    <!-- Transcript AI Tag Pill -->
+    <rect x="32" y="190" width="536" height="44" rx="10" fill="rgba(15, 23, 42, 0.6)" stroke="rgba(255,255,255,0.08)"/>
+    <circle cx="56" cy="212" r="5" fill="#38bdf8"/>
+    <text x="74" y="216" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="12" font-weight="600">AI Insight: Agent demonstrated active listening &amp; correct policy verification.</text>
+  </g>
+
+  <!-- Right Bottom Floating Outcomes Feature Card -->
+  <g transform="translate(500, 360)">
+    <rect width="600" height="170" rx="20" fill="url(#cardGrad1)" stroke="url(#cardBorder1)" stroke-width="1.5"/>
+    
+    <g transform="translate(32, 32)">
+      <!-- Feature Item 1 -->
+      <g>
+        <circle cx="20" cy="20" r="16" fill="rgba(6,182,212,0.15)"/>
+        <path d="M 14 20 L 18 24 L 26 16" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round"/>
+        <text x="48" y="18" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="800">100% Call Coverage</text>
+        <text x="48" y="34" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Automatic AI scoring on every customer interaction</text>
+      </g>
+
+      <!-- Feature Item 2 -->
+      <g transform="translate(280, 0)">
+        <circle cx="20" cy="20" r="16" fill="rgba(16,185,129,0.15)"/>
+        <path d="M 14 20 L 18 24 L 26 16" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+        <text x="48" y="18" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="800">3x Faster Coaching</text>
+        <text x="48" y="34" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Instant action items linked to exact call timestamps</text>
+      </g>
+    </g>
+  </g>
+</svg>

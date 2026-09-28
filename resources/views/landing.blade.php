@@ -1171,34 +1171,31 @@
         .teams-section {
             position: relative;
             padding: 120px 0 140px;
-            background: #f1f5f9;
+            background: #f8fafc;
             overflow: hidden;
         }
         .teams-section::before {
             content: "";
             position: absolute;
             inset: 0;
-            background:
-                radial-gradient(ellipse 50% 40% at 16% 50%, rgba(6,182,212,0.08), transparent),
-                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(139,92,246,0.06), transparent),
-                radial-gradient(ellipse 50% 40% at 84% 50%, rgba(251,191,36,0.06), transparent);
+            background: radial-gradient(ellipse 50% 40% at 50% 50%, rgba(6,182,212,0.03), transparent);
             pointer-events: none;
         }
         .teams-section .section-heading {
             text-align: center;
-            margin-bottom: 80px;
+            margin-bottom: 64px;
             position: relative;
             z-index: 2;
         }
         .teams-section .section-kicker {
-            color: #6d28d9;
+            color: #0891b2;
             font-weight: 700;
         }
         .teams-section .section-heading h2 {
             font-size: clamp(28px, 4vw, 44px);
             line-height: 1.12;
             letter-spacing: -0.03em;
-            color: #111827;
+            color: #0f172a;
         }
         .teams-section .section-heading p {
             margin-top: 16px;
@@ -1222,17 +1219,17 @@
         /* ── Portal Base ── */
         .portal {
             position: relative;
-            border-radius: 24px;
+            border-radius: 20px;
             padding: 0;
             overflow: hidden;
             cursor: default;
-            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease, border-color 0.4s ease;
             background: #fff;
-            border: 1.5px solid #cbd5e1;
+            border: 1px solid #e2e8f0;
         }
         .portal:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 24px 64px -12px rgba(0,0,0,0.15);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 48px -12px rgba(0,0,0,0.12);
         }
 
         .portal-bg {
@@ -1244,16 +1241,16 @@
         .portal-content {
             position: relative;
             z-index: 3;
-            padding: 36px 32px 32px;
+            padding: 32px 28px 28px;
             display: flex;
             flex-direction: column;
         }
         .portal-features {
             list-style: none;
-            margin-top: 20px;
+            margin-top: 18px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
         .portal-features li {
             display: flex;
@@ -1275,7 +1272,7 @@
             gap: 12px;
             margin-top: auto;
             padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #f1f5f9;
         }
         .portal-mini-stat strong {
             display: block;
@@ -1295,323 +1292,106 @@
         }
 
         .portal-icon-wrap {
-            width: 64px;
-            height: 64px;
-            border-radius: 18px;
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
             display: grid;
             place-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             position: relative;
         }
         .portal-icon-wrap svg {
-            width: 30px;
-            height: 30px;
-        }
-        .portal-icon-ring {
-            position: absolute;
-            inset: -4px;
-            border-radius: 22px;
-            border: 2px solid transparent;
-            animation: portalRingSpin 8s linear infinite;
-        }
-        @keyframes portalRingSpin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            width: 26px;
+            height: 26px;
         }
 
         .portal-tag {
             display: inline-block;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             padding: 4px 10px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 10px;
             font-weight: 800;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
+            width: fit-content;
         }
         .portal h3 {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             line-height: 1.2;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #0f172a;
         }
         .portal p {
             font-size: 14px;
-            line-height: 1.7;
+            line-height: 1.65;
             max-width: 320px;
             color: #475569;
         }
 
-        /* ── Portal 1: Crystal Vault (QA) ── */
+        /* ── Portal 1: QA Managers ── */
         .portal--vault {
-            background: linear-gradient(180deg, #e0f7fa 0%, #fff 100%);
-            border-color: #99f6e4;
+            background: #fff;
         }
         .portal--vault:hover {
-            border-color: #5eead4;
-            box-shadow: 0 24px 64px -12px rgba(6,182,212,0.2);
-        }
-        .portal--vault .portal-bg {
-            background:
-                radial-gradient(circle at 70% 20%, rgba(6,182,212,0.12), transparent 50%),
-                radial-gradient(circle at 30% 80%, rgba(6,182,212,0.06), transparent 40%);
+            border-color: #bae6fd;
+            box-shadow: 0 20px 48px -12px rgba(6,182,212,0.1);
         }
         .portal--vault .portal-icon-wrap {
-            background: #cffafe;
-            border: 1px solid #67e8f9;
+            background: #f0fdfa;
+            border: 1px solid #ccfbf1;
             color: #0891b2;
-        }
-        .portal--vault .portal-icon-ring {
-            border-color: rgba(6,182,212,0.35);
         }
         .portal--vault .portal-tag {
             color: #0891b2;
-            background: #cffafe;
-            border: 1px solid #67e8f9;
+            background: #f0fdfa;
+            border: 1px solid #ccfbf1;
         }
         .portal--vault .portal-mini-stat strong { color: #0891b2; }
         .portal--vault .portal-features li svg { stroke: #0891b2; }
 
-        /* Vault: floating crystals */
-        .vault-crystal {
-            position: absolute;
-            z-index: 1;
-            opacity: 0.45;
-            animation: crystalFloat 6s ease-in-out infinite;
-        }
-        .vault-crystal--1 {
-            top: 12%;
-            right: 10%;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, rgba(6,182,212,0.55), rgba(6,182,212,0.15));
-            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-            animation-delay: 0s;
-        }
-        .vault-crystal--2 {
-            top: 30%;
-            left: 8%;
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(135deg, rgba(34,211,238,0.5), rgba(34,211,238,0.15));
-            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-            animation-delay: 2s;
-            animation-duration: 8s;
-        }
-        .vault-crystal--3 {
-            top: 55%;
-            right: 20%;
-            width: 18px;
-            height: 18px;
-            background: rgba(6,182,212,0.45);
-            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-            animation-delay: 4s;
-            animation-duration: 7s;
-        }
-        @keyframes crystalFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.45; }
-            50% { transform: translateY(-12px) rotate(8deg); opacity: 0.65; }
-        }
-
-        /* Vault: scan line */
-        .vault-scan {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(6,182,212,0.45), transparent);
-            z-index: 2;
-            animation: scanDown 4s ease-in-out infinite;
-            pointer-events: none;
-        }
-        @keyframes scanDown {
-            0% { top: 0; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-
-        /* ── Portal 2: Growth Grove (L&D) ── */
+        /* ── Portal 2: L&D Teams ── */
         .portal--grove {
-            background: linear-gradient(180deg, #f0e6ff 0%, #fff 100%);
-            border-color: #d8b4fe;
+            background: #fff;
         }
         .portal--grove:hover {
-            border-color: #c084fc;
-            box-shadow: 0 24px 64px -12px rgba(139,92,246,0.2);
-        }
-        .portal--grove .portal-bg {
-            background:
-                radial-gradient(circle at 40% 30%, rgba(139,92,246,0.1), transparent 50%),
-                radial-gradient(circle at 70% 70%, rgba(168,85,247,0.06), transparent 40%);
+            border-color: #bae6fd;
+            box-shadow: 0 20px 48px -12px rgba(6,182,212,0.1);
         }
         .portal--grove .portal-icon-wrap {
-            background: #ede9fe;
-            border: 1px solid #c4b5fd;
-            color: #7c3aed;
-        }
-        .portal--grove .portal-icon-ring {
-            border-color: rgba(139,92,246,0.35);
+            background: #f0fdfa;
+            border: 1px solid #ccfbf1;
+            color: #0891b2;
         }
         .portal--grove .portal-tag {
-            color: #7c3aed;
-            background: #ede9fe;
-            border: 1px solid #c4b5fd;
+            color: #0891b2;
+            background: #f0fdfa;
+            border: 1px solid #ccfbf1;
         }
-        .portal--grove .portal-mini-stat strong { color: #7c3aed; }
-        .portal--grove .portal-features li svg { stroke: #7c3aed; }
+        .portal--grove .portal-mini-stat strong { color: #0891b2; }
+        .portal--grove .portal-features li svg { stroke: #0891b2; }
 
-        /* Grove: floating leaves */
-        .grove-leaf {
-            position: absolute;
-            z-index: 1;
-            width: 12px;
-            height: 20px;
-            border-radius: 0 50% 50% 0;
-            opacity: 0.4;
-            animation: leafDrift 10s ease-in-out infinite;
-        }
-        .grove-leaf--1 {
-            top: 15%;
-            right: 12%;
-            background: rgba(139,92,246,0.55);
-            animation-delay: 0s;
-            transform: rotate(30deg);
-        }
-        .grove-leaf--2 {
-            top: 40%;
-            left: 6%;
-            width: 10px;
-            height: 16px;
-            background: rgba(168,85,247,0.5);
-            animation-delay: 3s;
-            animation-duration: 12s;
-            transform: rotate(-20deg);
-        }
-        .grove-leaf--3 {
-            top: 65%;
-            right: 25%;
-            width: 8px;
-            height: 14px;
-            background: rgba(196,181,253,0.45);
-            animation-delay: 5s;
-            animation-duration: 9s;
-            transform: rotate(60deg);
-        }
-        .grove-leaf--4 {
-            top: 25%;
-            left: 22%;
-            width: 14px;
-            height: 22px;
-            background: rgba(139,92,246,0.35);
-            animation-delay: 1s;
-            animation-duration: 11s;
-            transform: rotate(-45deg);
-        }
-        @keyframes leafDrift {
-            0%, 100% { transform: translateY(0) rotate(var(--rot, 30deg)); opacity: 0.4; }
-            33% { transform: translateY(-16px) rotate(calc(var(--rot, 30deg) + 15deg)); opacity: 0.6; }
-            66% { transform: translateY(-6px) rotate(calc(var(--rot, 30deg) - 10deg)); opacity: 0.5; }
-        }
-
-        /* Grove: pulse ring */
-        .grove-pulse {
-            position: absolute;
-            top: 30%;
-            left: 50%;
-            width: 200px;
-            height: 200px;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            border: 1.5px solid rgba(139,92,246,0.15);
-            z-index: 1;
-            animation: grovePulse 4s ease-out infinite;
-            pointer-events: none;
-        }
-        .grove-pulse::after {
-            content: "";
-            position: absolute;
-            inset: 20px;
-            border-radius: 50%;
-            border: 1.5px solid rgba(139,92,246,0.1);
-        }
-        @keyframes grovePulse {
-            0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.6; }
-            100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
-        }
-
-        /* ── Portal 3: Data Tide (CX) ── */
+        /* ── Portal 3: CX Leaders ── */
         .portal--tide {
-            background: linear-gradient(180deg, #fef3c7 0%, #fff 100%);
-            border-color: #fcd34d;
+            background: #fff;
         }
         .portal--tide:hover {
-            border-color: #fbbf24;
-            box-shadow: 0 24px 64px -12px rgba(251,191,36,0.2);
-        }
-        .portal--tide .portal-bg {
-            background:
-                radial-gradient(circle at 60% 40%, rgba(251,191,36,0.1), transparent 50%),
-                radial-gradient(circle at 20% 80%, rgba(245,158,11,0.06), transparent 40%);
+            border-color: #bae6fd;
+            box-shadow: 0 20px 48px -12px rgba(6,182,212,0.1);
         }
         .portal--tide .portal-icon-wrap {
-            background: #fef9c3;
-            border: 1px solid #fde047;
-            color: #d97706;
-        }
-        .portal--tide .portal-icon-ring {
-            border-color: rgba(251,191,36,0.35);
+            background: #f0fdfa;
+            border: 1px solid #ccfbf1;
+            color: #0891b2;
         }
         .portal--tide .portal-tag {
-            color: #d97706;
-            background: #fef9c3;
-            border: 1px solid #fde047;
+            color: #0891b2;
+            background: #f0fdfa;
+            border: 1px solid #ccfbf1;
         }
-        .portal--tide .portal-mini-stat strong { color: #d97706; }
-        .portal--tide .portal-features li svg { stroke: #d97706; }
-
-        /* Tide: wave lines */
-        .tide-wave {
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 1px;
-            z-index: 1;
-            pointer-events: none;
-        }
-        .tide-wave svg {
-            width: 100%;
-            height: 40px;
-            opacity: 0.3;
-        }
-        .tide-wave--1 { top: 20%; animation: waveShift 8s ease-in-out infinite; }
-        .tide-wave--2 { top: 45%; animation: waveShift 10s ease-in-out infinite 2s; }
-        .tide-wave--3 { top: 70%; animation: waveShift 7s ease-in-out infinite 4s; }
-        @keyframes waveShift {
-            0%, 100% { transform: translateX(0); opacity: 0.3; }
-            50% { transform: translateX(20px); opacity: 0.5; }
-        }
-
-        /* Tide: data dots */
-        .tide-dot {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: rgba(251,191,36,0.6);
-            z-index: 1;
-            animation: tideDotFloat 6s ease-in-out infinite;
-        }
-        .tide-dot:nth-child(1) { top: 18%; left: 15%; animation-delay: 0s; }
-        .tide-dot:nth-child(2) { top: 35%; right: 18%; animation-delay: 1.5s; animation-duration: 7s; }
-        .tide-dot:nth-child(3) { top: 60%; left: 25%; animation-delay: 3s; animation-duration: 5s; }
-        .tide-dot:nth-child(4) { top: 78%; right: 30%; animation-delay: 0.8s; animation-duration: 8s; }
-        @keyframes tideDotFloat {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
-            50% { transform: translateY(-14px) scale(1.5); opacity: 1; }
-        }
+        .portal--tide .portal-mini-stat strong { color: #0891b2; }
+        .portal--tide .portal-features li svg { stroke: #0891b2; }
 
         /* ── Portal Grid Responsive ── */
         .portal-grid::before,
@@ -1621,8 +1401,8 @@
         .outcome-panel {
             display: grid;
             grid-template-columns: 1.05fr 0.95fr;
-            gap: 64px;
-            align-items: center;
+            gap: 48px;
+            align-items: start;
         }
         .solo-heading {
             max-width: 760px;
@@ -1631,34 +1411,151 @@
         }
 
         .outcome-summary {
-            min-height: 560px;
+            min-height: 480px;
             padding: 0;
             color: var(--white);
-            background: #020617;
+            background: linear-gradient(160deg, #020617 0%, #0c1a3a 50%, #020617 100%);
             position: relative;
             overflow: hidden;
             border-radius: 28px;
-            box-shadow: 0 30px 70px rgba(15, 23, 42, 0.18);
+            box-shadow:
+                0 30px 70px rgba(15, 23, 42, 0.18),
+                0 0 0 1px rgba(6, 182, 212, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease;
+        }
+        .outcome-summary::before {
+            content: "";
+            position: absolute;
+            top: -120px;
+            right: -120px;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            animation: outcomeGlow 6s ease-in-out infinite;
+        }
+        .outcome-summary::after {
+            content: "";
+            position: absolute;
+            bottom: -80px;
+            left: -80px;
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, rgba(250, 204, 21, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            animation: outcomeGlow 6s ease-in-out infinite 3s;
+        }
+        @keyframes outcomeGlow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
         }
         .outcome-image-shape {
             position: relative;
             width: 100%;
-            height: 260px;
+            height: 200px;
             overflow: hidden;
+            border-radius: 16px;
         }
         .outcome-image-shape img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
-            clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%);
+            filter: saturate(0.85);
+            transition: filter 0.5s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
+        .outcome-summary:hover .outcome-image-shape img {
+            filter: saturate(1);
+            transform: scale(1.04);
+        }
+        /* Scan line */
+        .outcome-scan {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent 0%, #22d3ee 30%, #67e8f9 50%, #22d3ee 70%, transparent 100%);
+            box-shadow: 0 0 20px 6px rgba(34, 211, 238, 0.4), 0 0 60px 12px rgba(34, 211, 238, 0.15);
+            z-index: 4;
+            animation: scanDown 3s ease-in-out infinite;
+            opacity: 0.9;
+        }
+        @keyframes scanDown {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 0.9; }
+            90% { opacity: 0.9; }
+            100% { top: 100%; opacity: 0; }
+        }
+        /* Corner brackets */
+        .outcome-bracket {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            z-index: 4;
+            opacity: 0;
+            transition: opacity 0.4s ease 0.1s;
+        }
+        .outcome-summary:hover .outcome-bracket {
+            opacity: 1;
+        }
+        .outcome-bracket::before,
+        .outcome-bracket::after {
+            content: "";
+            position: absolute;
+            background: #67e8f9;
+        }
+        .outcome-bracket--tl { top: 12px; left: 12px; }
+        .outcome-bracket--tl::before { top: 0; left: 0; width: 28px; height: 2px; }
+        .outcome-bracket--tl::after { top: 0; left: 0; width: 2px; height: 28px; }
+        .outcome-bracket--tr { top: 12px; right: 12px; }
+        .outcome-bracket--tr::before { top: 0; right: 0; width: 28px; height: 2px; }
+        .outcome-bracket--tr::after { top: 0; right: 0; width: 2px; height: 28px; }
+        .outcome-bracket--bl { bottom: 12px; left: 12px; }
+        .outcome-bracket--bl::before { bottom: 0; left: 0; width: 28px; height: 2px; }
+        .outcome-bracket--bl::after { bottom: 0; left: 0; width: 2px; height: 28px; }
+        .outcome-bracket--br { bottom: 12px; right: 12px; }
+        .outcome-bracket--br::before { bottom: 0; right: 0; width: 28px; height: 2px; }
+        .outcome-bracket--br::after { bottom: 0; right: 0; width: 2px; height: 28px; }
+        /* Overlay gradient */
         .outcome-image-shape::after {
             content: "";
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(2, 6, 23, 0.1) 0%, rgba(2, 6, 23, 0.7) 80%, rgba(2, 6, 23, 0.95) 100%);
-            clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%);
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.1) 0%, rgba(2, 6, 23, 0) 30%, rgba(2, 6, 23, 0) 60%, rgba(2, 6, 23, 0.85) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+        /* Data wave canvas */
+        .outcome-mesh {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 110px;
+            z-index: 3;
+            pointer-events: none;
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 40%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 40%, transparent 100%);
+        }
+        .outcome-mesh canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .mesh-glow {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: radial-gradient(ellipse at 50% 100%, rgba(34, 211, 238, 0.1) 0%, transparent 70%);
+            z-index: 2;
             pointer-events: none;
         }
         .outcome-summary-text {
@@ -1668,6 +1565,30 @@
         }
         .outcome-summary-text .section-kicker {
             margin-bottom: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(6, 182, 212, 0.12);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 999px;
+            color: #67e8f9;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .outcome-summary-text .section-kicker::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: #67e8f9;
+            border-radius: 50%;
+            animation: kickerDot 2s ease-in-out infinite;
+        }
+        @keyframes kickerDot {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
         }
         .outcome-summary-text h3 {
             max-width: 390px;
@@ -1679,11 +1600,22 @@
         }
         .outcome-summary-text h3 .yellow-highlight {
             color: #facc15;
+            position: relative;
+        }
+        .outcome-summary-text h3 .yellow-highlight::after {
+            content: "";
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #facc15, rgba(250, 204, 21, 0.3));
+            border-radius: 2px;
         }
         .outcome-summary-text p {
             max-width: 420px;
             margin-top: 14px;
-            color: #f8fafc;
+            color: #e2e8f0;
             font-size: 15px;
             line-height: 1.75;
             text-shadow: 0 2px 14px rgba(2, 6, 23, 0.5);
@@ -1695,24 +1627,35 @@
         .outcome-proof {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 28px;
+            gap: 16px;
+            margin-top: 32px;
         }
         .outcome-proof div {
-            padding-top: 18px;
-            border-top: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 18px 0 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            position: relative;
+        }
+        .outcome-proof div::before {
+            content: "";
+            position: absolute;
+            top: -1px;
+            left: 0;
+            width: 40px;
+            height: 1px;
+            background: linear-gradient(90deg, #06b6d4, transparent);
         }
         .outcome-proof span {
             display: block;
             color: #67e8f9;
-            font-size: 24px;
+            font-size: 28px;
             line-height: 1;
-            font-weight: 800;
+            font-weight: 900;
+            letter-spacing: -0.02em;
         }
         .outcome-proof small {
             display: block;
-            margin-top: 7px;
-            color: #f8fafc;
+            margin-top: 8px;
+            color: #e2e8f0;
             font-size: 11px;
             font-weight: 700;
             line-height: 1.4;
@@ -1729,38 +1672,67 @@
             display: flex;
             gap: 22px;
             align-items: start;
-            padding: 28px 0;
+            padding: 28px 20px;
+            margin: 0 -20px;
+            border-radius: 16px;
             border-bottom: 1px solid var(--line);
-            transition: background 0.25s ease;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+        }
+        .outcome-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.04), rgba(6, 182, 212, 0.01));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .outcome-card:hover::before {
+            opacity: 1;
         }
         .outcome-card:last-child {
             border-bottom: 0;
         }
         .outcome-card:hover {
-            background: transparent;
+            transform: translateX(4px);
         }
         .outcome-number {
             display: inline-flex;
-            width: 44px;
-            height: 44px;
-            flex: 0 0 44px;
+            width: 48px;
+            height: 48px;
+            flex: 0 0 48px;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ecfeff 0%, #e0f2fe 100%);
             color: #0891b2;
-            background: #ecfeff;
-            font-size: 14px;
-            font-weight: 800;
-            border: 1px solid rgba(6, 182, 212, 0.24);
+            font-size: 15px;
+            font-weight: 900;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.1);
+            transition: all 0.3s ease;
+        }
+        .outcome-card:hover .outcome-number {
+            background: linear-gradient(135deg, #0891b2, #06b6d4);
+            color: white;
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.3);
+            transform: scale(1.05);
         }
         .outcome-card h3 {
             font-size: 17px;
             font-weight: 800;
+            color: var(--navy-2);
+            transition: color 0.3s ease;
+        }
+        .outcome-card:hover h3 {
+            color: #0891b2;
         }
         .outcome-card p {
             margin-top: 10px;
             color: var(--slate);
-            font-size: 13px;
+            font-size: 14px;
             line-height: 1.7;
         }
         .outcome-actions {
@@ -1768,25 +1740,53 @@
             flex-wrap: wrap;
             align-items: center;
             gap: 18px;
-            margin-top: 30px;
+            margin-top: 36px;
+            padding-top: 28px;
+            border-top: 1px solid var(--line);
         }
         .outcome-included {
-            color: #64748b;
+            color: #94a3b8;
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .outcome-included::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+            border-radius: 50%;
+            flex-shrink: 0;
         }
         .outcome-link {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             color: #0891b2;
             font-size: 14px;
             font-weight: 800;
+            padding: 12px 24px;
+            border-radius: 12px;
+            background: rgba(6, 182, 212, 0.08);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .outcome-link:hover {
+            background: linear-gradient(135deg, #0891b2, #06b6d4);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 8px 24px rgba(6, 182, 212, 0.3);
+            transform: translateY(-2px);
         }
         .outcome-link svg {
             width: 17px;
             height: 17px;
-            transition: transform 0.25s ease;
+            transition: transform 0.3s ease;
+        }
+        .outcome-link:hover svg {
+            transform: translateX(4px);
         }
         .outcome-link:hover svg {
             transform: translateX(3px);
@@ -2139,17 +2139,36 @@
                 border-radius: 22px;
             }
             .outcome-image-shape {
-                height: 200px;
+                height: 160px;
             }
+            .outcome-bracket { display: none; }
+            .outcome-mesh { height: 80px; }
             .outcome-summary-text {
                 padding: 24px 26px 32px;
             }
             .outcome-summary-text h3 {
                 font-size: 24px;
             }
+            .outcome-summary-text h3 .yellow-highlight::after {
+                display: none;
+            }
             .outcome-card {
                 gap: 12px;
-                padding: 24px 0;
+                padding: 20px 14px;
+                margin: 0;
+            }
+            .outcome-number {
+                width: 42px;
+                height: 42px;
+                flex: 0 0 42px;
+                border-radius: 12px;
+                font-size: 14px;
+            }
+            .outcome-proof span {
+                font-size: 24px;
+            }
+            .outcome-proof small {
+                font-size: 10px;
             }
             .inside-grid {
                 grid-template-columns: 1fr;
@@ -2292,7 +2311,7 @@
                 <div class="how-split" data-reveal>
                     <div class="how-visual">
                         <div class="how-visual-inner">
-                            <img src="{{ asset('assets/images/telephone-operator.png') }}" alt="Analytics dashboard" class="how-hero-img" loading="lazy">
+                            <img src="{{ asset('assets/images/ai-audio-waveform.png') }}" alt="AI Audio Analysis Visualization" class="how-hero-img" loading="lazy">
                             <div class="how-float-card how-float-card--top">
                                 <span class="how-float-dot"></span>
                                 Recording active
@@ -2476,11 +2495,24 @@
         <!-- OUTCOMES -->
         <section class="section">
             <div class="container">
-                <h2 class="solo-heading" data-reveal>What your team gets</h2>
+                <div class="solo-heading" data-reveal>
+                    <p class="section-kicker" style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);border-radius:999px;color:#0891b2;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:18px;">Outcomes</p>
+                    <h2>What your team gets</h2>
+                    <p style="margin-top:14px;color:var(--slate);font-size:16px;line-height:1.7;max-width:520px;margin-left:auto;margin-right:auto;">Every call becomes structured evidence for faster reviews, better coaching, and earlier risk detection.</p>
+                </div>
                 <div class="outcome-panel" data-reveal>
                     <div class="outcome-summary">
                         <div class="outcome-image-shape">
-                            <img src="{{ asset('assets/images/coaching.png') }}" alt="Team coaching with Evalia" loading="lazy">
+                            <img src="{{ asset('assets/images/qa-analytics-outcomes.png') }}" alt="Evalia QA Performance Outcomes" loading="lazy">
+                            <div class="outcome-scan"></div>
+                            <div class="outcome-bracket outcome-bracket--tl"></div>
+                            <div class="outcome-bracket outcome-bracket--tr"></div>
+                            <div class="outcome-bracket outcome-bracket--bl"></div>
+                            <div class="outcome-bracket outcome-bracket--br"></div>
+                            <div class="mesh-glow"></div>
+                            <div class="outcome-mesh">
+                                <canvas id="meshCanvas"></canvas>
+                            </div>
                         </div>
                         <div class="outcome-summary-text">
                             <p class="section-kicker">Operational impact</p>
@@ -2542,16 +2574,11 @@
                 </div>
 
                 <div class="portal-grid" data-reveal>
-                    <!-- Portal 1: Crystal Vault — QA -->
+                    <!-- Portal 1: QA Managers -->
                     <div class="portal portal--vault">
                         <div class="portal-bg"></div>
-                        <div class="vault-scan"></div>
-                        <div class="vault-crystal vault-crystal--1"></div>
-                        <div class="vault-crystal vault-crystal--2"></div>
-                        <div class="vault-crystal vault-crystal--3"></div>
                         <div class="portal-content">
                             <div class="portal-icon-wrap">
-                                <div class="portal-icon-ring"></div>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
                             </div>
                             <span class="portal-tag">Quality Assurance</span>
@@ -2584,17 +2611,11 @@
                         </div>
                     </div>
 
-                    <!-- Portal 2: Growth Grove — L&D -->
+                    <!-- Portal 2: L&D Teams -->
                     <div class="portal portal--grove">
                         <div class="portal-bg"></div>
-                        <div class="grove-pulse"></div>
-                        <div class="grove-leaf grove-leaf--1"></div>
-                        <div class="grove-leaf grove-leaf--2"></div>
-                        <div class="grove-leaf grove-leaf--3"></div>
-                        <div class="grove-leaf grove-leaf--4"></div>
                         <div class="portal-content">
                             <div class="portal-icon-wrap">
-                                <div class="portal-icon-ring"></div>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                             </div>
                             <span class="portal-tag">Learning & Development</span>
@@ -2627,25 +2648,11 @@
                         </div>
                     </div>
 
-                    <!-- Portal 3: Data Tide — CX -->
+                    <!-- Portal 3: CX Leaders -->
                     <div class="portal portal--tide">
                         <div class="portal-bg"></div>
-                        <div class="tide-wave tide-wave--1">
-                            <svg viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 20 Q50 0 100 20 T200 20 T300 20 T400 20" fill="none" stroke="rgba(217,119,6,0.4)" stroke-width="1"/></svg>
-                        </div>
-                        <div class="tide-wave tide-wave--2">
-                            <svg viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 20 Q50 35 100 20 T200 20 T300 20 T400 20" fill="none" stroke="rgba(217,119,6,0.35)" stroke-width="1"/></svg>
-                        </div>
-                        <div class="tide-wave tide-wave--3">
-                            <svg viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 20 Q50 5 100 20 T200 20 T300 20 T400 20" fill="none" stroke="rgba(217,119,6,0.3)" stroke-width="1"/></svg>
-                        </div>
-                        <span class="tide-dot"></span>
-                        <span class="tide-dot"></span>
-                        <span class="tide-dot"></span>
-                        <span class="tide-dot"></span>
                         <div class="portal-content">
                             <div class="portal-icon-wrap">
-                                <div class="portal-icon-ring"></div>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
                             </div>
                             <span class="portal-tag">Customer Experience</span>
@@ -2746,6 +2753,96 @@
         } else {
             revealItems.forEach((item) => item.classList.add('revealed'));
         }
+
+        /* ─── DATA WAVE ANIMATION ─── */
+        (function () {
+            const canvas = document.getElementById('meshCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let w, h, time = 0;
+
+            const COLS = 30;
+            const ROWS = 6;
+            const speed = 0.018;
+
+            function resize() {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                w = rect.width;
+                h = rect.height;
+                canvas.width = w * dpr;
+                canvas.height = h * dpr;
+                canvas.style.width = w + 'px';
+                canvas.style.height = h + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+
+            function getY(col, row, t) {
+                const xRatio = col / COLS;
+                const yRatio = row / ROWS;
+                var wave = Math.sin(xRatio * Math.PI * 2.5 + t) * (14 + row * 2.5);
+                wave += Math.cos(xRatio * Math.PI * 1.8 + t * 1.4) * (6 + row * 1.2);
+                wave += Math.sin(xRatio * Math.PI * 4 + t * 2.1) * 3;
+                var baseY = h - row * (h / (ROWS + 1)) - 8;
+                return baseY - wave * (1 - yRatio * 0.4);
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+
+                /* Horizontal wave lines */
+                for (var row = 0; row < ROWS; row++) {
+                    var alpha = 0.32 - row * 0.04;
+                    ctx.strokeStyle = 'rgba(34,211,238,' + alpha + ')';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    for (var col = 0; col <= COLS; col++) {
+                        var x = (col / COLS) * w;
+                        var y = getY(col, row, time);
+                        if (col === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+
+                /* Vertical connecting lines */
+                for (var col = 0; col <= COLS; col++) {
+                    var distFromCenter = Math.abs(col - COLS / 2) / (COLS / 2);
+                    var alpha2 = 0.14 - distFromCenter * 0.08;
+                    ctx.strokeStyle = 'rgba(34,211,238,' + alpha2 + ')';
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    for (var row = 0; row < ROWS; row++) {
+                        var x = (col / COLS) * w;
+                        var y = getY(col, row, time);
+                        if (row === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+
+                /* Node dots at intersections */
+                for (var row = 0; row < ROWS; row++) {
+                    for (var col = 0; col <= COLS; col++) {
+                        var x = (col / COLS) * w;
+                        var y = getY(col, row, time);
+                        var dotAlpha = 0.4 - row * 0.055;
+                        var dotR = 1.3 - row * 0.12;
+                        ctx.fillStyle = 'rgba(103,232,249,' + dotAlpha + ')';
+                        ctx.beginPath();
+                        ctx.arc(x, y, Math.max(dotR, 0.4), 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                time += speed;
+                requestAnimationFrame(draw);
+            }
+
+            resize();
+            draw();
+            window.addEventListener('resize', resize);
+        })();
     </script>
 </body>
 </html>

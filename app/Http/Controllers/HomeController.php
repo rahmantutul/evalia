@@ -220,6 +220,7 @@ class HomeController extends Controller
             ->latest()
             ->limit(10)
             ->get();
+        $dashboardTaskCompanyId = optional($taskList->first())->company_id;
 
         // ── 9. Pass everything to the view ────────────────────────────────────────
         return view('user.dashboard', [
@@ -241,6 +242,7 @@ class HomeController extends Controller
             // Tables
             'companyAgents'      => $companyAgents,
             'taskList'           => $taskList,
+            'dashboardTaskCompanyId' => $dashboardTaskCompanyId,
         ]);
     }
 

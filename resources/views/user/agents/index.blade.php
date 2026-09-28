@@ -156,6 +156,23 @@
                                                 </a>
                                             </li>
                                             @endcan
+                                            @can('users.delete')
+                                                @if($agent['is_active'])
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <form action="{{ route('users.destroy', $agent['id']) }}" method="POST">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <input type="hidden" name="type" value="agent">
+                                                            <button type="submit"
+                                                                    class="dropdown-item text-danger"
+                                                                    onclick="return confirm('Delete this agent? This will deactivate the account.')">
+                                                                <i class="fas fa-user-slash me-2"></i> Delete Agent
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                @endif
+                                            @endcan
                                         </ul>
                                     </div>
                                 </td>

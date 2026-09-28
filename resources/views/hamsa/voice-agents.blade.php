@@ -571,8 +571,7 @@ function resetForm() {
     let isCallActive = false;
     let canCloseModal = true; // Control whether modal can be closed
     
-    // Your Hamsa API Key
-    const HAMSA_API_KEY = 'f03dbabc-a5f1-424c-a66e-fd9080d83f2e';
+    const HAMSA_API_KEY = @json(config('services.hamsa.api_key'));
     
     window.openVoiceTest = function(agentId, agentName, agentLang) {
         currentAgent = {

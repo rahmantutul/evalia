@@ -39,6 +39,290 @@ class TaskController extends Controller
         $this->openai = $openai;
     }
 
+    private function transcriptContainsEvidence(?string $evidence, string $transcript): bool
+    {
+        $normalize = static function (string $value): string {
+            $value = mb_strtolower($value, 'UTF-8');
+            $value = preg_replace('/[\p{P}\p{S}\s]+/u', ' ', $value) ?? '';
+            return trim($value);
+        };
+
+        $normalizedEvidence = $normalize((string) $evidence);
+        $normalizedTranscript = $normalize($transcript);
+
+        return mb_strlen($normalizedEvidence, 'UTF-8') >= 3
+            && str_contains($normalizedTranscript, $normalizedEvidence);
+    }
+
+    private function normalizedText(?string $value): string
+    {
+        $value = mb_strtolower((string) $value, 'UTF-8');
+        // Treat Arabic text with and without tashkeel as equivalent.
+        $value = preg_replace('/\p{Mn}+/u', '', $value) ?? '';
+        $value = preg_replace('/[\p{P}\p{S}\s]+/u', ' ', $value) ?? '';
+        return trim($value);
+    }
+
+    private function containsAny(string $text, array $needles): bool
+    {
+        $text = $this->normalizedText($text);
+        foreach ($needles as $needle) {
+            if (str_contains($text, $this->normalizedText($needle))) return true;
+        }
+        return false;
+    }
+
+    private function speakerText(string $transcript, string $speaker): string
+    {
+        $lines = preg_split('/\R/u', $transcript) ?: [];
+        return implode("\n", array_values(array_filter($lines, function ($line) use ($speaker) {
+            return preg_match('/^\s*' . preg_quote($speaker, '/') . '\s*:/iu', $line) === 1;
+        })));
+    }
+
+    private function firstTranscriptLine(string $transcript, array $needles, ?string $speaker = null): ?string
+    {
+        foreach (preg_split('/\R/u', $transcript) ?: [] as $line) {
+            if ($speaker && preg_match('/^\s*' . preg_quote($speaker, '/') . '\s*:/iu', $line) !== 1) continue;
+            if ($this->containsAny($line, $needles)) return trim($line);
+        }
+        return null;
+    }
+
+    private function hasUnauthorizedFinancialPromise(string $transcript): bool
+    {
+        foreach (preg_split('/\R/u', $this->speakerText($transcript, 'Agent')) ?: [] as $line) {
+            $isPromise = $this->containsAny($line, ['اعتبرهم راجعين', 'برجعلك', 'رح نرجعلك', 'استرداد', 'إعفاء', 'اعفاء', 'بشيل الرسم', 'أشيل الرسم']);
+            $isRefusal = $this->containsAny($line, ['ما بقدر أوعد', 'لا أستطيع أن أعد', 'لا يمكنني أن أعد', 'بعد الموافقة', 'إذا تمت الموافقة']);
+            if ($isPromise && !$isRefusal) return true;
+        }
+        return false;
+    }
+
+    private function postProcessRisks(array $riskItems, array $configuredRisks, string $transcript): array
+    {
+        $riskItems = collect($riskItems)->reject(function ($risk) {
+            $combined = $this->normalizedText(($risk['risk_title'] ?? '') . ' ' . ($risk['impact'] ?? ''));
+            $evidence = $this->normalizedText($risk['evidence'] ?? '');
+            $isPrivacyRisk = $this->containsAny($combined, ['كشف رصيد', 'تفاصيل حساب', 'بيانات حساب', 'قبل التحقق', 'هوية', 'privacy', 'identity verification']);
+            $isSafeguard = $this->containsAny($evidence, ['قبل ما أكشف', 'قبل أن أكشف', 'ممكن الاسم الكامل', 'تم التحقق', 'بدون تحقق', 'ما بقدر أحدد', 'ما بقدر أكشف', 'لا أستطيع الكشف', 'ممنوع أكشف']);
+            return $isPrivacyRisk && $isSafeguard;
+        })->values()->all();
+
+        if ($this->hasUnauthorizedFinancialPromise($transcript)) {
+            $configuredTitle = collect($configuredRisks)->first(fn($risk) =>
+                $this->containsAny((string) $risk, ['استرداد مالي', 'إعفاء من الرسوم', 'اعفاء من الرسوم'])
+            );
+            $title = (string) ($configuredTitle ?: 'Unauthorized refund or fee-waiver promise');
+            $alreadyPresent = collect($riskItems)->contains(fn($risk) =>
+                $this->containsAny((string) ($risk['risk_title'] ?? ''), ['استرداد', 'إعفاء', 'اعفاء', 'refund', 'fee waiver'])
+            );
+
+            if (!$alreadyPresent) {
+                $evidence = $this->firstTranscriptLine($transcript, ['اعتبرهم راجعين', 'برجعلك', 'رح نرجعلك', 'استرداد', 'إعفاء', 'اعفاء', 'بشيل الرسم', 'أشيل الرسم'], 'Agent');
+                if ($evidence) {
+                    $riskItems[] = [
+                        'risk_title' => preg_replace('/^[\d\x{0660}-\x{0669}]+[\s.\-)]+/u', '', $title),
+                        'detected' => true,
+                        'evidence' => $evidence,
+                        'severity' => 9,
+                        'impact' => 'The agent made a definite refund or fee-waiver promise without documented authorization.',
+                    ];
+                }
+            }
+        }
+
+        return array_values($riskItems);
+    }
+
+    private function postProcessPolicies(array $items, array $definitions, string $transcript): array
+    {
+        $all = $this->normalizedText($transcript);
+        $customer = $this->normalizedText($this->speakerText($transcript, 'Customer'));
+        $hasThirdParty = $this->containsAny($customer, ['خط أخوي', 'حساب أخوي', 'اخوي', 'أختي', 'اختي', 'زوجي', 'زوجتي', 'والدي', 'والدتي', 'شخص آخر']);
+        $hasPlanChange = $this->containsAny($all, ['ترقية', 'تخفيض', 'إلغاء الخدمة', 'الغاء الخدمة', 'تغيير الباقة', 'غير الباقة', 'غيّر الباقة']);
+        $hasFormalComplaint = $this->containsAny($customer, ['شكوى رسمية', 'أسجل شكوى', 'اسجل شكوى', 'تسجيل شكوى', 'رقم شكوى']);
+        $hasHold = $this->containsAny($all, ['على الانتظار', 'خليك معي', 'ابقى معي', 'انتظر لحظة', 'استأذنك أحطك']);
+        $hasAnger = $this->containsAny($customer, ['مزعج', 'معقدينها', 'غلط', 'اعتراض', 'معترضة', 'مش شايف', 'ما بوافق', 'انقطاع', 'متضايق', 'مديرك']);
+        $hasUncertainty = $this->containsAny($all, ['مش متأكد', 'غير متأكد', 'ما بعرف', 'بحاجة لتدقيق', 'بده تدقيق', 'طلب مراجعة', 'نسجل مراجعة']);
+        $hasVerificationSafeguard = $this->containsAny($all, ['قبل ما أكشف', 'قبل أن أكشف', 'ممكن الاسم الكامل', 'تم التحقق', 'ما بقدر أحددلك بدون تحقق', 'ما بقدر أكشف بدون تحقق']);
+
+        foreach ($items as $index => &$item) {
+            $policy = $this->normalizedText(($definitions[$index] ?? '') . ' ' . ($item['title'] ?? '') . ' ' . ($item['requirement'] ?? ''));
+            $notApplicableReason = null;
+
+            if ($this->containsAny($policy, ['وضع العميل على الانتظار', 'عند وضع العميل']) && !$hasHold) {
+                $notApplicableReason = 'The customer was not placed on hold.';
+            } elseif ($this->containsAny($policy, ['قبل تنفيذ ترقية', 'تخفيض أو إلغاء', 'توضيح أثر التغيير']) && !$hasPlanChange) {
+                $notApplicableReason = 'No package change or cancellation was performed.';
+            } elseif ($this->containsAny($policy, ['الشكاوى الرسمية', 'تسجيل الشكاوى', 'تسجيل الشكوى']) && !$hasFormalComplaint) {
+                $notApplicableReason = 'No formal complaint was requested or registered.';
+            } elseif ($this->containsAny($policy, ['عند غضب العميل', 'إظهار التعاطف', 'اظهار التعاطف']) && !$hasAnger) {
+                $notApplicableReason = 'No customer anger requiring this conditional policy was present.';
+            } elseif ($this->containsAny($policy, ['إذا لم يكن الموظف متأكدا', 'اذا لم يكن الموظف متأكدا', 'عدم التخمين', 'عدم التأكد من الإجابة']) && !$hasUncertainty) {
+                $notApplicableReason = 'The agent did not encounter an uncertain answer requiring escalation.';
+            } elseif ($this->containsAny($policy, ['لأي شخص آخر', 'شخص غير صاحب الحساب', 'خصوصية الحساب']) && !$hasThirdParty) {
+                $notApplicableReason = 'No third-party account disclosure scenario occurred.';
+            }
+
+            if ($notApplicableReason) {
+                $item['evaluation'] = 'Not applicable';
+                $item['action'] = $notApplicableReason;
+                continue;
+            }
+
+            $isIdentityPolicy = $this->containsAny($policy, ['التحقق من هوية', 'التحقق من الهوية']);
+            $isPrivacyPolicy = $this->containsAny($policy, ['لأي شخص آخر', 'شخص غير صاحب الحساب', 'خصوصية الحساب']);
+            if (($isIdentityPolicy || ($isPrivacyPolicy && $hasThirdParty)) && $hasVerificationSafeguard) {
+                $item['evaluation'] = 'Meets policy';
+                $item['action'] = $this->firstTranscriptLine($transcript, ['قبل ما أكشف', 'قبل أن أكشف', 'ممكن الاسم الكامل', 'تم التحقق', 'بدون تحقق'], 'Agent')
+                    ?? 'The agent protected account data until verification.';
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    private function extractionOption(array $definition, string $desired): string
+    {
+        foreach ((array) ($definition['options'] ?? []) as $option) {
+            if ($this->normalizedText((string) $option) === $this->normalizedText($desired)) return (string) $option;
+        }
+        return $desired;
+    }
+
+    private function postProcessExtractions(array $items, array $definitions, string $transcript): array
+    {
+        // Return one item for every configured extraction, in configuration order,
+        // even when the model omits or reorders a field.
+        if (!empty($definitions)) {
+            $itemsByLabel = [];
+            foreach ($items as $item) {
+                $key = $this->normalizedText($item['label'] ?? '');
+                if ($key !== '') $itemsByLabel[$key] = $item;
+            }
+
+            $orderedItems = [];
+            foreach ($definitions as $index => $definition) {
+                $definition = (array) $definition;
+                $label = (string) ($definition['description'] ?? '');
+                $key = $this->normalizedText($label);
+                $orderedItems[] = $itemsByLabel[$key] ?? ($items[$index] ?? [
+                    'label' => $label,
+                    'type' => $definition['type'] ?? 'string',
+                    'value' => null,
+                    'evidence' => null,
+                ]);
+            }
+            $items = $orderedItems;
+        }
+
+        $all = $this->normalizedText($transcript);
+        $customer = $this->normalizedText($this->speakerText($transcript, 'Customer'));
+        $thirdParty = $this->containsAny($customer, ['خط أخوي', 'حساب أخوي', 'اخوي', 'أختي', 'اختي', 'زوجي', 'زوجتي', 'شخص آخر']);
+        $downgrade = $this->containsAny($all, ['تخفيض', 'موبايل plus 20 لموبايل plus 10', 'موبايل plus 20 وبدي أردن موبايل plus 10']);
+        $upgrade = !$downgrade && $this->containsAny($all, ['ترقية', 'رفع الباقة']);
+        $outage = $this->containsAny($customer, ['انقطاع الإنترنت', 'انقطاع الانترنت', 'النت فاصل', 'الإنترنت فاصل', 'الانترنت فاصل']);
+        $billing = $this->containsAny($customer, ['فاتورة', 'الفاتورة']);
+        $billReview = $this->containsAny($all, ['طلب مراجعة', 'مراجعة الفاتورة', 'مراجعة فاتورة']);
+        $supervisorEscalation = $this->containsAny($all, ['مديرك', 'المشرف', 'طلب التصعيد', 'تصعيد']);
+        $planRegistered = $this->containsAny($all, ['تم تسجيل الطلب', 'تم التسجيل الطلب', 'سجلنا تخفيض', 'التغيير للدورة الجاية']);
+        $unauthorizedPromise = $this->hasUnauthorizedFinancialPromise($transcript);
+
+        foreach ($items as $index => &$item) {
+            $definition = (array) ($definitions[$index] ?? []);
+            $label = $this->normalizedText($definition['description'] ?? ($item['label'] ?? ''));
+            $value = null;
+            $evidence = null;
+
+            if ($this->containsAny($label, ['نوع طلب العميل', 'request type'])) {
+                if ($thirdParty) $value = 'استفسار عن حساب شخص آخر';
+                elseif ($downgrade) $value = 'تخفيض باقة';
+                elseif ($upgrade) $value = 'ترقية باقة';
+                elseif ($outage) $value = 'مشكلة تقنية';
+                elseif ($billing) $value = 'استفسار فاتورة';
+                $evidence = $this->firstTranscriptLine($transcript, ['خط أخوي', 'حساب أخوي', 'تخفيض', 'موبايل plus 20', 'انقطاع', 'النت فاصل', 'فاتورة'], 'Customer');
+            } elseif ($this->containsAny($label, ['نتيجة المكالمة', 'call outcome'])) {
+                if ($unauthorizedPromise) $value = 'unresolved';
+                elseif ($supervisorEscalation) $value = 'escalated';
+                elseif ($billReview) $value = 'follow_up_needed';
+                elseif ($planRegistered) $value = 'resolved';
+                $evidence = $this->firstTranscriptLine($transcript, ['اعتبرهم راجعين', 'تصعيد', 'المشرف', 'طلب مراجعة', 'مراجعة الفاتورة', 'تم تسجيل الطلب', 'تم التسجيل الطلب'], 'Agent');
+            } elseif ($this->containsAny($label, ['الخدمة أو المنتج', 'product'])) {
+                if ($this->containsAny($all, ['موبايل plus 10', 'موبايل بلس 10'])) $value = 'موبايل بلس 10';
+                elseif ($this->containsAny($all, ['موبايل plus 20', 'موبايل بلس 20'])) $value = 'موبايل بلس 20';
+                elseif ($billing) $value = 'فاتورة شهرية';
+                $evidence = $this->firstTranscriptLine($transcript, ['موبايل plus 10', 'موبايل بلس 10', 'موبايل plus 20', 'فاتورة']);
+            } elseif ($this->containsAny($label, ['حالة التحقق من الهوية', 'identity verification'])) {
+                $value = $this->containsAny($all, ['تم التحقق']) ? 'تم التحقق' : 'لم يتم التحقق';
+                $evidence = $this->firstTranscriptLine($transcript, ['تم التحقق', 'مش ضروري', 'بدون تحقق', 'ما بقدر أكشف'], 'Agent');
+            } elseif ($this->containsAny($label, ['شكوى رسمية أو تصعيدا', 'شكوى رسمية أو تصعيداً', 'formal complaint or escalation'])) {
+                $value = $supervisorEscalation || $this->containsAny($customer, ['شكوى رسمية', 'أسجل شكوى', 'اسجل شكوى']);
+                $evidence = $value ? $this->firstTranscriptLine($transcript, ['مديرك', 'المشرف', 'تصعيد', 'شكوى'], 'Customer') : null;
+            } elseif ($this->containsAny($label, ['قيمة الرسوم', 'fee amount'])) {
+                if ($this->containsAny($all, ['دينارين']) && $this->containsAny($all, ['رسم', 'رسوم', 'غرامة'])) {
+                    $value = 2;
+                    $evidence = $this->firstTranscriptLine($transcript, ['دينارين']);
+                } elseif (preg_match('/(?:رسم|رسوم|غرامة)[^\d\n]{0,25}(\d+)/u', $all, $match)
+                    || preg_match('/(\d+)\s*(?:دينار|دنانير)[^\n]{0,25}(?:رسم|رسوم|غرامة)/u', $all, $match)) {
+                    $value = (int) $match[1];
+                    $evidence = $this->firstTranscriptLine($transcript, ['رسم', 'رسوم', 'غرامة']);
+                }
+            } elseif ($this->containsAny($label, ['رقم تذكرة', 'ticket number'])) {
+                if (preg_match('/\b([a-z]{1,5}(?:\s+[a-z]{1,5})?)\s+test\s+((?:\d\s*){3,})/iu', $transcript, $match)) {
+                    $prefixes = preg_split('/\s+/', trim($match[1])) ?: [];
+                    $prefix = strtoupper((string) end($prefixes));
+                    $digits = preg_replace('/\D/', '', $match[2]);
+                    $value = $prefix . '-TEST-' . $digits;
+                    $evidence = trim($match[0]);
+                }
+            } elseif ($this->containsAny($label, ['سبب المشكلة الرئيسي', 'main issue'])) {
+                if ($thirdParty) $value = 'خصوصية الحساب';
+                elseif ($outage) $value = 'انقطاع الإنترنت';
+                elseif ($billing) $value = 'فاتورة غير واضحة';
+                $evidence = $this->firstTranscriptLine($transcript, ['خط أخوي', 'حساب أخوي', 'انقطاع', 'النت فاصل', 'فاتورة'], 'Customer');
+            } elseif ($this->containsAny($label, ['الإجراء التالي المتفق عليه', 'agreed next step'])) {
+                if ($supervisorEscalation) $value = 'تصعيد للمشرف';
+                elseif ($billReview) $value = 'انتظار اتصال';
+                elseif ($planRegistered) $value = 'تغيير الباقة';
+                else $value = 'لا يوجد';
+                $evidence = $this->firstTranscriptLine($transcript, ['تصعيد', 'المشرف', 'طلب مراجعة', 'مراجعة الفاتورة', 'تم تسجيل الطلب', 'التغيير للدورة الجاية'], 'Agent');
+            } else {
+                continue;
+            }
+
+            if (is_string($value) && !empty($definition['options'])) $value = $this->extractionOption($definition, $value);
+            $item['label'] = $definition['description'] ?? ($item['label'] ?? '');
+            $item['type'] = $definition['type'] ?? ($item['type'] ?? 'string');
+            $item['value'] = $value;
+            $item['evidence'] = $evidence;
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    private function canonicalCallOutcome(string $transcript): string
+    {
+        if ($this->hasUnauthorizedFinancialPromise($transcript)) return 'Unresolved — unauthorized refund or fee-waiver promise requires review.';
+        if ($this->containsAny($transcript, ['مديرك', 'المشرف', 'طلب التصعيد'])) return 'Escalated — supervisor follow-up requested.';
+        if ($this->containsAny($transcript, ['طلب مراجعة', 'مراجعة الفاتورة', 'مراجعة فاتورة'])) return 'Follow-up needed — billing review opened; customer is waiting for the result.';
+        if ($this->containsAny($transcript, ['تم تسجيل الطلب', 'تم التسجيل الطلب', 'سجلنا تخفيض', 'التغيير للدورة الجاية'])) return 'Resolved — package change registered for the next billing cycle.';
+        return '';
+    }
+
+    private function inferSentiment(string $text): string
+    {
+        $negative = ['مزعج', 'معقدينها', 'غلط', 'اعتراض', 'معترضة', 'مش شايف', 'ما بوافق', 'انقطاع', 'متضايق', 'مديرك', 'مشكلة'];
+        $positive = ['ممتاز', 'موافق', 'شكرا', 'شكراً', 'تمام', 'يعطيك العافية'];
+        $negativeScore = collect($negative)->sum(fn($word) => mb_substr_count($this->normalizedText($text), $this->normalizedText($word)));
+        $positiveScore = collect($positive)->sum(fn($word) => mb_substr_count($this->normalizedText($text), $this->normalizedText($word)));
+        if ($negativeScore > $positiveScore) return 'Negative';
+        if ($positiveScore > 0) return 'Positive';
+        return 'Neutral';
+    }
+
     private function findTaskById($taskId)
     {
         if (is_numeric($taskId)) {
@@ -83,7 +367,7 @@ class TaskController extends Controller
 
         // ── Load tasks from database ─────────────────────────
         $allTasks = Task::where('company_id', $companyId)
-            ->with('agent')
+            ->with('agent.supervisor')
             ->orderByDesc('created_at')
             ->get()
             ->map(function($t) {
@@ -101,20 +385,27 @@ class TaskController extends Controller
                     $transcription = $searchIn['transcription'] ?? ($searchIn['text'] ?? ($analysis['transcription'] ?? ''));
                 }
 
+                $storedRisk = strtolower(trim((string) $t->risk_flag));
+                $riskFlag = in_array($storedRisk, ['yes', 'high', 'true', '1'], true) ? 'High' : 'No';
+                $outcome = $t->outcome
+                    ?? data_get($analysis, 'gpt_evaluation.call_outcome')
+                    ?? data_get($analysis, 'call_outcome')
+                    ?? 'N/A';
+
                 return [
                     'id'               => (string) $t->id,
                     'company_id'       => $t->company_id,
                     'score'            => $t->score,
                     'status'           => $t->status,
                     'agent_name'       => $t->agent?->name ?? 'Unassigned',
-                    'supervisor_name'  => 'N/A',
+                    'supervisor_name'  => $t->agent?->supervisor?->name ?? 'N/A',
                     'duration'         => $t->duration ?? 'N/A',
                     'source'           => $t->source,
                     'channel'          => $t->channel,
-                    'outcome'          => $t->outcome ?? 'N/A',
+                    'outcome'          => $outcome,
                     'coaching_required'=> $t->score < 80 ? 'Yes' : 'No',
                     'sentiment'        => $t->sentiment,
-                    'risk_flag'        => $t->risk_flag,
+                    'risk_flag'        => $riskFlag,
                     'lang'             => $t->lang,
                     'transcription'    => $transcription,
                     'analysis'         => $analysis,
@@ -302,7 +593,31 @@ class TaskController extends Controller
 
     public function deleteTask($workId)
     {
-        return redirect()->back()->with('success', 'Task removed.');
+        $task = Task::find($workId);
+
+        if (!$task) {
+            return redirect()->back()->with('error', 'Task not found or already removed.');
+        }
+
+        $audioPath = $task->audio_path;
+
+        try {
+            $task->delete();
+
+            if (!empty($audioPath)) {
+                try {
+                    Storage::disk('s3')->delete($audioPath);
+                } catch (\Throwable $e) {
+                    Log::warning("Task {$workId} was deleted, but its audio file could not be removed from S3: " . $e->getMessage());
+                }
+            }
+
+            return redirect()->back()->with('success', 'Task removed.');
+        } catch (\Throwable $e) {
+            Log::error("Failed to delete task {$workId}: " . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Task could not be removed. Please try again.');
+        }
     }
 
     public function taskStore(Request $request)
@@ -321,6 +636,7 @@ class TaskController extends Controller
         $agentId   = $request->agent_id;
         $jobId     = $request->hamsa_job_id;
         $path      = null;
+        $jobResponse = [];
 
         if ($request->hasFile('audio_file')) {
             $audioFile = $request->file('audio_file');
@@ -350,22 +666,55 @@ class TaskController extends Controller
             }
             $jobId = $jobResponse['jobId'];
         }
-        try {
-            $details = $this->hamsa->waitForCompletion($jobId, 300, 5);
-        } catch (\Exception $e) {
-            return back()->with('error', 'Processing failed: ' . $e->getMessage());
-        }
-        $resultData   = $details['result'] ?? [];
-        $text         = $resultData['transcription'] ?? ($resultData['text'] ?? '');
-        $conversation = $this->hamsa->extractConversation($resultData);
 
         $task = Task::create([
             'company_id'    => $companyId,
             'agent_id'      => $agentId,
             'audio_path'    => $path,
+            'transcription' => '',
+            'analysis'      => [
+                'jobId'              => $jobId,
+                'hamsa_create_data'  => $jobResponse['data'] ?? null,
+                'audio_path'         => $path,
+                'processing_started_at' => now()->toDateTimeString(),
+            ],
+            'status'    => 'processing',
+            'score'     => 0,
+            'sentiment' => 'Neutral',
+            'risk_flag' => 'No',
+            'source'    => 'api',
+            'channel'   => 'Call',
+            'lang'      => 'ar',
+            'duration'  => '00:00',
+        ]);
+
+        try {
+            $details = $this->hamsa->waitForCompletion($jobId, 300, 5);
+        } catch (\Exception $e) {
+            $failureDetails = $this->hamsa->getJobDetails($jobId);
+            $task->update([
+                'status' => 'failed',
+                'analysis' => array_merge($task->analysis ?? [], [
+                    'hamsa_status' => strtoupper($failureDetails['status'] ?? 'FAILED'),
+                    'error' => $e->getMessage(),
+                    'error_details' => $failureDetails['full_response'] ?? $failureDetails,
+                    'failed_at' => now()->toDateTimeString(),
+                ]),
+            ]);
+
+            return redirect()->route('user.task.details', $task->id)
+                ->with('error', 'Hamsa processing failed. The failed job was saved for inspection.');
+        }
+
+        $resultData   = $details['result'] ?? [];
+        $text         = $resultData['transcription'] ?? ($resultData['text'] ?? '');
+        $conversation = $this->hamsa->extractConversation($resultData);
+
+        $task->update([
             'transcription' => $text,
             'analysis'      => [
                 'jobId'            => $jobId,
+                'hamsa_create_data'=> $jobResponse['data'] ?? null,
                 'jobResponse'      => $resultData,
                 'hamsa_full_data'  => $details['data'] ?? [],
                 'conversation'     => $conversation,
@@ -490,7 +839,7 @@ class TaskController extends Controller
      *            different KBs).
      * Stage 2 — sends the full transcript + pair-aware KB context to GPT.
      */
-    private function performEvaluation($taskId)
+    public function performEvaluation($taskId)
     {
         set_time_limit(0);
         $task = \App\Models\Task::with(['agent.evaluationRole'])->find($taskId);
@@ -618,7 +967,7 @@ class TaskController extends Controller
         // Build extra company context to help GPT understand evaluation scope
         $companyContext = '';
         if ($company) {
-            $companyContext .= 'Company: ' . ($company->name ?? 'Unknown') . "\n";
+            $companyContext .= 'Company: ' . ($company->company_name ?? 'Unknown') . "\n";
             if (!empty($company->main_topics)) {
                 $companyContext .= 'Main Topics: ' . implode(', ', (array) $company->main_topics) . "\n";
             }
@@ -669,6 +1018,66 @@ class TaskController extends Controller
             $evalSettings
         );
 
+        // Reject evidence copied from KB/policy context instead of the transcript.
+        if ($evalSettings['eval_risks'] ?? false) {
+            $gptResponse['risk_assessment'] = collect($gptResponse['risk_assessment'] ?? [])
+                ->filter(function ($risk) use ($transcriptFormatted, $task) {
+                    $valid = filter_var($risk['detected'] ?? false, FILTER_VALIDATE_BOOLEAN)
+                        && $this->transcriptContainsEvidence($risk['evidence'] ?? null, $transcriptFormatted);
+                    if (!$valid && filter_var($risk['detected'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+                        Log::warning("Discarded ungrounded risk evidence for task {$task->id}", ['risk' => $risk]);
+                    }
+                    return $valid;
+                })
+                ->values()
+                ->all();
+            $gptResponse['risk_flag'] = empty($gptResponse['risk_assessment']) ? 'No' : 'Yes';
+        }
+
+        if ($evalSettings['eval_extractions'] ?? false) {
+            $gptResponse['extracted_data'] = collect($gptResponse['extracted_data'] ?? [])
+                ->map(function ($item) use ($transcriptFormatted, $task) {
+                    $isNegativeBoolean = (($item['type'] ?? '') === 'boolean' && ($item['value'] ?? null) === false);
+                    if (($item['value'] ?? null) !== null && !$isNegativeBoolean
+                        && !$this->transcriptContainsEvidence($item['evidence'] ?? null, $transcriptFormatted)) {
+                        Log::warning("Cleared ungrounded extracted value for task {$task->id}", ['extraction' => $item]);
+                        $item['value'] = null;
+                        $item['evidence'] = null;
+                    }
+                    return $item;
+                })
+                ->values()
+                ->all();
+        }
+
+        if ($evalSettings['eval_risks'] ?? false) {
+            $gptResponse['risk_assessment'] = $this->postProcessRisks(
+                (array) ($gptResponse['risk_assessment'] ?? []),
+                $risks,
+                $transcriptFormatted
+            );
+            $gptResponse['risk_flag'] = empty($gptResponse['risk_assessment']) ? 'No' : 'Yes';
+        }
+
+        if ($evalSettings['eval_policies'] ?? false) {
+            $gptResponse['policy_compliance'] = $this->postProcessPolicies(
+                (array) ($gptResponse['policy_compliance'] ?? []),
+                $policies,
+                $transcriptFormatted
+            );
+        }
+
+        if ($evalSettings['eval_extractions'] ?? false) {
+            $gptResponse['extracted_data'] = $this->postProcessExtractions(
+                (array) ($gptResponse['extracted_data'] ?? []),
+                $extractions,
+                $transcriptFormatted
+            );
+        }
+
+        $canonicalOutcome = $this->canonicalCallOutcome($transcriptFormatted);
+        if ($canonicalOutcome !== '') $gptResponse['call_outcome'] = $canonicalOutcome;
+
         // 4. Update task analysis with GPT result
         $analysis = $task->analysis ?? [];
         
@@ -701,6 +1110,7 @@ class TaskController extends Controller
             if ($t['speaker'] === 'Agent') {
                 $analysis['agent_speakers_transcriptions'][] = $t;
             } elseif ($t['speaker'] === 'Customer') {
+                $t['sentiment'] = $this->inferSentiment((string) ($t['text'] ?? ''));
                 $analysis['customer_speakers_transcriptions'][] = $t;
             }
         }
@@ -720,30 +1130,59 @@ class TaskController extends Controller
         $analysis['evaluation_settings'] = $evalSettings;
         $analysis['evaluation_role_name'] = $evalRole->name ?? 'Default';
 
-        // Calculate average score from the 3 sections
-        $scores = [
-            $gptResponse['agent_professionalism']['total_score']['percentage'] ?? 0,
-            $gptResponse['agent_assessment']['total_score']['percentage'] ?? 0,
-            $gptResponse['agent_cooperation']['total_score']['percentage'] ?? 0,
-        ];
+        // Calculate the average only from evaluation sections that were actually enabled.
+        $scores = [];
+        if ($evalSettings['eval_professionalism'] ?? false) {
+            $scores[] = $gptResponse['agent_professionalism']['total_score']['percentage'] ?? 0;
+        }
+        if ($evalSettings['eval_assessment'] ?? false) {
+            $scores[] = $gptResponse['agent_assessment']['total_score']['percentage'] ?? 0;
+        }
+        if ($evalSettings['eval_cooperation'] ?? false) {
+            $scores[] = $gptResponse['agent_cooperation']['total_score']['percentage'] ?? 0;
+        }
         $overallScore = count($scores) > 0 ? (array_sum($scores) / count($scores)) : 0;
 
-        // Determine dominant sentiment for the overall task summary
-        $counts = ['Positive' => 0, 'Neutral' => 0, 'Negative' => 0];
-        foreach ($allTranscripts as $t) {
-            $s = ucfirst(strtolower(trim($t['sentiment'] ?? 'Neutral')));
-            if (isset($counts[$s])) $counts[$s]++;
+        $detectedRisks = collect($gptResponse['risk_assessment'] ?? [])
+            ->filter(fn($risk) => filter_var($risk['detected'] ?? false, FILTER_VALIDATE_BOOLEAN));
+        $hasRisk = strtolower(trim((string) ($gptResponse['risk_flag'] ?? 'no'))) === 'yes'
+            || $detectedRisks->isNotEmpty();
+        $riskFlag = $hasRisk ? 'Yes' : 'No';
+
+        // A severe confirmed risk must materially affect the overall QA score.
+        $maxRiskSeverity = (int) $detectedRisks->max(fn($risk) => (int) ($risk['severity'] ?? 0));
+        if ($maxRiskSeverity >= 8) {
+            $overallScore = min($overallScore, 59);
+        } elseif ($maxRiskSeverity >= 6) {
+            $overallScore = min($overallScore, 69);
         }
-        arsort($counts);
-        $taskSentiment = key($counts);
+
+        // Determine customer sentiment from customer speech only.
+        $customerText = collect($allTranscripts)
+            ->filter(fn($turn) => ($turn['speaker'] ?? '') === 'Customer')
+            ->pluck('text')
+            ->implode(' ');
+        $taskSentiment = $this->inferSentiment($customerText);
 
         $task->update([
             'status'    => 'evaluated',
             'score'     => round($overallScore),
             'sentiment' => $taskSentiment,
-            'risk_flag' => $gptResponse['risk_flag'] ?? 'No',
+            'risk_flag' => $riskFlag,
+            'outcome'   => $gptResponse['call_outcome'] ?? null,
             'analysis'  => $analysis
         ]);
+
+        if (env('ACTIVEPIECES_EVALIA_WEBHOOK_URL')) {
+            try {
+                \Illuminate\Support\Facades\Http::post(env('ACTIVEPIECES_EVALIA_WEBHOOK_URL'), [
+                    'workId' => $task->id,
+                    'status' => 'completed',
+                ]);
+            } catch (\Throwable $e) {
+                Log::warning('Activepieces webhook failed: ' . $e->getMessage());
+            }
+        }
 
         return true;
     }

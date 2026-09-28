@@ -234,11 +234,16 @@ class UserController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $user = User::findOrFail($id);
         $user->update(['is_active' => false]);
-        return redirect()->route('users.index')->with('success', 'User deactivated successfully!');
+
+        $isAgent = $request->type === 'agent' || $user->user_type === User::TYPE_AGENT;
+
+        return redirect()
+            ->route($isAgent ? 'user.agents.index' : 'users.index')
+            ->with('success', ($isAgent ? 'Agent' : 'User') . ' deactivated successfully!');
     }
 
     public function activate($id)
